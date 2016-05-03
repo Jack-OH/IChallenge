@@ -1,2 +1,12 @@
+<<<<<<< HEAD
 ji hyang kim
 joan
+=======
+Welcome to Infinity Chellange Team!
+
+Team Leader
+Namjin Lee
+
+Team Member
+Jaeheon Kim
+>>>>>>> 32666c154c5969ff2516eb7eda20a5d440778b29
