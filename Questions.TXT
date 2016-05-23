@@ -1,0 +1,7 @@
+1. 고객 자리 예약 가능? 
+   Is it possible to reserve a specific parking slot by a customer?
+2. 1대만 in and out
+   How can we control the concurrent car entrance and leaving cases.
+3. 예약 하지 않은 차는 어떻게 처리 
+   We are wondering that we need to consider about the car has not made a reservation.
+4. 부품만 확장 가능 OR 아두이노만 확장 한지. 
