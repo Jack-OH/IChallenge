@@ -1,0 +1,98 @@
+Question 1
+List the major functions of project management and briefly explain each in your own words. [2 points].
+
+A project management is a set of principle( processes ) supported by tools for
+1. Defining : Scoping the project(Problem / Opportunity, Goal, Objective, Indentification, Success Criteria, Risk, etc)
+2. Planning : Developing the plan( WBS / Schedule / Resource requirements / Construct, analyze project network / prepare the project proposal )
+3. Excuting : Launching the plan
+4. Controlling : Monitoring & Controlling
+5. Completing : Closing out the project
+
+Question 2
+Describe the cone of uncertainty for estimation [3 points].
+
+The Cone of Uncertainty shows how an estimate will start with a high degree of uncertainty ? either over-estimated or under-estimated ? which then improves over time as more is known about the task(s). 
+The diagram shows several common stages within a project and shows how accuracy will be increased as the project progresses.
+If, therefore, it is not possible to guarantee the accuracy of an estimate, then another approach is required.
+It is reasonable to assume that an estimate for completion of a single task could be bounded by a range of best and worst possible cases. 
+If such a range is further defined as having a most likely completion point, an estimation profile for the task can be demonstrated.
+
+Question 3
+How is the tiered pattern different from the layered pattern? Generally what quality attribute properties
+can we reason about in each pattern? [5 points]
+
+Layers are not tiers and tiers are not layers.
+Layer elements are code-oriented structures like packages, modules, and libraries(Static perspective)
+Layer elements often disappear at run-time.
+Tier elements are processes / thread visible dynamically.( dynamic perspective).
+So, they are different.
+
+We consider quality attributes.
+layered pattern :  modifiability, portability, reusability, performance, etc.
+tiered pattern :  security, reliability, performance, scalability, etc.
+
+Question 4
+
+
+[중요 요약 정리]
+*** Earned Value [ IMPORTANT]
+
+An Objective Measure of how much Work has been Accomplished based on the Planned Value
+What we got for what was Spent!
+
+[NOTE] your mentor shall ask you about “Earned Value” for your project!!
+
+Q: deliver something but has defect then, is it is earned(completed) or not?
+A : there should be a some criteria on earned/lose condition.
+  -> if you don’t do that , than guaranteed to fail.
+
+*** Middleware
+The term “middleware” comes from the fact that it is the software and hardware that exists between clients and servers.
+Essentially middleware abstracts operating systems and communication protocols (e.g. sockets)
+Hiding distribution and the various interconnected parts of a system running in distributed locations
+Hiding the heterogeneity of the various system elements 
+Providing uniform, standard, high-level interfaces to application developers and integrators ease composition, promote reuse, and interoperability;
+Provide common services to perform various general purpose functions to avoid duplication facilitate collaboration between applications.
+
+it decouples clients from servers. It eases issues associated with: 
+security management
+transaction management reliability
+performance (in terms of load leveling)
+changing or supporting multiple protocols merging data
+transition/migration (technology, application, new data formats, protocols…)
+
+*** Choose the right software method for the job
+1. The need for flexibility
+2. Categories of method
+3. Compareing development methods
+4. Categories of projects
+5. You may need several method
+
+1. Key word in context
+   문제 : KWIC는 문장에서 키워드를 뽑아내는 시스템으로 Solution으로 
+   
+   Solution 1 : Main Program / Subroutine with Shared Data
+                        - Main에서 Data를 공유하여 문장 분석함
+   Solution 2 : Abstract Data Type
+                        - Data 종류에 따라, OO디자인의 Overloading 이용해 분석함.
+   Solution 3 : Implicit Invocation
+                        - Solution 1과 비슷하나 아래 두가지가 다름
+                           1) 데이터의 인터페이스가 좀더 추상적임. 
+                          2) 데이터가 수정되면 자동으로 묵시적으로 동작함.
+   Solution 4 : Pipes and Filters
+                        장점 : 1) 직관적인 흐름이 유지되고 있음(Intuitive flow of processing)
+                                    2) 각 필터는 독립적으로 작동하기 때문에 재사용이 가능(Reusability)
+                                    3) 각 필터는 수정이 용이함(Modifiability)
+                        단점 : 1) 두개이상 시스템에서 상호 교류 지원을 위해 디자인 수정이 거의 불가능함.
+                                     2) 메모리 활용면에서 비효율적임(Inefficiency)
+  S1 ~ S4 비교                       
+   Solution 2와 4가 좋음.
+  대신 직관적인 흐름과 수정이 용이한 Pipes and Filters가 유리해 보임.
+Good Solution is 2 and 4.   
+I recommend "Pipes and filters", because it is easy to modify and reuse.
+
+*** Client and Sever
+
+
+
+ 

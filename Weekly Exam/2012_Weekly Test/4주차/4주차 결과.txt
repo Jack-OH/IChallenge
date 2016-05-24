@@ -1,0 +1,115 @@
+User Hakrae Lee  
+Course M12-LG Software Course: April - July  
+Test Weekly Exam 4  
+Started 6/22/12 1:01 PM  
+Submitted 6/25/12 10:29 PM  
+Status Completed  
+Score 22 out of 25 points    
+Time Elapsed 1 hour, 6 minutes.  
+Instructions  
+
+Question 1 .5 out of 5 points
+  
+   Why might it be inadequate to only conduct functional testing? Why might it be inadequate to only conduct structural testing? [5 points]
+Answer  
+
+Selected Answer:  1) structural testing (=white box testing).
+   Structural testing examines how the program works, taking into account possible pitfalls in the structure and logic.
+2) functional testing (=black-box testing), which compares test program behavior against a requirements specification. 
+   Functional testing examines what the program accomplishes, without regard to how it works internally.
+  Coverage analysis helps eliminate gaps in a test suite.
+  It helps most in the absence of a detailed, up-to-date requirements specification. 
+  Thus, in case of choosing only one side, we cannot  test the product or software fully.  
+   
+Response Feedback:  [None Given]  
+ 
+Question 2 .5 out of 5 points
+  
+Assume a program has achieved 100% statement coverage, what type of faults might
+still be undetected? Give an example using pseudocode. Explain your example? [5 points]
+
+Statement coverage is the most basic form of code coverage. 
+A statement is covered if it is executed. 
+Look at the below example.
+int* p = NULL;
+if (condition)  p = &variable;
+*p = 123;
+If condition is true, the program has achieved 100% statement coverage.
+But, if condition is false, this code fails. 
+This is the most serious shortcoming of statement coverage. If-statements are very common.
+Pros of statement coverage.
+1.To ensure that all source code can be reached at least for one time.
+2.It is suitable for making Performance profiling because it can be applied directly to object code without processing source code.
+Cons of statement coverage.
+1.It is insensitive to logical operators such as OR (||),AND (&&) etc.
+2.If your source code have a lot of IF-ELSEIF-ELSE statements or contain consecutive switch labels then 
+   the test case used for doing Statement Coverage will be increased respectively. 
+   
+ 
+Question 3 .5 out of 5 points
+  
+What two types of properties can be analyzed with Petri-net models? Give an example of each type. [5 points]
+
+In a Petri-net models, the two types of properties are "behavioral properties" and "structural properties".
+Behavioral properties is depend on the initail marking.
+And the other(=Structural properties) is independent of the initial marking.
+-Behavioral properties can analyze as follow :
+   Reachability, Liveness, Boundedness, Reversibility and Home State,  
+   Coverablility, Synchronic Distance, Fairness, Persistence, and etc.
+ 
+  For example, among models that can represent concurrent activities, 
+  marked graphs are the most amenable to analysis. 
+  (use the method of "tree method", "matrix-equation approach", "reduction or decomposition", and etc.)
+ 
+-Structural properties can analyze as follow :
+   Structural Liveness, Structural Boundedness, Controllability,
+   Corollary, Conservativeness, Repetitiveness, Consistency, and etc. 
+  For example, structural properties use to analyze "minimum cycle time", "stochastic and performance modeling", and so forth. 
+   
+Response Feedback:  [None Given]  
+ 
+Question 4 .2 out of 5 points
+  
+What is the ¡°Big Brother¡± effect? [5 points]
+
+In the best practice of code review, Big Brother effect is as follows :
+- The manager show the best practice.
+   Because the best practice tell the more thing than teaching or others. 
+   And sometimes the big brother is effectiveness than inspection, code review, and etc.
+- The manager review the code as possible as shortly.    
+   
+Response Feedback:  If developers believe that metrics will be used against them, not only will they be hostile to the process, but they will probably focus on improving their metrics rather than truly writing better code and being more productive. 
+Managers should keep an eye out to make sure they are not propagating the impression that Big Brother is indeed scrutinizing every move.  
+ 
+Question 5 .5 out of 5 points
+  
+What are the strengths and weaknesses with pair programming and code inspections?
+In your opinion which is better or when might one approach be better than the other
+(clearly explain your rational)? [5 points]
+
+Pair programming is that one is the driver of code, the other(s) is inspection, test, or another thing.
+And Code inspection is more formal action of among the code review.
+Pair programming and code inspection have similar the strengths and weaknesses.
+I think, the difference is only more 
+The strengths is 
+- maintain High quality     
+- refresh the developer(use other's opinion)
+- make more extensive and flexible code
+The weakness is 
+- lost time(The period of developing code is needed more time. one developer make code quickly)
+- process a lot of the other's opinion.
+- someone hate to look his code.
+In my experience, now we use both pair programming and code inspection for finding bugs.
+I think that pair programming is more effective than code inspection.
+But, during several year, the pair programming is loosely. 
+Looks like that one main is the main SW engineer(senior) and the other is support man(young guy).
+And when the young guy modify the code, the senior don't review or do skim the code.
+In this case, the pair programming is not effect.
+So, now we use to additional code inspection in development process.
+The 3rd persons look the code strictly.
+The code inspection is very useful. 
+But, some developer complain to lost time and procedure many process.    
+In my opinion, "pair programming" gives me a better. 
+Having two engineers is better for the morale of the team, improves communication, 
+provides real training and helps me do away with the paper work of a "peer code review" process.
+But, sometimes needs strictly rule like code inspection.   

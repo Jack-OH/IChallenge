@@ -1,0 +1,139 @@
+[ASIS08] Chapter 5
+
+[AK01] Anita King, ¡°Commercial Off-the-Shelf Software?Benefits and Burdens,¡± The Edge, Volume 2, Number 1, Mitre Corporation, March 2001 (Read Entire Paper)
+
+[SRG95] Lui Sha, Ragunathan Rajkumar, Michael Gagliardi, A Software Architecture for Dependable and Evolvable Industrial Computing Systems, Technical Report CMU/SEI-95-TR-005 ESC-TR-95-005, July 1995 (Read Entire Paper)
+
+[Mul10] Gerrit Muller, ¡°Introduction to System Performance Design¡±, Embedded Systems Institute, Eindhoven, Netherlands (Read Entire Paper)
+
+=============
+Question 1.
+
+In [SRG95] what was the relationship between performance and availability?     [2 points]
+ 
+In industrial and defense computing systems, the architecture can be used to maintain the safety, reliability and real-time constraint.
+To improve availability, it may be difficult to maintain high performance.
+Contrary, it is difficult to maintain availability that achieve to high performance.
+Generally, to improve availability and performance, they need to be trade-off.
+So, in [SRG95], they suggest to simplex architecture. 
+To solve the conflict of between high availability and high performance, the simplex architecture suggest to real-time scheduling, analytic redundancy, model based voting and so forth.   
+
+===================
+Question 2
+
+What is design rationale, why is it important, and why is it important to for architects to document design rationale as they design? [ 3 points ]
+
+Design rationale consist of Architectural Drivers, Design Choice and Documenting.
+It is very important. Because a design rationale is the explicit listing of decisions and the reasons why those decisions were made.
+
+And, It is important that architects document design rationale. 
+The reason is that document rationale provide analysis/prototype results supporting the design decision made.
+In the opposite case, the arcitects will forgot many details design and rationale.
+
+====================
+Question 3
+
+How is ACDM fundamentally different from and ATAM. How is ACDM different from process frameworks such as XP, RUP, or TSP. [4 points]
+
+1. ATAM and ACDM are different. Because ATAM(Architecture Tradeoff Analysis Method) only addresses evaluation.
+The purpose of ATAM is to find general trends and to discover any risk, sensitive points, tradoffs, and non-risk created by architectural decisions.
+But, ACDM(Architecture Centric Design Method) is a scaleable method for designing the architecture of a software system.
+
+2. ACDM is intended to be a design framework for 
+-identifying, analyzing
+-organizing architectural drivers, 
+-guiding the design 
+-guiding experimentation 
+-evaluation designs
+-and iterative refinement the design to reduce risk
+-estimate, plan, and track system or product construction.
+ So, ACDM is not intended to software development process or process framework.
+ The others(XP, RUP or TSP) are intended to be a process framework.
+ ACDM was created to complement other software development framework.
+
+====================
+Question 4
+
+What is the role of element and relationship responsibility catalogs? Briefly discuss their importance in terms of how they can help ensure design completeness and requirements traceability. [2 points]
+
+
+[Answer] Architecture Design is produced from ADS after hierarchical, iterative, recursive decomposition. In the decomposition process, element and relationship catalogs are recursively used to explicitly assign responsibility to elements and relationships as they are derived from the architectural drivers. By both design completeness and traceability are served by this since there is a documented mapping from architectural driver, to responsibility, to elements and relationship throughout the design process.
+
+Answers should include the following key points: 
+Element and relationship catalogs are used to explicitly assign responsibility to elements and relationships as they are derived from the architectural drivers. By both design completeness and traceability are served by this since there is a documented mapping from architectural driver, to responsibility, to elements and/or relationship.
+==================
+Question 5
+
+Why is if often hard to document dynamic system structure? [3 points]
+
+It is difficult to document dynamic system structure. Because the system structure changes at run time. 
+And the dynamic structure has many combination situation(between elements and relationships) at run-time such as starting condition, exiting condition, normal conditon, and so forth.
+So we will consider what is key elements and relationships and how to choice, etc.
+
+==================
+Question 6
+
+Product Lines vs. SOA
+SOA is identical to product lines in many ways. Differences can be subtle: One key difference between product lines and SOA approaches is in the granularity of the reuse
+
+- Product Lines: core assets = elements x, y, different combinations of elements ¡æ different products
+- SOA: core assets = products a, b, different combinations of elements ¡æ different systems
+
+==================
+Question 7
+Describes the Benefit and Burden of COTS and/or Open Source?
+
+Benefit:
+- quick incorporation of new technology into the product
+- time to market
+- productivity increasing
+- focusing on the targeted application/domain area
+- build more reliable and capable system
+- adopt standards to produce more extensible, interoperable product/system
+
+Burden:
+- direction of COTS element evolution is out of our control, undesirable for our product, organization, market, and client base.
+- behavioral and especially quality attribute properties may change: these are usually difficult to detect
+- migration might be difficult or impossible
+- Vendor may stop supporting a particular product & can go out of business
+
+So, Architect must estimate the relative cost/benefit of using COTS before the decision.
+
+users are demanding ever-increasing quantities of business applications, and how to approach?
+
+1. buy a COTS (commercial off-the-shelf) product and integrate
+2. build your own application
+3. try to minimize your involvement and just use an ASP (application service provider)
+
+
+COTS seems to be the easy answer but consider...
+
+Benefits :
+1. save the time and money
+
+Burdens :
+1. Integration, licenses, upgrades, customizations, testing, user training, rollout
+
+
+=================
+ACDM, ATAM
+
+ATAM  is a scenario based evaluation method
+-  to find general trends
+- to discover any risks, sensitivity points, trade-offs, and non-risks created by architectural decisions
+
+The purpose of ATAM is to assess the consequences of architectural decisions in light of quality attribute requirements and business goals.
+
+ATAM Procedule
+- Phase 0 :  Partnership and preparation
+- customer and a subset of the evaluation team exchange understanding about method and the syste
+- go/no-go decision : to ensure the success of the ATAM evaluation
+- Phase 1 : Initial evaluation (architecture-centric)
+- focus on eliciting detailed architectural information and analyzing it (top-down analysis)
+- generate quality attribute utility tree : to identify, prioritize, and refine the most important quality attribute goals
+- Phase 2 : Complete Evaluation (stakeholder-centric)
+- focus on eliciting diverse stakeholders point of view and on verification of the Phase 1 results (bottom-up analysis)
+- Phase 3 : Follow-up
+- produce a final report for the customer, as well as assessing the quality of the evaluation and the ATAM materials
+
+

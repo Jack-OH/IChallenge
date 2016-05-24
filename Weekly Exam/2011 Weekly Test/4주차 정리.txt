@@ -1,0 +1,61 @@
+Why might it be inadequate to only conduct functional testing? 
+Why might it be inadequate to only conduct structural testing?
+
+Functional testing (AKA black-box testing) is good to check program behavior against a requirements specification.
+But, This testing examines what the program accomplished, without regard to how it works internally.
+Structural testing (AKA white-box testing) compares test program behavior against the apparent intention of the source code
+and examines how the program works, taking into account possible pitfalls in the structure and logic.
+But, This testing seems unsafe and cannot find errors of omission.
+The difference between functional and structural testing is blurry when release time is near.
+
+----------------------------------------------------
+
+Assume a program has achieved 100% statement coverage, what type of faults might still be undetected? 
+Give an example using pseudocode. Explain your example.
+
+Disadvantage of statement coverage are insensitive to some control structures. 
+For example, Let me assume following condition.
+
+int* p = NULL;
+if (condition) {
+    p = &variable;
+    *p = 1;
+}
+*p = 0;
+printout ("%d", p);
+
+If, "condition" is true, statement coverage rates this code fully covered.
+But, if "condition" ever evaluates false, this code fails. this code dereferences a null pointer.
+This is the most serious shortcoming of statement coverage. If-statements are very common.
+
+----------------------------------------------------
+
+What two types of properties can be analyzed with a Petri-net models? Give an example of each type.
+
+Petri-net model have two types of properties as below.
+1) Marking-dependent or behavioral properties is depend on the initial marking.
+For example, a set of logic equations or linear inequalities can describe as behavioral properties.
+They include reachability, boundedness, liveness, reversibility, coverability, persistence and fairness properties.
+
+2) Structural properties is independent of the initial marking.
+Most of the structural properties can be easily verified by means of algebraic techniques.
+For example, they can often be characterized in terms of the incidence matrix A and its associated homogeneous equations or inequalities.
+They include liveness, boundedness, conservativeness, repetitivity, consistency and controllability properties.
+
+----------------------------------------------------
+
+What is the difference between procedural and object-oriented approach?
+
+Procedural approach are focuses on sequence of instructions needed to process the data.
+They are implemented as functions and the data items are passed to functions as arguments.
+Procedural program are executed one by one when procedure is called.
+And they provides modularity and scoping.
+
+On the other hand, object oriented approach focuses on the objects which encapsulate the data and functions needed to process the data.
+And they provides abstraction, encapsulation and inheritance.
+
+Procedural approach are fast and consume less space.
+But object oriented approach provides important features that make programming efficient. 
+
+
+----------------------------------------------------

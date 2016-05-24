@@ -1,0 +1,167 @@
+Question 1
+
+Why might it be inadequate to only conduct functional testing? 
+Why might it be inadequate to only conduct structural testing?
+
+1) structural testing (=white box testing).
+   Structural testing examines how the program works, taking into account possible pitfalls in the structure and logic.
+
+2) functional testing (=black-box testing), which compares test program behavior against a requirements specification. 
+   Functional testing examines what the program accomplishes, without regard to how it works internally.
+
+  Coverage analysis helps eliminate gaps in a test suite.
+  It helps most in the absence of a detailed, up-to-date requirements specification. 
+
+  Thus, in case of choosing only one side, we cannot  test the product or software fully. 
+
+==================
+Question 2 
+
+Assume a program has achieved 100% statement coverage, what type of faults might still be undetected? 
+Give an example using pseudocode. Explain your example.
+
+Statement coverage is the most basic form of code coverage. 
+A statement is covered if it is executed. 
+
+Look at the below example.
+
+int* p = NULL;
+if (condition)
+    p = &variable;
+*p = 123;
+
+If condition is true, the program has achieved 100% statement coverage.
+In fact, if condition ever evaluates false, this code fails. 
+This is the most serious shortcoming of statement coverage. If-statements are very common.
+
+Pros.
+1.To ensure that all source code can be reached at least for one time.
+2.It is suitable for making Performance profiling because it can be applied directly to object code without processing source code.
+
+Cons.
+1.It is insensitive to logical operators such as OR (||),AND (&&) etc.
+2.If your source code have a lot of IF-ELSEIF-ELSE statements or contain consecutive switch labels then the test case used for doing Statement Coverage will be increased respectively.
+===================
+Question 3
+
+What two types of properties can be analyzed with a Petri-net models? 
+Give an example of each type.
+
+In a Petri-net models, the two types of properties are "behavioral properties" and "structural properties".
+Behavioral properties is depend on the initail marking.
+And the other(=Structural properties) is independent of the initial marking.
+
+-Behavioral properties can analyze as follow :
+   Reachability, Liveness, Boundedness, Reversibility and Home State,  
+   Coverablility, Synchronic Distance, Fairness, Persistence, and etc.
+  
+  For example, among models that can represent concurrent activities, 
+  marked graphs are the most amenable to analysis. 
+  (use the method of "tree method", "matrix-equation approach", "reduction or decomposition", and etc.)
+    
+
+-Structural properties can analyze as follow :
+   Structural Liveness, Structural Boundedness, Controllability,
+   Corollary, Conservativeness, Repetitiveness, Consistency, and etc. 
+
+  For example, structural properties use to analyze "minimum cycle time", "stochastic and performance modeling", and so forth.
+ 
+===================
+Question 4
+
+What is the difference between procedural and object-oriented approach?
+ 
+Object Oriented approach deals with the elemental basic parts or building blocks of the problem, 
+whereas Procedural approach focuses on the steps required to produce the desired results.
+ 
+Procedural programming focuses on writing code that is as precise as possible. 
+Most procedural programming use predefined or preset groups of functions that immediately solve the problem. In most situations, this gets highly efficient applications. Its main drawback is maintainability.
+ 
+Object-oriented programming (OOP), focuses on abstract relationships and a hierarchy of functionality. 
+Similar functionality can all share a common code, making maintenance much easier. 
+It provides increased code reuse functionality. 
+
+Generally, procedural approach use belows.
+-top-down design
+-step-wise refinement
+-divide-and-conqure
+
+But, Object oriented design is not top-down it is "inside-out".
+The most obvious difference in object oriented design.
+- Related data and behavior are tightly coupled.
+- Component is loosely coupled.
+- Object encapsulate state and behavior.
+
+=====================
+ What is Pair 
+
+
+ Pair programming is that chage the driver of the software every 1 hour.
+ If the driver hits a problem, there are two people to find a solution, and one of the two usually has a good idea
+ two people have differing specialities, these skills are transferred
+ It's less likely to contain bugs and hacks and things that cause maintenance problems later.
+ it gets developers talking and communicating ideas in the common language of code
+ absorb a few of their tricks and techniques. It's a fast track learning experience for both participants     	
+ Each half of the pair has to understand the code, right then and there, as it's being written.
+====================
+Code Review
+
+1. Review fewer than 200-400 lines of code at a time.
+2. Aim for an inspection rate of less than 300-500 LOC/hour.
+3. Take enough time for a proper, slow review, but not more than 60-90 minutes.
+4. Authors should annotate source code before the review begins.
+   : Sure enough, reviews with author preparation have barely any defects compared to reviews without author preparation.
+5. Establish quantifiable goals for code review and capture metrics so you can improve your processes.
+6. Checklists substantially improve results for both authors and reviewers.
+  : Checklists are especially important for reviewers, since if the author forgot it, the reviewer is likely to miss it as well.
+7. Verify that defects are actually fixed!
+8. Managers must foster a good code review culture in which finding defects is viewed positively.
+9. Beware the ¡°Big Brother¡± effect.
+10. The Ego Effect: Do at least some code review, even if you don¡¯t have time to review it all.
+  Reviewing 20-33% of the code will probably give you maximal Ego Effect benefit with minimal time expenditure, and reviewing 20% of your code is certainly better than none!
+11. Lightweight-style code reviews are efficient, practical, and effective at finding bugs.
+====================
+Architectural Design & Detailed Design
+
+Architectural Design
+-defines systemic partitioning
+-addresses systemic properties
+-helps identify systemic risks early
+-supports early systemic analysis
+-guides system construction and work assignment
+-refines the system spec. into a ¡®systemic design¡¯
+
+Detailed Design
+-defines element¡¯s functional requirements
+-supports algorithmic and code structure analysis
+-guides element construction
+====================
+Test cannot reduce the bug, but test show the bug.
+
+Quality Control
+-Product-oriented, ex) inspection, review and test
+-¡°All activities involved in engineering a software product w.r.t quality¡±
+
+Quality Assurance
+-Process-oriented, ex)Data collection and review
+-¡°Activities for independent assurance of adherence to a defined process¡±
+Quality Management
+-¡°Project internal activities to monitor ad manage the software quality¡±
+
+V&V(Verification & Validation) 
+-Verification: Build the thing right. 
+-Validation: Build the right thing. 
+
+Summary
+-Why Quality is important? : The quality impact to cost and schedule of development product.
+-Cost of quality: If we find defact lately, the cost of solving the problem increase more.
+
+======================
+In my experience, "peer code review" does not result in all the bugs being caught. For any large code changes, I only see general comments in "peer code review".
+In my opinion, "pair programming" gives me a better bang for the buck! Having two engineers is better for the morale of the team, improves communication, provides real training and helps me do away with the paper work of a "peer code review" process.
+
+There are some disadvantages of "pair programming". They are not big enough for me to be worried about but some other people might find the information useful -
+1. The day-to-day progress is slower than when a single programmer is working on the project. 
+   However the end result is a product of much higher quality so its worth it! In those organizations where each phase of the project has its own deadline, it is very difficult to introduce "pair programming".
+2. It requires great discipline and oversight to make sure that the "pair programming" routine is being followed. 
+  The strong programmers have a tendency to takeover the coding process while the weaker programmer would be happy to stay in the reviewer's role without significantly contributing to the project.

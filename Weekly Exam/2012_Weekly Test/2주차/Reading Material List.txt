@@ -1,0 +1,58 @@
+Readings:
+
+ [STR00] Three Tier Software Architectures. Software Technology Review. CMU SEI. 
+
+               16 Feb 2000. Read the entire paper.
+
+ [Vin02] Where is Middleware? Read the entire paper.
+
+ [SG94] An Introduction to Software Architecture, David Garlan and Mary Shaw. Read the entire paper.
+
+ [HRT09] Evaluating Project Decisions, Chapters 1, 4, 6 (reference - scan only)
+
+ [HRT09] Evaluating Project Decisions, Chapters 3, Read entire chapter
+
+ [Amb09] Choose the Right Software Method for the Job, Scott Ambler, 2009 
+
+                Read entire article: http://www.agiledata.org/essays/differentStrategies.html
+
+
+Week 2 - Reading Assignments
+Weekly Readings for Week 2 
+Monday June 4, 2012 - Friday June 8, 2012
+ 
+Cooperation Policy: This is an individual assignment. You are not permitted to work with other students on this assignment. If you do share answers it constitutes cheating. You will receive a zero for the assignment, and LG program directors will be notified. You are not permitted to share this work with anyone ? to do so is a breach of copyright.
+
+Readings:
+
+ [STR00] Three Tier Software Architectures. Software Technology Review. CMU SEI. 
+
+               16 Feb 2000. Read the entire paper.
+
+ [Vin02] Where is Middleware? Read the entire paper.
+
+ [SG94] An Introduction to Software Architecture, David Garlan and Mary Shaw. Read the entire paper.
+
+ [HRT09] Evaluating Project Decisions, Chapters 1, 4, 6 (reference - scan only)
+
+ [HRT09] Evaluating Project Decisions, Chapters 3, Read entire chapter
+
+ [Amb09] Choose the Right Software Method for the Job, Scott Ambler, 2009 
+
+                Read entire article: http://www.agiledata.org/essays/differentStrategies.html
+
+
+Week 1 - Reading Assignments
+Weekly Readings for Week 1 
+Wednesday May 30, 2012 - Friday June 1, 2012
+ 
+Cooperation Policy: This is an individual assignment. You are not permitted to work with other students on this assignment. If you do share answers it constitutes cheating. You will receive a zero for the assignment, and LG program directors will be notified. You are not permitted to share this work with anyone ? to do so is a breach of copyright.
+
+Readings:
+
+[ASIS08] Chapters 2, 3, 4
+
+[IBM05] Entire paper (http://www.ibm.com/developerworks/rational/library/4706.html)
+
+
+*** ASIS08 = Architecting Software Intensive Systems : A Practitioners Guide by Anthony Lattanze
