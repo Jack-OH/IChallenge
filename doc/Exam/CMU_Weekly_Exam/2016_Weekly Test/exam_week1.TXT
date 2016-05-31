@@ -1,0 +1,10 @@
+Question 1
+What are the architectural drivers?  Describe each one of them briefly and explain what makes a good example of each.  [4 Point]
+
+Question 2
+What are the benefits and liabilities of using Pipes and Filters? [6 Points]
+
+Question 3
+Describe what the following  architectural patterns are and what type of problems each of them address, 
+and generally what quality attributes each promotes and inhibits.  
+1) MVC; 2) publish-subscribe; 3) client-server; 4) peer-to-peer; 5) event-driven [3 points each for a total of 15 points]
