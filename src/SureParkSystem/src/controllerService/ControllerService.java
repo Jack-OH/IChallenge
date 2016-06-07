@@ -13,8 +13,9 @@ public class ControllerService {
 	BufferedReader mIn = null;
 	Socket mClientSocket = null;
 	
-	FacilityPacketReader mfReader = null;
 	FacilityPacketWriter mfWriter = null;
+	FacilityPacketReader mfReader = null;
+
 	
 	public ControllerService(String host, int port) throws Exception {
     	
