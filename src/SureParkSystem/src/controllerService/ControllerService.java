@@ -17,7 +17,7 @@ public class ControllerService {
 	FacilityPacketReader mfReader = null;
 
 	
-	public ControllerService(String host, int port) throws Exception {
+	public ControllerService(String host, int port, int ArduinoId) throws Exception {
     	
 		try {
 			mClientSocket = new Socket(host, port);
@@ -30,14 +30,24 @@ public class ControllerService {
     	mOut = new BufferedWriter(new OutputStreamWriter(mClientSocket.getOutputStream()));
 		mIn = new BufferedReader( new InputStreamReader( mClientSocket.getInputStream()));
 		
-		mfReader = new FacilityPacketReader(mIn);
-		mfReader.setDaemon(true);
-		mfReader.start();
-		
-		mfWriter = new FacilityPacketWriter(mOut);
+		mfWriter = new FacilityPacketWriter(mOut, ArduinoId);
 		mfWriter.setDaemon(true);
 		mfWriter.start();
 		
+		mfReader = new FacilityPacketReader(mIn, ArduinoId);
+		mfReader.setDaemon(true);
+		mfReader.start();
+		
+		mfWriter.sendInformation();
+		
+	}
+	
+	public void openEntryGate() {
+		mfWriter.request2openEntryGate();
+	}
+	
+	public void turnonStallLED(int stallIndex) {
+		mfWriter.request2turnOnStallLED(stallIndex);
 	}
 	
 	public void close() throws IOException {

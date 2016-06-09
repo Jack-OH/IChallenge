@@ -1,5 +1,8 @@
 package controllerService;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 public class ControllerServiceMain {
 
 	public static void main(String[] args) throws Exception {
@@ -15,17 +18,28 @@ public class ControllerServiceMain {
 		GarageInfo info = c.getGarageInfo(1);		
 		System.out.println("ip=" + info.ip + ", port=" + info.port);
 		// create ControllerService
-		ControllerService cs = new ControllerService(info.ip, info.port);
+		ControllerService cs = new ControllerService(info.ip, info.port, 1);
 		
-		
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		while(true) {
+			
+			String message = in.readLine();
+			
+			if( message.equals("GATE") ) {
+				cs.openEntryGate();
+			} else if(message.equals("LED")) {
+				cs.turnonStallLED(1);
+			} else if(message.equals("EXIT")) {
+				break;
+			}	
+			
 			
 			Thread.sleep(3000);
 			
 			
 		}
 		
-		//cs.close();
+		cs.close();
 		
 	}
 
