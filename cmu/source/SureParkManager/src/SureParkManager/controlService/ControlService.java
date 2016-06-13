@@ -32,6 +32,7 @@ public class ControlService {
 	
 	public void createClient(FacilityClientInfo info, String host, int port, int facilityId) throws Exception {
 		try {
+			System.out.println("IP : " + host);
 			info.mClientSocket = new Socket(host, port);
 			System.out.println("connected to serer");
 		} catch (IOException ioe) {

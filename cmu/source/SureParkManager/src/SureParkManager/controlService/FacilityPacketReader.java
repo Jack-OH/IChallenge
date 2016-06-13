@@ -63,6 +63,7 @@ public class FacilityPacketReader extends Thread {
 				}
 				
 				c.setGarageSlotState(facilityId, list);
+				System.err.println("Update Garage Status!!");
 			}
 			
 			
@@ -73,7 +74,7 @@ public class FacilityPacketReader extends Thread {
 		
 	}
 	
-	// 1ºÐ µÚ¿¡ ½ÇÇàµÉ ³»¿ë..
+	// 1ï¿½ï¿½ ï¿½Ú¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½..
 	final Runnable beeper = new Runnable() {
 	       public void run() { System.out.println("beep"); }
 	     };
@@ -98,7 +99,7 @@ public class FacilityPacketReader extends Thread {
 		} catch (IOException ioe) {
 			System.err.println("Connection to server broken");
 			
-			// ¼­¹ö Ä¿³Ø¼Ç ²÷¾îÁú¶§ È£ÃâµÊ. 
+			// ï¿½ï¿½ï¿½ï¿½ Ä¿ï¿½Ø¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½ï¿½. 
 			ioe.printStackTrace();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
