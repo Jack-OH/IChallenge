@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import SureParkManager.common.GarageInfo;
 import SureParkManager.common.SureParkConfig;
+import SureParkManager.controlService.ControlService;
 import SureParkManager.managementService.ManagementServer;
 
 public class SureParkManager {
@@ -21,6 +22,11 @@ public class SureParkManager {
         
         // Start server thread
         mgrServer.start();
+        
+        // Create ControlService
+        ControlService ctlService = new ControlService();
+        
+        
         
         // Example for update status
         ArrayList<Integer> slotStatus = new ArrayList<Integer>();
