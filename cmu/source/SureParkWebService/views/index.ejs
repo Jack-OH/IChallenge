@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <title> SurePark Reservation Service </title>
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans" / > <!-- google web font service -->
+    <link rel="stylesheet" href="/css/style.css" /> <!-- default style -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/jquery-ui-1.11.4.custom/jquery-ui.min.css" />
+    <link rel="stylesheet" href="/bootstrap/3.3.5/css/bootstrap.min.css">
+</head>
+<body>
+    <section id="loginAsAdmin">
+        <article>
+            <input type="button" id="usernameBtn" value="Login" class="btn btn-default"/>
+        </article>
+        <article id="loginInput">
+            <h2>Login</h2>
+            <form>
+                <p><input type="text" id="login_id" placeholder="ID" style="width: 200px; padding:5px" /></p>
+                <p><input type="password" id="login_passwd" placeholder="Password" style="width: 200px;padding:5px" /></p>
+                <p><input type="button" value="Login" id="loginBtn" class="btn" style="width: 200px; background-color: #000;" /></p>
+                <p id="login_errorMsg"></p>
+            </form>
+        </article>
+    </section>
+
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">SurePark Reservation Service</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li><a id="make_reservation" href="#">Make reservation</a></li>
+                <li><a id="confirm_reservation" href="#">Confirm reservation</a></li>
+                <li><a id="add_new_garage" href="#">Add new garage</a></li>
+                <li><a id="show_statistics" showSection="#showStatistics" >Show statistics</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div id="content ">  
+        <div id="newReservation" class="inputForm" >
+            <div class="well well-sm"> Reserve a parking sapce</div>
+            <br>
+            <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="reserve_date">Date</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control col-xs-4" id="reserve_date" placeholder="Enter Date">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="card_information">Card Info.</label>
+                    <div class="col-sm-10">          
+                        <input type="password" class="form-control" id="card_information" placeholder="Enter card number">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="reserve_garage">Garage Name</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control col-xs-4" id="reserve_garage" placeholder="Enter garage">
+                    </div>
+                </div>
+
+                <div class="form-group">        
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button id="makeReserveDoneBtn" type="submit" class="btn btn-default">Submit</button>
+                        <button id="makeReserveCancelBtn" type="submit" class="btn btn-default">Cancel</button>
+                    </div>
+                </div>
+          </form>
+        </div>
+
+        <div id="confirmReservation" class="inputForm" >
+            <div class="well well-sm"> Check the reservation ID </div>
+            <br>
+            <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="confirmReservation_name"> User ID </label>
+                    <div class="col-sm-10">          
+                        <input type="text" class="form-control" id="confirmReservation_name" placeholder="Enter user ID">
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="control-label col-sm-2" for="confirmReservation_info"> Reservation Info </label>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control" id="confirmReservation_info" placeholder="Enter reservation ID">
+                    </div>
+                </div>
+
+                <div class="form-group">        
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button id="confirmReserveDoneBtn" type="submit" class="btn btn-default">Confirm</button>
+                        <button id="confirmReserveCancelBtn" type="submit" class="btn btn-default">Cancel</button>
+                    </div>
+                </div>
+          </form>
+        </div>
+        <div id="addNewGarage" class="inputForm" >
+            <div class="well well-sm"> Add new garage</div>
+            <br>
+            <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="add_garage_name">Garage name </label>
+                    <div class="col-sm-10">          
+                        <input type="password" class="form-control" id="add_garage_name" placeholder="Enter new garage name">
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="control-label col-sm-2" for="add_number_of_slot"> Number of slots </label>
+                    <div class="col-xs-2">
+                        <input type="text" class="form-control" id="add_number_of_slot" placeholder="Enter slot numbers">
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="control-label col-sm-2" for="add_grace_period"> Default grace period </label>
+                    <div class="col-xs-2">
+                        <input type="text" class="form-control" id="add_grace_period" placeholder="Enter default grace period">
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="control-label col-sm-2" for="add_parking_fee"> Parking fee per hour </label>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control" id="add_parking_fee" placeholder="Enter default parking fee per hour">
+                    </div>
+                </div>
+
+                <div class="form-group" >
+                    <label class="control-label col-sm-2" for="add_garage_ip"> Garage IP </label>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control" id="add_garage_ip" placeholder="192.168.0.1">
+                    </div>
+                </div>
+
+                <div class="form-group">        
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button id="addGarageDoneBtn" type="submit" class="btn btn-default">Submit</button>
+                        <button id="addGarageCancelBtn" type="submit" class="btn btn-default">Cancel</button>
+                    </div>
+                </div>
+          </form>
+        </div>
+
+        <div id="showStatistics">
+            <div class="well well-sm"> Statistics </div>
+            <div class="row">
+                <div class="panel-group col-sm-6" style="padding-left:2px">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"> Will be displayed the average occupancy </div>
+                        <div class="panel-body">average occupancy</div>
+                    </div>                    
+                </div>
+                <div class="panel-group col-sm-6" style="background-color:lightgreen">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Will be display peak usage hour</div>
+                        <div class="panel-body">Peak usage hour</div>
+                    </div>      
+                </div>
+                <div class="panel-group col-sm-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"> Will be displayed parking hour </div>
+                        <div class="panel-body">Parking hour</div>
+                    </div>                    
+                </div>
+                <div class="panel-group col-sm-6" style="background-color:lavenderblush;">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"> Will be displayed heavy users </div>
+                        <div class="panel-body">  Heavy users</div>
+                    </div>      
+                </div>
+            </div>
+        </div>
+
+        <section id="showReservation">            
+        </section>
+
+
+        <div id="showGarageStatus">
+        </div>
+
+        <div id="outer_page_gallery">
+            <div id="page_gallery">
+            </div>
+        </div>
+
+        
+    </div>
+
+    
+
+
+    
+
+    <div id='footer'>
+    </div>
+    
+    <script>
+         var userName = "<%= userName %>";
+         var userType = "<%= userType %>";
+    </script>
+    <script src="/jquery/jquery-2.1.3.min.js"></script>
+    <script src="/jquery-ui-1.11.4.custom/jquery-ui.min.js"></script>
+    <script src="/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="/js/session_infomation.js"></script>
+    <script src="/js/main_page.js"></script>  
+</body>
+</html>
