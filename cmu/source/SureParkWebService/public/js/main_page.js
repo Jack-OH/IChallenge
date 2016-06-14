@@ -100,8 +100,8 @@ $('#loginBtn').click(function(){
 });
 
 $('#makeReserveDoneBtn').click(function(){
-    var date = $('#reserve_date').val();
-    var time = $('#reserve_time').val();
+    //var date = $('#reserve_date').val();
+    //var time = $('#reserve_time').val();
     var cardInfo = $('#card_information').val();
     var garageName = $('#reserve_garage').val();
     var gracePeriod;
@@ -128,7 +128,10 @@ $('#makeReserveDoneBtn').click(function(){
                     {"newReservation": {"userID":userName, "cardInfo":cardInfo, "confirmInformation":confirmInformation, 
                      "gracePeriod":gracePeriod, "parkingFee":parkingFee, "usingGarage":garageName}}; 
 
-                 $.post("newReservation", newReservation, function(resdata){
+                console.log(newReservation);
+                $.post("newReservation", newReservation, function(resdata){
+                    
+
                     if(resdata.errorMsg){
                         alert("TCP/IP Error");
                     }

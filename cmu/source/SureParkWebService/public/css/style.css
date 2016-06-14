@@ -341,13 +341,13 @@ input[type="button"]:hover, .btn:hover
 #loginInput {
   background-color: #f0f0f0;
   text-align: center;
-  padding: 30px;
+  padding: 10px 30px;
   margin-top: 10px;
   position:relative;
   top:40px;
   border-radius: 3px;
   display: none;
-  width: 400px;
+  width: 300px;
   border: 1px solid #ddd;
   box-shadow: 0 6px 16px rgba(100, 100, 100, 0.3);
 }

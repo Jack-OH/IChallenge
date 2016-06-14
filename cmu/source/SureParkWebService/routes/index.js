@@ -66,8 +66,9 @@ function ContentHandler(db) {
     };
 
     this.setGarage = function(req, res, next){
-        var data = req.query;
-        transManager.setGarage(data, function(err, result){
+        var data = req.body;
+        console.log(data);
+        transManager.saveDatabase(data, function(err, result){
 
         if(err)
             return next(err);
@@ -78,8 +79,9 @@ function ContentHandler(db) {
     };
 
     this.newReservation = function(req, res, next){
-        var data = req.query;
-        transManager.newReservation(data, function(err, result){
+        var data = req.body;
+        console.log(data);
+        transManager.saveDatabase(data, function(err, result){
 
         if(err)
             return next(err);
@@ -104,7 +106,7 @@ function ContentHandler(db) {
     };
 
     this.checkReservation = function(req, res, next){
-        var query = req.query;
+        var query = req.body;
         moduleDB.checkReservation(query, function(err, result){
 
         if(err)
@@ -117,7 +119,8 @@ function ContentHandler(db) {
 
     this.parkingCar = function(req, res, next){
         var data = req.query;
-        transManager.parkingCar(data, function(err, result){
+        console.log(data);
+        transManager.saveDatabase(data, function(err, result){
 
         if(err)
             return next(err);
