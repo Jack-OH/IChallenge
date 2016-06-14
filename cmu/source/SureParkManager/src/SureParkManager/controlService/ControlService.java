@@ -1,6 +1,7 @@
-package SureParkManager.controlService;
-import SureParkManager.common.GarageInfo;
-import SureParkManager.common.SureParkConfig;
+package sureParkManager.controlService;
+import sureParkManager.managementService.AbstractManagementFacility;
+import sureParkManager.common.GarageInfo;
+import sureParkManager.common.SureParkConfig;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -16,8 +17,9 @@ public class ControlService {
 
 
 	ArrayList<FacilityClientInfo> mClientInfo;
+	private AbstractManagementFacility mgrFacility = null;
 	
-	public ControlService() throws Exception {
+	public ControlService(AbstractManagementFacility mgrFacility) throws Exception {
 		
 		 SureParkConfig config = SureParkConfig.getInstance();
 		 
@@ -26,8 +28,8 @@ public class ControlService {
 			 GarageInfo gInfo = config.getGarageInfoFromIndex(i);
 			 createClient(info, gInfo.ip, 5001, gInfo.id); 
 		 }
-		 
-		
+
+		this.mgrFacility = mgrFacility;
 	}
 	
 	public void createClient(FacilityClientInfo info, String host, int port, int facilityId) throws Exception {
@@ -67,7 +69,6 @@ public class ControlService {
 		//mIn.close();
 		
 		//mClientSocket.close();		
-	}	
-	
+	}
 
 }

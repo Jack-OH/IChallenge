@@ -1,11 +1,8 @@
-package SureParkManager.controlService;
-import SureParkManager.common.SureParkConfig;
+package sureParkManager.controlService;
+import sureParkManager.common.SureParkConfig;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Vector;
 import java.util.concurrent.LinkedBlockingQueue;
 
 

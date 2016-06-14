@@ -1,35 +1,34 @@
-package SureParkManager;
+package sureParkManager;
 
-import java.util.ArrayList;
-
-import SureParkManager.common.GarageInfo;
-import SureParkManager.common.SureParkConfig;
-import SureParkManager.controlService.ControlService;
-import SureParkManager.managementService.ManagementServer;
+import sureParkManager.managementService.AbstractManagementFacility;
+import sureParkManager.managementService.ManagementFacility;
+import sureParkManager.common.SureParkConfig;
+import sureParkManager.controlService.ControlService;
+import sureParkManager.managementService.ServerReceiver;
 
 public class SureParkManager {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-		
-		ManagementServer mgrServer = new ManagementServer();
-        
+	        
         SureParkConfig config = SureParkConfig.getInstance();
         config.updateGarageInfo(); // DB update
         
         // Show current List
         config.printGarageList();
+
+        // Create ManagementFacility;
+        AbstractManagementFacility mgrFacility = new ManagementFacility();
+                
+        // Create ControlService
+        ControlService ctlService = new ControlService(mgrFacility);
         
         // Start server thread
-        mgrServer.start();
-        
-        // Create ControlService
-        ControlService ctlService = new ControlService();
-        
-        
+		ServerReceiver commRecv = new ServerReceiver(ctlService);
+        commRecv.start();
         
         // Example for update status
-        ArrayList<Integer> slotStatus = new ArrayList<Integer>();
+        /* ArrayList<Integer> slotStatus = new ArrayList<Integer>();
         slotStatus.add(GarageInfo.kGarageInfoSlotStatusOpen);
         slotStatus.add(GarageInfo.kGarageInfoSlotStatusBroken);
         slotStatus.add(GarageInfo.kGarageInfoSlotStatusOccupied);
@@ -38,6 +37,7 @@ public class SureParkManager {
         config.setGarageSlotState(1001, slotStatus);
         
         config.printGarageList();
+        */
                     
         while (true) {
             // Wait maximum of 1 second

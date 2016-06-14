@@ -1,9 +1,9 @@
-package SureParkManager.managementService;
+package sureParkManager.managementService;
 
 import com.mongodb.MongoClient;
 import com.mongodb.util.JSON;
 
-import SureParkManager.common.GarageInfo;
+import sureParkManager.common.GarageInfo;
 
 import java.util.ArrayList;
 
@@ -14,18 +14,19 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.DBCursor;
 
-public class DBtransactionManager {
+public class ManagementDBTransaction {
+	private static ManagementDBTransaction instance = null;
 
-	private MongoClient mongoClient = null;
-	private DB db = null;
+	private static MongoClient mongoClient = null;
+	private static DB db = null;
 
-	private boolean isDBConnected;
+	private static boolean isDBConnected;
 
 	public boolean isDBConnected() {
 		return isDBConnected;
 	}
 
-	public DBtransactionManager() throws Exception {
+	public ManagementDBTransaction() throws Exception {
 		// To connect to mongodb server
 		mongoClient = new MongoClient("localhost", 27017);
 
@@ -34,6 +35,17 @@ public class DBtransactionManager {
 		System.out.println("Connect to database successfully");
 
 		isDBConnected = true;
+	}
+
+	public static ManagementDBTransaction getInstance() throws Exception {
+		if (instance == null) {
+			synchronized (ManagementDBTransaction.class) {
+				if (instance == null) {
+					instance = new ManagementDBTransaction();
+				}
+			}
+		}
+		return instance;
 	}
 
 	public ArrayList<GarageInfo> getGaragesInfo() throws Exception {

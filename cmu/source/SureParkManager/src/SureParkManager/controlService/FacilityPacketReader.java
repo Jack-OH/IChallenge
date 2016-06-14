@@ -1,4 +1,4 @@
-package SureParkManager.controlService;
+package sureParkManager.controlService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,8 +8,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import SureParkManager.common.GarageInfo;
-import SureParkManager.common.SureParkConfig;
+import sureParkManager.common.GarageInfo;
+import sureParkManager.common.SureParkConfig;
 
 public class FacilityPacketReader extends Thread {
 	

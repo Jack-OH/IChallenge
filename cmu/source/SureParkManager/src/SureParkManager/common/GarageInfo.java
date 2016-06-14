@@ -1,4 +1,4 @@
-package SureParkManager.common;
+package sureParkManager.common;
 
 import java.util.ArrayList;
 
@@ -7,8 +7,6 @@ public class GarageInfo {
 	public static final int kGarageInfoSlotStatusOccupied = 1;
 	public static final int kGarageInfoSlotStatusBroken = 2;
 	public static final int kGarageInfoSlotStatusReserved = 3;
-
-
 
 	public int id;
 	public String name;

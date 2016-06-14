@@ -1,6 +1,6 @@
-package SureParkManager.common;
+package sureParkManager.common;
 
-import SureParkManager.managementService.DBtransactionManager;
+import sureParkManager.managementService.ManagementDBTransaction;
 import java.util.ArrayList;
 
 public class SureParkConfig {
@@ -45,18 +45,30 @@ public class SureParkConfig {
 	}
 
 	public void updateGarageInfo() throws Exception {
-		DBtransactionManager dbMngr = new DBtransactionManager();
+		ManagementDBTransaction mgtDB = ManagementDBTransaction.getInstance();
 
 		System.out.println("update Config");
 
-		if (dbMngr.isDBConnected()) {
+		if (mgtDB.isDBConnected()) {
 			this.garageArray.clear();
-			this.garageArray = dbMngr.getGaragesInfo();
+			this.garageArray = mgtDB.getGaragesInfo();
 		}
 	}
 	
+	public void setGarageSlotState(int garageID, int slotIdx, int slotStatus) throws Exception {
+		ManagementDBTransaction mgtDB = ManagementDBTransaction.getInstance();
+		
+		for (GarageInfo info : this.garageArray) {
+			if ( info.id == garageID ) {
+					info.slotStatus.set(slotStatus, slotStatus);
+				
+				mgtDB.updateGarageSlot(info.id, info.slotStatus);
+			}
+		}
+	}	
+	
 	public void setGarageSlotState(int garageID, ArrayList<Integer> slotStatus) throws Exception {
-		DBtransactionManager dbMgr = new DBtransactionManager();
+		ManagementDBTransaction mgtDB = ManagementDBTransaction.getInstance();
 		
 		for (GarageInfo info : this.garageArray) {
 			if ( info.id == garageID ) {
@@ -64,7 +76,7 @@ public class SureParkConfig {
 					info.slotStatus.set(i, slotStatus.get(i));
 				}
 				
-				dbMgr.updateGarageSlot(info.id, info.slotStatus);
+				mgtDB.updateGarageSlot(info.id, info.slotStatus);
 			}
 		}
 	}

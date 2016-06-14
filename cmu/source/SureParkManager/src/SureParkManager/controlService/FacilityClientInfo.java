@@ -1,4 +1,4 @@
-package SureParkManager.controlService;
+package sureParkManager.controlService;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
