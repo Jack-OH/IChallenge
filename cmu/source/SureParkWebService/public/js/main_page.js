@@ -100,55 +100,68 @@ $('#loginBtn').click(function(){
 });
 
 $('#makeReserveDoneBtn').click(function(){
-    //var date = $('#reserve_date').val();
+    var date = $('#reserve_date').val();
     //var time = $('#reserve_time').val();
     var cardInfo = $('#card_information').val();
     var garageName = $('#reserve_garage').val();
     var gracePeriod;
     var parkingFee;
     var newReservation;
+    var userID;
     var confirmInformation = garageName + '-' + Math.floor((Math.random() * 10000) + 1);
+
+    var query = {};
 
     if(userName === "") {
         alert("To make reservation, you need to log-in first.");
         return;
     }
 
-    
-    var query = {};
-
-    $.get("getGarages", query, function(data) {
-        data.forEach(function(item){
-            console.log(item);
-            if(item.garageName ==  garageName) {
-                gracePeriod = item.gracePeriod;
-                parkingFee = item.parkingFee;
-
-                newReservation = 
-                    {"newReservation": {"userID":userName, "cardInfo":cardInfo, "confirmInformation":confirmInformation, 
-                     "gracePeriod":gracePeriod, "parkingFee":parkingFee, "usingGarage":garageName}}; 
-
-                console.log(newReservation);
-                $.post("newReservation", newReservation, function(resdata){
-                    
-
-                    if(resdata.errorMsg){
-                        alert("TCP/IP Error");
-                    }
-                    else {
-                        console.log(resdata);
-                        location.reload();
-                    }
-                });
-
-            }            
+    $.get('getUsers', {'displayName':userName}, function(userdata) {
+        userdata.forEach(function(useritem){
+            if(useritem.displayName == userName) {
+                userID = useritem.userID;
+            }
         });
 
-        if(newReservation===undefined) {
-            alert("Please check your reservation input ...");    
+        //userID = userdata.userID;
+        if(userID !== undefined) {
+            $.get("getGarages", query, function(data) {
+                data.forEach(function(item){
+                    console.log(item);
+                    if(item.garageName ==  garageName) {
+                        gracePeriod = item.gracePeriod;
+                        parkingFee = item.parkingFee;
+
+                        newReservation = 
+                            {"newReservation": {"userID":userID, "cardInfo":cardInfo, "confirmInformation":confirmInformation, 
+                             "gracePeriod":gracePeriod, "parkingFee":parkingFee, "usingGarage":garageName }}; 
+
+                        console.log(newReservation);
+                        $.post("newReservation", newReservation, function(resdata){
+                            
+
+                            if(resdata.errorMsg){
+                                alert("TCP/IP Error");
+                            }
+                            else {
+                                console.log(resdata);
+                                location.reload();
+                            }
+                        });
+
+                    }            
+                });
+
+                if(newReservation===undefined) {
+                    alert("Please check your reservation input ...");    
+                }
+                
+            });
         }
-        
+
     });
+   
 });
 
 $('#makeReserveCancelBtn').click(function(){
