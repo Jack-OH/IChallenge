@@ -27,6 +27,8 @@ public class ControlService {
         
 		 for( int i = 0 ; i < config.getGarageNum() ; i++ ) {
 			 FacilityClientInfo info = new FacilityClientInfo();
+			 mClientInfo.add(new FacilityClientInfo());
+			 
 			 GarageInfo gInfo = config.getGarageInfoFromIndex(i);
 			 createClient(info, gInfo.ip, 5001, gInfo.id); 
 		 }
