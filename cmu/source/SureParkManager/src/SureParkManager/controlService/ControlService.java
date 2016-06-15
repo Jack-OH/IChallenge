@@ -17,23 +17,23 @@ public class ControlService {
 
 	private static final int kFacilitySlotNumberBase = 0;
 
-	private ArrayList<FacilityClientInfo> mClientInfo = null;
+	private ArrayList<FacilityClientInfo> mClientInfo = new ArrayList<FacilityClientInfo>();
 	private AbstractManagementFacility mgrFacility = null;
 	
 	public ControlService(AbstractManagementFacility mgrFacility) throws Exception {
 
 		 SureParkConfig config = SureParkConfig.getInstance();
          this.mgrFacility = mgrFacility;
-         mClientInfo = new ArrayList<FacilityClientInfo>();
         
-		 for( int i = 0 ; i < config.getGarageNum()
-                 ; i++ ) {
+		 for( int i = 0 ; i < config.getGarageNum() ; i++ ) {
 			 FacilityClientInfo info = new FacilityClientInfo();
 			 mClientInfo.add(info);
 			 
 			 GarageInfo gInfo = config.getGarageInfoFromIndex(i);
 			 createClient(info, gInfo.ip, 5001, gInfo.id); 
 		 }
+		 
+		 System.err.println("ctor ControlService");
 	}
 	
 	public void createClient(FacilityClientInfo info, String host, int port, int facilityId) throws Exception {
@@ -41,25 +41,29 @@ public class ControlService {
 			System.out.println("IP : " + host);
 			info.mClientSocket = new Socket(host, port);
 			System.out.println("connected to serer");
+			
+			info.facilityId = facilityId;
+	    	info.mOut = new BufferedWriter(new OutputStreamWriter(info.mClientSocket.getOutputStream()));
+			info.mIn = new BufferedReader(new InputStreamReader(info.mClientSocket.getInputStream()));
+			
+			info.mfWriter = new FacilityPacketWriter(info.mOut, facilityId);
+			info.mfWriter.setDaemon(true);
+			info.mfWriter.start();
+			
+			info.mfReader = new FacilityPacketReader(info.mIn, facilityId);
+	        info.mfReader.setManager(mgrFacility);
+			info.mfReader.setDaemon(true);
+			info.mfReader.start();
+			
+			info.mfWriter.sendInformation();
+			
 		} catch (IOException ioe) {
 			System.err.println("cannot establish connection");
 			ioe.printStackTrace();
 		}
-    	
-		info.facilityId = facilityId;
-    	info.mOut = new BufferedWriter(new OutputStreamWriter(info.mClientSocket.getOutputStream()));
-		info.mIn = new BufferedReader(new InputStreamReader(info.mClientSocket.getInputStream()));
 		
-		info.mfWriter = new FacilityPacketWriter(info.mOut, facilityId);
-		info.mfWriter.setDaemon(true);
-		info.mfWriter.start();
+
 		
-		info.mfReader = new FacilityPacketReader(info.mIn, facilityId);
-        info.mfReader.setManager(mgrFacility);
-		info.mfReader.setDaemon(true);
-		info.mfReader.start();
-		
-		info.mfWriter.sendInformation();
 	}
 	
 	public void openEntryGate(int facilityId, int slotIndex ) {
@@ -75,6 +79,9 @@ public class ControlService {
 	
 	public void close() throws IOException {
 		for( FacilityClientInfo i : mClientInfo ) {
+			i.mfReader.stopThread();
+			i.mfWriter.stopThread();
+			
 			i.mOut.close();
 			i.mIn.close();
 			i.mClientSocket.close();			

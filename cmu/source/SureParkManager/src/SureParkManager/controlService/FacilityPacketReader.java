@@ -20,6 +20,7 @@ public class FacilityPacketReader extends Thread {
 	volatile private ScheduledFuture<?> noPacketHandle;
 	private AbstractManagementFacility mgrFacility = null;
 	private boolean isFirstStatus = true;
+	private boolean runningTread = true;
 	
 	
 	public FacilityPacketReader(BufferedReader in, int id) {
@@ -29,6 +30,10 @@ public class FacilityPacketReader extends Thread {
 	
 	public void setManager(AbstractManagementFacility mgr) {
 		mgrFacility = mgr;
+	}
+	
+	public void stopThread() {
+		runningTread = false;
 	}
 	
 	public void parse(String packet) throws Exception {
@@ -91,7 +96,7 @@ public class FacilityPacketReader extends Thread {
 		// display read message from server
 		try {
 			String message;
-			while ((message = mIn.readLine()) != null) {
+			while ( runningTread && (message = mIn.readLine()) != null) {
 				System.out.println(message + ", length=" + message.length());
 				
 				if( message.length() > 0 ) {
@@ -104,8 +109,12 @@ public class FacilityPacketReader extends Thread {
 					noPacketHandle = scheduler.schedule(handler, 10, TimeUnit.SECONDS);
 				}
 			}
+			
+			System.out.println("FacilityPacketReader thread stopped");
 		} catch (IOException ioe) {
 			System.err.println("Connection to server broken");
+			
+			
 			
 			// ¼­¹ö Ä¿³Ø¼Ç ²÷¾îÁú¶§ È£ÃâµÊ. 
 			ioe.printStackTrace();

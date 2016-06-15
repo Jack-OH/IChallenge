@@ -12,11 +12,16 @@ public class FacilityPacketWriter extends Thread {
 	private BufferedWriter mOut = null;
 	private int facilityId = 0;
 	private LinkedBlockingQueue<String> mMessageQueue = new LinkedBlockingQueue<String>();
+	private boolean runningTread = true;
 	
 	public FacilityPacketWriter(BufferedWriter out, int id) {
 		mOut = out;	
 		facilityId = id;
 
+	}
+	
+	public void stopThread() {
+		runningTread = false;
 	}
 	
 	public void sendInformation() throws Exception {
@@ -73,7 +78,7 @@ public class FacilityPacketWriter extends Thread {
 			// read cmd message
 			//BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 			
-			while (!isInterrupted()) {
+			while (runningTread && !isInterrupted()) {
 				//String message = in.readLine() + '\n';
 				//message = "$0001I4\n";
 				//System.out.println("length=" +  message.length() );
@@ -82,6 +87,8 @@ public class FacilityPacketWriter extends Thread {
 				mOut.write(message, 0, message.length());
 				mOut.flush();
 			}
+			
+			System.out.println("FacilityPacketReader thread stopped");
 			
 		} catch (InterruptedException ioe) {
 			
