@@ -94,7 +94,7 @@ public class ServerReceiver extends Thread {
                                 // DB Update
 
                                 // open gate
-                                this.ctlService.openEntryGate();
+                                this.ctlService.openEntryGate(1001, 0);
 
                                 retJsonObj.put("parkingCar", "OK");
                             }
