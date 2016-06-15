@@ -11,4 +11,7 @@ public class FacilityClientInfo {
 	
 	FacilityPacketWriter mfWriter = null;
 	FacilityPacketReader mfReader = null;
+	
+	int facilityId = 0;
+	
 }

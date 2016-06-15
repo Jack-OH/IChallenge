@@ -16,7 +16,7 @@ import java.util.ArrayList;
 public class ControlService {
 
 
-	ArrayList<FacilityClientInfo> mClientInfo;
+	private ArrayList<FacilityClientInfo> mClientInfo = null;
 	private AbstractManagementFacility mgrFacility = null;
 	
 	public ControlService(AbstractManagementFacility mgrFacility) throws Exception {
@@ -42,6 +42,7 @@ public class ControlService {
 			ioe.printStackTrace();
 		}
     	
+		info.facilityId = facilityId;
     	info.mOut = new BufferedWriter(new OutputStreamWriter(info.mClientSocket.getOutputStream()));
 		info.mIn = new BufferedReader(new InputStreamReader(info.mClientSocket.getInputStream()));
 		
@@ -53,22 +54,29 @@ public class ControlService {
 		info.mfReader.setDaemon(true);
 		info.mfReader.start();
 		
-		info.mfWriter.sendInformation();		
+		info.mfWriter.sendInformation();	
+		
+		
 	}
 	
-	public void openEntryGate() {
-		//mfWriter.request2openEntryGate();
+	public void openEntryGate(int facilityId, int slotIndex ) {
+		for( FacilityClientInfo i : mClientInfo ) {
+			if( i.facilityId == facilityId ) {
+				i.mfWriter.request2openEntryGate();
+				i.mfWriter.request2turnOnStallLED(slotIndex);
+				break;
+			}
+		}
 	}
 	
-	public void turnonStallLED(int stallIndex) {
-		//info.mfWriter.request2turnOnStallLED(stallIndex);
-	}
 	
 	public void close() throws IOException {
-		//info.mOut.close();
-		//mIn.close();
-		
-		//mClientSocket.close();		
+		for( FacilityClientInfo i : mClientInfo ) {
+			i.mOut.close();
+			i.mIn.close();
+			i.mClientSocket.close();			
+		}
+
 	}
 
 }
