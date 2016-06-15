@@ -22,7 +22,7 @@ public class ManagementFacility extends AbstractManagementFacility {
 
 		serverSender.write(jsonObject.toJSONString());
 		
-		System.out.println("update slot state");
+		System.out.println("update slot state, garageID : " + garageID + ", slot Index : " + slotIdx + ", slot Status : " + slotStatus);
 	}
 	
 	// CS -> MS

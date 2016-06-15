@@ -15,21 +15,21 @@ import java.util.ArrayList;
 
 public class ControlService {
 
+	private static final int kFacilitySlotNumberBase = 0;
 
 	private ArrayList<FacilityClientInfo> mClientInfo = null;
 	private AbstractManagementFacility mgrFacility = null;
 	
 	public ControlService(AbstractManagementFacility mgrFacility) throws Exception {
-		
+
 		 SureParkConfig config = SureParkConfig.getInstance();
-		 
+         this.mgrFacility = mgrFacility;
+        
 		 for( int i = 0 ; i < config.getGarageNum() ; i++ ) {
 			 FacilityClientInfo info = new FacilityClientInfo();
 			 GarageInfo gInfo = config.getGarageInfoFromIndex(i);
 			 createClient(info, gInfo.ip, 5001, gInfo.id); 
 		 }
-
-		this.mgrFacility = mgrFacility;
 	}
 	
 	public void createClient(FacilityClientInfo info, String host, int port, int facilityId) throws Exception {
@@ -51,6 +51,7 @@ public class ControlService {
 		info.mfWriter.start();
 		
 		info.mfReader = new FacilityPacketReader(info.mIn, facilityId);
+        info.mfReader.setManager(mgrFacility);
 		info.mfReader.setDaemon(true);
 		info.mfReader.start();
 		

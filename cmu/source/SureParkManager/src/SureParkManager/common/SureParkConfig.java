@@ -60,7 +60,7 @@ public class SureParkConfig {
 		
 		for (GarageInfo info : this.garageArray) {
 			if ( info.id == garageID ) {
-					info.slotStatus.set(slotStatus, slotStatus);
+					info.slotStatus.set(slotIdx, slotStatus);
 				
 				mgtDB.updateGarageSlot(info.id, info.slotStatus);
 			}
