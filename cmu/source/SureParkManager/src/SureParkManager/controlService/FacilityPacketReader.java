@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import sureParkManager.common.GarageInfo;
 import sureParkManager.common.SureParkConfig;
+import sureParkManager.managementService.AbstractManagementFacility;
 
 public class FacilityPacketReader extends Thread {
 	
@@ -17,11 +18,17 @@ public class FacilityPacketReader extends Thread {
 	private int facilityId = 0;
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	volatile private ScheduledFuture<?> noPacketHandle;
+	private AbstractManagementFacility mgrFacility = null;
+	private boolean isFirstStatus = true;
 	
 	
 	public FacilityPacketReader(BufferedReader in, int id) {
 		mIn = in;
 		facilityId = id;
+	}
+	
+	public void setManager(AbstractManagementFacility mgr) {
+		mgrFacility = mgr;
 	}
 	
 	public void parse(String packet) throws Exception {
@@ -46,25 +53,17 @@ public class FacilityPacketReader extends Thread {
 			//SureParkConfig info = c.getGarageInfo(id);
 			GarageInfo info = c.getGarageInfoFromGarageID(facilityId);
 			
-			boolean needtoUpdate = false;
 			for( int i = 0 ; i < info.slotNum ; i++ ) {
 				int status = Integer.valueOf(slotStatus.charAt(i))-'0';
-				if( status != info.slotStatus.get(i) ) {
-					needtoUpdate = true;
-					break;
+				if( isFirstStatus || status != info.slotStatus.get(i) ) {
+					//evtMgr.updateSlotStatus(facilityId, i, status);
+					mgrFacility.updateSlotStatus(facilityId, i, status);
 				}
 			}
 			
-			if( needtoUpdate ) {
-				ArrayList<Integer> list = new ArrayList<Integer>();
-				
-				for( int i = 0 ; i < info.slotNum ; i++ ) {
-					list.add(Integer.valueOf(slotStatus.charAt(i))-'0' );
-				}
-				
-				c.setGarageSlotState(facilityId, list);
-				System.err.println("Update Garage Status!!");
-			}
+			isFirstStatus = false;
+			
+
 			
 			
 		} else {
@@ -74,9 +73,18 @@ public class FacilityPacketReader extends Thread {
 		
 	}
 	
-	// 1�� �ڿ� ����� ����..
-	final Runnable beeper = new Runnable() {
-	       public void run() { System.out.println("beep"); }
+	// 1ºÐ µÚ¿¡ ½ÇÇàµÉ ³»¿ë..
+	final Runnable handler = new Runnable() {
+	       public void run() { 
+	    	   System.out.println("no heartbeat from facility"); 
+	    	   //evtMgr.setFacilityFailure(facilityId, true);
+	    	   try {
+				mgrFacility.setFacilityFailure(facilityId, true);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	       }
 	     };
 	
 	public void run() {
@@ -93,13 +101,13 @@ public class FacilityPacketReader extends Thread {
 						noPacketHandle.cancel(true);
 					}
 					
-					noPacketHandle = scheduler.schedule(beeper, 10, TimeUnit.SECONDS);
+					noPacketHandle = scheduler.schedule(handler, 10, TimeUnit.SECONDS);
 				}
 			}
 		} catch (IOException ioe) {
 			System.err.println("Connection to server broken");
 			
-			// ���� Ŀ�ؼ� �������� ȣ���. 
+			// ¼­¹ö Ä¿³Ø¼Ç ²÷¾îÁú¶§ È£ÃâµÊ. 
 			ioe.printStackTrace();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
