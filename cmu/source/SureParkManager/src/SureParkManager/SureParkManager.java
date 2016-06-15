@@ -49,7 +49,7 @@ public class SureParkManager {
         	
 			String message = in.readLine();
 			
-			if( message.equals("GATE") ) {
+			if( message.equals("g") ) {
 				ctlService.openEntryGate(1001, 1);
 			} else if(message.equals("EXIT")) {
 				break;

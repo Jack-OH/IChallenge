@@ -24,10 +24,12 @@ public class ControlService {
 
 		 SureParkConfig config = SureParkConfig.getInstance();
          this.mgrFacility = mgrFacility;
+         mClientInfo = new ArrayList<FacilityClientInfo>();
         
-		 for( int i = 0 ; i < config.getGarageNum() ; i++ ) {
+		 for( int i = 0 ; i < config.getGarageNum()
+                 ; i++ ) {
 			 FacilityClientInfo info = new FacilityClientInfo();
-			 mClientInfo.add(new FacilityClientInfo());
+			 mClientInfo.add(info);
 			 
 			 GarageInfo gInfo = config.getGarageInfoFromIndex(i);
 			 createClient(info, gInfo.ip, 5001, gInfo.id); 
@@ -57,9 +59,7 @@ public class ControlService {
 		info.mfReader.setDaemon(true);
 		info.mfReader.start();
 		
-		info.mfWriter.sendInformation();	
-		
-		
+		info.mfWriter.sendInformation();
 	}
 	
 	public void openEntryGate(int facilityId, int slotIndex ) {
