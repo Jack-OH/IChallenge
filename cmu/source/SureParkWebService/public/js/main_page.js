@@ -1,5 +1,7 @@
 
 var win;
+var gGarages = [];          //garage name을 저장해 놓기 위한 전역 변수.  query의 횟수를 줄일 수 있을 것임
+
 $('#slideShowStartBtn').click(function(){
 
     $('#slideShowStartBtn').hide(0);
@@ -102,7 +104,7 @@ $('#loginBtn').click(function(){
 $('#makeReserveDoneBtn').click(function(){
     var date = $('#reserve_date').val();
     //var time = $('#reserve_time').val();
-    var cardInfo = $('#card_information').val();
+    var cardInfo = $('#card1').val() + "-" + $('#card2').val() + "-" + $('#card3').val() + "-" + $('#card4').val();
     var garageName = $('#reserve_garage').val();
     var gracePeriod;
     var parkingFee;
@@ -112,7 +114,7 @@ $('#makeReserveDoneBtn').click(function(){
 
     var query = {};
 
-    if(userName === "") {
+    if(userName === "" || date===undefined || cardInfo===undefined || garageName===undefined) {
         alert("To make reservation, you need to log-in first.");
         return;
     }
@@ -149,6 +151,9 @@ $('#makeReserveDoneBtn').click(function(){
                                 location.reload();
                             }
                         });
+
+                        //Below line is temporary code.
+                        location.reload();
 
                     }            
                 });
@@ -187,32 +192,41 @@ $('#make_reservation').click(function(){
 $('#confirmReserveDoneBtn').click(function(){
     var confirmInfo = $('#confirmReservation_info').val();
     var confirmUserID = $('#confirmReservation_name').val();
-    var query = {"confirmInformation":confirmInfo, "userID":confirmUserID};
+    var usingGarage = $('#confirmReservation_garage').text();
+    var query = {"confirmInformation":confirmInfo, "userID":confirmUserID, "usingGarage": usingGarage };
     var parkingCar;
-    var usingGarage;
+    
 
     $.post("checkReservation", query, function(data) {
-        data.forEach(function(item){
-            console.log(item);
-            if(item.reservationStatus == "waiting") {
-                usingGarage = item.usingGarage;
-                parkingCar = {"parkingCar": {"userID":confirmUserID, "usingGarage":usingGarage, "confirmInformation":confirmInfo}};
+        if(data.length===0) {
+            alert("Please check your reservation information ...");
+        } else {
+            data.forEach(function(item){
+                console.log(item);
+                if(item.reservationStatus == "waiting") {
+                    //usingGarage = item.usingGarage;
+                    parkingCar = {"parkingCar": 
+                        {"userID":confirmUserID, "usingGarage":usingGarage, "confirmInformation":confirmInfo}};
 
-                 $.get("parkingCar", parkingCar, function(resdata){
-                    if(resdata.errorMsg){
-                        alert("TCP/IP Error");
-                    }
-                    else {
-                        console.log(resdata);
-                        location.reload();
-                    }
-                });
+                     $.get("parkingCar", parkingCar, function(resdata){
+                        if(resdata.errorMsg){
+                            alert("TCP/IP Error");
+                        }
+                        else {
+                            console.log(resdata);
+                            location.reload();
+                        }
+                    });
 
-            }            
-        });
+                    // Below line is temporary code. 
+                    location.reload();
 
-        if(parkingCar===undefined) {
-            alert("Please check your reservation information ...");    
+                }            
+            });
+
+            if(parkingCar===undefined) {
+                alert("Please check your reservation information ...");
+            }
         }
         
     });
@@ -245,7 +259,7 @@ $('#addGarageDoneBtn').click(function(){
     var numberOfSlots = parseInt($('#add_number_of_slot').val());
     var gracePeriod = parseInt($('#add_grace_period').val());
     var parkingFee = parseInt($('#add_parking_fee').val());
-    var garageIP = $('#add_garage_ip').val();
+    var garageIP = $('#ip1').val() + "." + $('#ip2').val() + "." + $('#ip3').val() + "." + $('#ip4').val();
     var slotStatus = [];
     var i = 0;
     var newGarage;
@@ -459,9 +473,12 @@ function makeGarageTableList(garage_data, tbody){
         tr = $('<tr></tr>').addClass('tableRow').appendTo(tbody);
         $('<td colspan=8> There is no garage information </td>').appendTo(tr);
     } else {
-        i = 0;
         garage_data.forEach(function(arr){
                 console.log(arr);
+
+                //우선 아래에서 Garage 이름을 global 로 저장해 놓자 
+                gGarages.push(arr.garageName);
+
                 tr = $('<tr></tr>').addClass('tableRow').appendTo(tbody);
                 $('<td>' + arr.garageName + '</td>').appendTo(tr);
                 
@@ -486,7 +503,14 @@ function makeGarageTableList(garage_data, tbody){
                 }
         });
     }
-    
+
+    var table = $('<table class="table table-bordered" width:100%></table>').appendTo('#showReservation');
+
+    gGarages.forEach(function(garage) {
+        var li = '<li><a href="#">' + garage + '</a></li>';
+        $(li).appendTo('.dropdown-menu');
+        //$(li).appendTo('#confirmReservation_garage');        
+    });    
 }
 
 function updatePageList(arg, callback){

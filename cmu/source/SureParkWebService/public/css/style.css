@@ -203,6 +203,10 @@ li.active a, li.active a:hover {
   background: #336699;
 }
 
+#confirmReservationSelector {
+;
+}
+
 /*
 #newReservation {
   width: 100%;
@@ -253,20 +257,7 @@ li.active a, li.active a:hover {
   background: #3B599C;
 }
 
-
-
-#page_list input[type="text"], #page_list input[type="password"],#page_list input[type="url"]
-{
-  width: 150px;
-  line-height: 30px;
-  background: #fcfcfc;
-  border: 1px solid #ccc;
-  border-radius: 0px;
-  font-size: 14px;
-  margin-bottom: 2px;
-  padding: 0px 10px;
-}
-
+/*
 input[type="text"], input[type="password"], input[type="url"]
 {
   width: 350px;
@@ -278,6 +269,7 @@ input[type="text"], input[type="password"], input[type="url"]
   margin-bottom: 2px;
   padding: 0px 10px;
 }
+*/
 
 div.desc {
   text-align: center;

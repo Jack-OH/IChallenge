@@ -18,10 +18,18 @@ module.exports = function TransManager() {
 		socket.on('data', function(data) {
 			console.log('Received: ' + data);
 			socket.destroy(); // kill client after server's response
+			//if (err) return callback(err, null);
+
+             callback(null, data);
 		});
 
 		socket.on('close', function() {
 			console.log('Connection closed');
+		});
+
+		socket.on('error', function(err) {
+  			console.log("Error: " + err);
+  			callback(null, err);
 		});
 	};
 };

@@ -47,23 +47,38 @@
             <br>
             <form class="form-horizontal" role="form">
                 <div class="form-group">
-                    <label class="control-label col-sm-2" for="reserve_date">Date</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control col-xs-4" id="reserve_date" placeholder="Enter Date">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="control-label col-sm-2" for="card_information">Card Info.</label>
-                    <div class="col-sm-10">          
-                        <input type="text" class="form-control" id="card_information" placeholder="Enter card number">
-                    </div>
-                </div>
-
-                <div class="form-group">
                     <label class="control-label col-sm-2" for="reserve_garage">Garage Name</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control col-xs-4" id="reserve_garage" placeholder="Enter garage">
+                    
+                    <div class="dropdown col-xs-4">
+                      <button id="reserve_garage" class="btn btn-default dropdown-toggle" type="button" 
+                      data-toggle="dropdown">Sure-Park<span class="caret"></span></button>
+                      <ul class="dropdown-menu">
+                      </ul>
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="reserve_date">Date</label>
+                    <div class="col-xs-4">
+                        <input type="text" class="form-control col-xs-4" id="reserve_date" 
+                            placeholder="Enter Date" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="card1">Card Info.</label>
+                    <div class="col-xs-1">
+                        <input class="form-control" id="card1" type="text" maxlength="4" required>
+                    </div>
+                    <div class="col-xs-1">
+                        <input class="form-control" id="card2" type="text" maxlength="4" required>
+                    </div>
+                    <div class="col-xs-1">
+                        <input class="form-control" id="card3" type="text" maxlength="4" required>
+                    </div>
+                    <div class="col-xs-1">
+                        <input class="form-control" id="card4" type="password" maxlength="4" required>
                     </div>
                 </div>
 
@@ -81,18 +96,32 @@
             <br>
             <form class="form-horizontal" role="form">
                 <div class="form-group">
+                    <label class="control-label col-sm-2" for="confirmReservation_garage">Garage Name</label>
+                    
+                    <div class="dropdown col-xs-4">
+                      <button id="confirmReservation_garage" class="btn btn-default dropdown-toggle" type="button" 
+                        data-toggle="dropdown">Sure-Park<span class="caret"></span></button>
+                      <ul  class="dropdown-menu">
+                      </ul>
+                    </div>
+
+                </div>
+
+                <div class="form-group">
                     <label class="control-label col-sm-2" for="confirmReservation_name"> User ID </label>
-                    <div class="col-sm-10">          
-                        <input type="text" class="form-control" id="confirmReservation_name" placeholder="Enter user ID">
+                    <div class="col-xs-4">          
+                        <input type="text" class="form-control" id="confirmReservation_name" 
+                            placeholder="Enter user ID" required>
                     </div>
                 </div>
 
                 <div class="form-group" >
                     <label class="control-label col-sm-2" for="confirmReservation_info"> Reservation Info </label>
                     <div class="col-xs-4">
-                        <input type="text" class="form-control" id="confirmReservation_info" placeholder="Enter reservation ID">
+                        <input type="text" class="form-control" id="confirmReservation_info" 
+                            placeholder="Enter reservation ID" required>
                     </div>
-                </div>
+                </div>               
 
                 <div class="form-group">        
                     <div class="col-sm-offset-2 col-sm-10">
@@ -108,36 +137,48 @@
             <form class="form-horizontal" role="form">
                 <div class="form-group">
                     <label class="control-label col-sm-2" for="add_garage_name">Garage name </label>
-                    <div class="col-sm-10">          
-                        <input type="text" class="form-control" id="add_garage_name" placeholder="Enter new garage name">
+                    <div class="col-xs-4">          
+                        <input type="text" class="form-control" id="add_garage_name" 
+                            placeholder="Enter new garage name" required>
                     </div>
                 </div>
 
                 <div class="form-group" >
                     <label class="control-label col-sm-2" for="add_number_of_slot"> Number of slots </label>
                     <div class="col-xs-2">
-                        <input type="text" class="form-control" id="add_number_of_slot" placeholder="Enter slot numbers">
+                        <input type="number" class="form-control" id="add_number_of_slot" 
+                            placeholder="Enter slot numbers" required>
                     </div>
                 </div>
 
                 <div class="form-group" >
-                    <label class="control-label col-sm-2" for="add_grace_period"> Default grace period </label>
+                    <label class="control-label col-sm-2" for="add_grace_period"> Grace period(min) </label>
                     <div class="col-xs-2">
-                        <input type="text" class="form-control" id="add_grace_period" placeholder="Enter default grace period">
+                        <input type="number" class="form-control" id="add_grace_period" 
+                            placeholder="Enter default grace period" required>
                     </div>
                 </div>
 
                 <div class="form-group" >
-                    <label class="control-label col-sm-2" for="add_parking_fee"> Parking fee per hour </label>
-                    <div class="col-xs-4">
-                        <input type="text" class="form-control" id="add_parking_fee" placeholder="Enter default parking fee per hour">
+                    <label class="control-label col-sm-2" for="add_parking_fee"> Parking fee(hour) </label>
+                    <div class="col-xs-2">
+                        <input type="number" class="form-control" id="add_parking_fee" 
+                            placeholder="Enter default parking fee per hour" required>
                     </div>
                 </div>
-
-                <div class="form-group" >
-                    <label class="control-label col-sm-2" for="add_garage_ip"> Garage IP </label>
-                    <div class="col-xs-4">
-                        <input type="text" class="form-control" id="add_garage_ip" placeholder="192.168.0.1">
+                <div class="form-group">
+                    <label class="control-label col-sm-2" >Garage IP</label>
+                    <div class="col-xs-1">
+                        <input class="form-control" id="ip1" type="number" maxlength="3" max="255" required>
+                    </div>
+                    <div class="col-xs-1">
+                        <input class="form-control" id="ip2" type="number" maxlength="3" max="255" required>
+                    </div>
+                    <div class="col-xs-1">
+                        <input class="form-control" id="ip3" type="number" maxlength="3" max="255" required>
+                    </div>
+                    <div class="col-xs-1">
+                        <input class="form-control" id="ip4" type="number" maxlength="3" max="255" required>
                     </div>
                 </div>
 
