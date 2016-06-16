@@ -102,10 +102,11 @@ $('#loginBtn').click(function(){
 });
 
 $('#makeReserveDoneBtn').click(function(){
-    var date = $('#reserve_date').val();
+    //var date = $('#reserve_date').val();
+    var date = $('#reserve_date').combodate('getValue');
     //var time = $('#reserve_time').val();
     var cardInfo = $('#card1').val() + "-" + $('#card2').val() + "-" + $('#card3').val() + "-" + $('#card4').val();
-    var garageName = $('#reserve_garage').val();
+    var garageName = $('#reserve_garage').text();
     var gracePeriod;
     var parkingFee;
     var newReservation;
@@ -517,10 +518,19 @@ function updatePageList(arg, callback){
     setUserName(userName, userType);
     setGarageStatus();
     setUserReservation();
-    
+
+
+ 
 
     if(typeof callback !== 'undefined')
         callback();
 }
 
+
+
 updatePageList();
+
+
+$(function(){
+    $('#reserve_date').combodate();  
+});

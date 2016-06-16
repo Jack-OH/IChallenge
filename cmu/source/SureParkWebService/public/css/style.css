@@ -104,6 +104,10 @@ h3{
 }
 */
 
+.combodate select {
+  height:34px;
+}
+
 .tab-links {
   margin: 0px;
   background-color: #363636;
