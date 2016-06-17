@@ -106,7 +106,7 @@ $('#makeReserveDoneBtn').click(function(){
     var date = $('#reserve_date').combodate('getValue');
     //var time = $('#reserve_time').val();
     var cardInfo = $('#card1').val() + "-" + $('#card2').val() + "-" + $('#card3').val() + "-" + $('#card4').val();
-    var garageName = $('#reserve_garage').text();
+    var garageName = $('#reserve_garage').next().find('.current').html(); 
     var gracePeriod;
     var parkingFee;
     var newReservation;
@@ -193,7 +193,7 @@ $('#make_reservation').click(function(){
 $('#confirmReserveDoneBtn').click(function(){
     var confirmInfo = $('#confirmReservation_info').val();
     var confirmUserID = $('#confirmReservation_name').val();
-    var usingGarage = $('#confirmReservation_garage').text();
+    var usingGarage = $('#confirmReservation_garage').next().find('.current').html(); // $('#confirmReservation_garage').text();
     var query = {"confirmInformation":confirmInfo, "userID":confirmUserID, "usingGarage": usingGarage };
     var parkingCar;
     
@@ -505,22 +505,23 @@ function makeGarageTableList(garage_data, tbody){
         });
     }
 
-    var table = $('<table class="table table-bordered" width:100%></table>').appendTo('#showReservation');
-
+    i = 0;
     gGarages.forEach(function(garage) {
-        var li = '<li><a href="#">' + garage + '</a></li>';
-        $(li).appendTo('.dropdown-menu');
-        //$(li).appendTo('#confirmReservation_garage');        
-    });    
+        var option = '<option value=' + i + '>' + garage + '</option>';
+        i++;
+
+        $(option).appendTo('#reserve_garage');
+        $(option).appendTo('#confirmReservation_garage');
+    });
+
+    $('#reserve_garage').niceSelect();    
+    $('#confirmReservation_garage').niceSelect();
 }
 
 function updatePageList(arg, callback){
     setUserName(userName, userType);
     setGarageStatus();
     setUserReservation();
-
-
- 
 
     if(typeof callback !== 'undefined')
         callback();

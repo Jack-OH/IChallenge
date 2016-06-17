@@ -6,6 +6,7 @@
     <title> SurePark Reservation Service </title>
     <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans" / > <!-- google web font service -->
     <link rel="stylesheet" href="/css/style.css" /> <!-- default style -->
+    <link rel="stylesheet" href="/css/nice-select.css" /> <!-- nice-selector -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="/jquery-ui-1.11.4.custom/jquery-ui.min.css" />
     <link rel="stylesheet" href="/bootstrap/3.3.5/css/bootstrap.min.css">
@@ -48,12 +49,11 @@
             <form class="form-horizontal" role="form">
                 <div class="form-group">
                     <label class="control-label col-sm-2" for="reserve_garage">Garage Name</label>
-                    
-                    <div class="dropdown col-xs-4">
-                      <button id="reserve_garage" class="btn btn-default dropdown-toggle" type="button" 
-                      data-toggle="dropdown">Sure-Park<span class="caret"></span></button>
-                      <ul class="dropdown-menu">
-                      </ul>
+
+                    <div class="col-xs-4">
+                        <select id="reserve_garage">
+                            <option data-display="Select">Select</option>
+                        </select>
                     </div>
 
                 </div>
@@ -100,11 +100,10 @@
                 <div class="form-group">
                     <label class="control-label col-sm-2" for="confirmReservation_garage">Garage Name</label>
                     
-                    <div class="dropdown col-xs-4">
-                      <button id="confirmReservation_garage" class="btn btn-default dropdown-toggle" type="button" 
-                        data-toggle="dropdown">Sure-Park<span class="caret"></span></button>
-                      <ul  class="dropdown-menu">
-                      </ul>
+                    <div class="col-xs-4">
+                        <select id="confirmReservation_garage">
+                            <option data-display="Select">Select</option>
+                        </select>
                     </div>
 
                 </div>
@@ -253,6 +252,7 @@
     <script src="/jquery/jquery-2.1.3.min.js"></script>
     <script src="/jquery/combodate.js"></script>
     <script src="/jquery/moment.js"></script>
+    <script src="/jquery/jquery.nice-select.js"></script>
     <script src="/jquery-ui-1.11.4.custom/jquery-ui.min.js"></script>
     <script src="/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="/js/session_infomation.js"></script>
