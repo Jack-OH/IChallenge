@@ -1,62 +1,5 @@
 
-var win;
-var gGarages = [];          //garage name을 저장해 놓기 위한 전역 변수.  query의 횟수를 줄일 수 있을 것임
-
-$('#slideShowStartBtn').click(function(){
-
-    $('#slideShowStartBtn').hide(0);
-    $('#slideShowEndBtn').show(0);
-
-    /*
-
-    var query = {};
-    query.pl = true;
-
-    $.get('page_list',query ,function(data){
-        
-        data.forEach(function(item){
-            var tmp = new structPage();
-            tmp.url=item.url;
-            window.open(tmp.url, '');
-        });
-    });
-*/
-
-    var time = 30;
-
-    win = window.open('http://integrate.lge.com:9911/', 'newWindow');
-
-    setTimeout(function(){
-        window.open('http://integrate.lge.com:9998/', 'newWindow');
-    }, time*1000);
-    setTimeout(function(){
-        window.open('http://integrate.lge.com:9996/', 'newWindow');
-    }, time*2000);
-    setTimeout(function(){
-        window.open('http://integrate.lge.com:9921/', 'newWindow');
-    }, time*3000);
-    setTimeout(function(){
-        window.open('http://integrate.lge.com:9919/', 'newWindow');
-    }, time*4000);
-
-    setInterval(function(){
-        setTimeout(function(){
-            window.open('http://integrate.lge.com:9911/', 'newWindow');
-        }, time*1000);
-        setTimeout(function(){
-            window.open('http://integrate.lge.com:9998/', 'newWindow');
-        }, time*2000);
-        setTimeout(function(){
-            window.open('http://integrate.lge.com:9996/', 'newWindow');
-        }, time*3000);
-        setTimeout(function(){
-            window.open('http://integrate.lge.com:9921/', 'newWindow');
-        }, time*4000);
-        setTimeout(function(){
-            window.open('http://integrate.lge.com:9919/', 'newWindow');
-        }, time*5000);
-    }, time*5000);
-});
+var gGarages = [];
 
 $('#usernameBtn').click(function(){
     var status = $('#usernameBtn').attr('data-status');
@@ -142,7 +85,7 @@ $('#makeReserveDoneBtn').click(function(){
 
                         console.log(newReservation);
                         $.post("newReservation", newReservation, function(resdata){
-                            
+                        console.log(resdata);                      
 
                             if(resdata.errorMsg){
                                 alert("TCP/IP Error");
@@ -150,14 +93,15 @@ $('#makeReserveDoneBtn').click(function(){
                             else {
                                 console.log(resdata);
                                 location.reload();
+                                showPopup("Reservation Info.", "Your reservation id is " + 
+                                                confirmInformation + "Don't forget it!!" );
+                                
                             }
                         });
-
-                        //Below line is temporary code.
-                        location.reload();
-
                     }            
                 });
+
+                
 
                 if(newReservation===undefined) {
                     alert("Please check your reservation input ...");    
@@ -196,6 +140,9 @@ $('#confirmReserveDoneBtn').click(function(){
     var usingGarage = $('#confirmReservation_garage').next().find('.current').html(); // $('#confirmReservation_garage').text();
     var query = {"confirmInformation":confirmInfo, "userID":confirmUserID, "usingGarage": usingGarage };
     var parkingCar;
+
+    //$('#myModal').show(0);
+    
     
 
     $.post("checkReservation", query, function(data) {
@@ -218,9 +165,6 @@ $('#confirmReserveDoneBtn').click(function(){
                             location.reload();
                         }
                     });
-
-                    // Below line is temporary code. 
-                    location.reload();
 
                 }            
             });
@@ -273,14 +217,14 @@ $('#addGarageDoneBtn').click(function(){
         if(data.length > 0) {
             data.forEach(function(item){
                 console.log(item);
-                if(item.garageNumber > garageID) {
-                    garageID = item.garageNumber;
+                if(item.garageID > garageID) {
+                    garageID = item.garageID;
                 }
             });
             garageID++; 
         }
 
-        newGarage = {"newGarage": {"garageName":garageName, "garageNumber":garageID, "slotNumber":numberOfSlots, "slotStatus":slotStatus, 
+        newGarage = {"newGarage": {"garageName":garageName, "garageID":garageID, "slotNumber":numberOfSlots, "slotStatus":slotStatus, 
                       "gracePeriod":gracePeriod, "parkingFee":parkingFee, "garageIP":garageIP, "isAvailable":true}};
 
         console.log(newGarage);
@@ -292,7 +236,9 @@ $('#addGarageDoneBtn').click(function(){
             else {
                 console.log(resdata);
                 location.reload();
+                showPopup("Adding new garage", "Successfully added your garage." );
             }
+
         });
        
     });     
@@ -331,7 +277,7 @@ $('#show_statistics').click(function() {
 
 $('#show_statistics').click(function(){ 
 
-    var newGarage = {"newGarage": {"garageName":"AAAAA", "garageNumber":1001, "slotNumber":4, "slotStatus":["Open","Open","Open","Open"], 
+    var newGarage = {"newGarage": {"garageName":"AAAAA", "garageID":1001, "slotNumber":4, "slotStatus":["Open","Open","Open","Open"], 
                       "gracePeriod":90, "parkingFee":30, "garageIP":"127.0.0.1", "isAvailable":true}};
 
     var newReservation = {"newReservation": {"userID":"jack", "cardInfo":"1111-2222-3333-4444", "confirmInformation":"A1234", 
@@ -467,38 +413,53 @@ function makeGarageTable(garage_data) {
 }
 
 function makeGarageTableList(garage_data, tbody){
-    var tr;
+    var tr1, tr2;
     var i = 0;
     var slotIndex = 0;
     if (garage_data.length === 0){
-        tr = $('<tr></tr>').addClass('tableRow').appendTo(tbody);
-        $('<td colspan=8> There is no garage information </td>').appendTo(tr);
+        tr1 = $('<tr></tr>').addClass('tableRow').appendTo(tbody);
+        $('<td colspan=8> There is no garage information </td>').appendTo(tr1);
     } else {
         garage_data.forEach(function(arr){
                 console.log(arr);
 
-                //우선 아래에서 Garage 이름을 global 로 저장해 놓자 
                 gGarages.push(arr.garageName);
 
-                tr = $('<tr></tr>').addClass('tableRow').appendTo(tbody);
-                $('<td>' + arr.garageName + '</td>').appendTo(tr);
+                //tr1 = $('<tr></tr>').addClass('tableRow').appendTo(tbody);
+
+                if(access_priority=="attendant" || access_priority=="owner") {
+                    tr1 = $('<tr></tr>').addClass('tableRow').appendTo(tbody);
+                    tr2 = $('<tr></tr>').addClass('tableRow').appendTo(tbody);   
+                    $('<td rowspan="2">' + arr.garageName + '</td>').appendTo(tr1); 
+                } else {
+                    tr1 = $('<tr></tr>').addClass('tableRow').appendTo(tbody);
+                    $('<td>' + arr.garageName + '</td>').appendTo(tr1); 
+                }
+                
+                //$('<td rowspan="2">' + arr.garageName + '</td>').appendTo(tr1);
+
                 
                 slotIndex = 0;
                 while(slotIndex < arr.slotNumber) {
                     console.log(arr.slotStatus[slotIndex]);
                     if(arr.slotStatus[slotIndex] == "Open") {
                         $('<td>' + arr.slotStatus[slotIndex] + 
-                            '</td>').css("background-color","LimeGreen").css("text-align", "center").css("width", "120px").appendTo(tr);
+                            '</td>').css("background-color","LimeGreen").css("text-align", "-webkit-center").css("width", "150px").appendTo(tr1);
                     } else if(arr.slotStatus[slotIndex] == "Occupied") {
                         $('<td>' + arr.slotStatus[slotIndex] + 
-                            '</td>').css("background-color","OrangeRed").css("text-align", "center").css("width", "120px").appendTo(tr);
+                            '</td>').css("background-color","OrangeRed").css("text-align", "-webkit-center").css("width", "150px").appendTo(tr1);
                     } else if (arr.slotStatus[slotIndex] == "Reserved") {
                         $('<td>' + arr.slotStatus[slotIndex] + 
-                            '</td>').css("background-color","LightYellow").css("text-align", "bkit-center").css("width", "120px").appendTo(tr);
+                            '</td>').css("background-color","LightYellow").css("text-align", "-webkit-center").css("width", "150px").appendTo(tr1);
                     } else {
                         $('<td>' + arr.slotStatus[slotIndex] + 
-                            '</td>').css("background-color","DarkGray").css("text-align", "-webkit-center").css("width", "120px").appendTo(tr);
+                            '</td>').css("background-color","DarkGray").css("text-align", "-webkit-center").css("width", "150px").appendTo(tr1);
                     } 
+
+                    if(access_priority=="attendant" || access_priority=="owner") {
+                        $('<td>' + calUpdateTime(arr.updateTime[slotIndex]) + 
+                            '</td>').css("background-color","white").css("text-align", "-webkit-center").css("width", "150px").appendTo(tr2);
+                    }
 
                     slotIndex++;                   
                 }
@@ -527,11 +488,41 @@ function updatePageList(arg, callback){
         callback();
 }
 
+function calUpdateTime(updateTime) {
+    var passedTime="";
+    console.log(updateTime);
+
+    var lastDate = new Date(updateTime);
+    var currDate = new Date();
+    console.log("current:" + currDate.getTime());
+    console.log("last:" + lastDate.getTime());
+    console.log("current - last = " + (currDate.getTime() - lastDate.getTime()) );
+
+    passedTime = (currDate.getTime() - lastDate.getTime())/(1000*60);
+    passedTime = Math.round(passedTime) + " min";
+
+    return passedTime;
+
+}
+
+function showPopup(popupHeader, popupContent) {
+    console.log(popupHeader);
+    console.log(popupContent);
+
+    $('#modal_title').text(popupHeader);
+    $('#modal_content').text(popupContent);
+
+    //('#myModal').find('h1').innerText = popupHeader;
+    //('#myModal').find('p').innerText = popupContent;
+
+    $('#myModal').modal('show');    
+}
+
 
 
 updatePageList();
 
 
 $(function(){
-    $('#reserve_date').combodate();  
+    $('#reserve_date').combodate();
 });

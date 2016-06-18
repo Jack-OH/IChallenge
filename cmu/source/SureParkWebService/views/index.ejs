@@ -34,10 +34,10 @@
                 <a class="navbar-brand" href="#">SurePark Reservation Service</a>
             </div>
             <ul class="nav navbar-nav">
-                <li><a id="make_reservation" href="#">Make reservation</a></li>
-                <li><a id="confirm_reservation" href="#">Confirm reservation</a></li>
-                <li><a id="add_new_garage" href="#">Add new garage</a></li>
-                <li><a id="show_statistics" showSection="#showStatistics" >Show statistics</a></li>
+                <li><a id="make_reservation"    class="driver attendant owner"  href="#">Make reservation</a></li>
+                <li><a id="confirm_reservation" class="attendant owner" href="#">Confirm reservation</a></li>
+                <li><a id="add_new_garage"      class="owner"   href="#">Add new garage</a></li>
+                <li><a id="show_statistics"     class="owner"   showSection="#showStatistics" >Show statistics</a></li>
             </ul>
         </div>
     </nav>
@@ -169,16 +169,16 @@
                 </div>
                 <div class="form-group">
                     <label class="control-label col-sm-2" >Garage IP</label>
-                    <div class="col-xs-1">
+                    <div class="col-xs-2">
                         <input class="form-control" id="ip1" type="number" maxlength="3" max="255" required>
                     </div>
-                    <div class="col-xs-1">
+                    <div class="col-xs-2">
                         <input class="form-control" id="ip2" type="number" maxlength="3" max="255" required>
                     </div>
-                    <div class="col-xs-1">
+                    <div class="col-xs-2">
                         <input class="form-control" id="ip3" type="number" maxlength="3" max="255" required>
                     </div>
-                    <div class="col-xs-1">
+                    <div class="col-xs-2">
                         <input class="form-control" id="ip4" type="number" maxlength="3" max="255" required>
                     </div>
                 </div>
@@ -235,6 +235,28 @@
         </div>
 
         
+    </div>
+
+
+    <!-- Modal -->
+    <div id="myModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title" id="modal_title"></h4>
+                </div>
+                <div class="modal-body">
+                    <p id="modal_content"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
     </div>
 
     

@@ -153,7 +153,7 @@ li.active a, li.active a:hover {
   color: white;
 }
 
-#confirm_reservation, #show_statistics {
+#make_reservation, #confirm_reservation, #show_statistics {
   display:none;
 }
 

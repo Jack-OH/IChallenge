@@ -1,16 +1,20 @@
-var access_priority = 0;
+var access_priority = "not_login";
 
 function getPriority(name, usertype) {
     if (usertype == 'owner' && getCookie('session')){
         document.cookie = "group=owner;";
         document.cookie = "name=" + name+";";
-        return 2;
+        return "owner";
     }else if (usertype == 'attendant' && getCookie('session')){
         document.cookie = "group=attendant;";
         document.cookie = "name=" + name+";";
-        return 1;
+        return "attendant";
+    }else if (usertype == 'driver' && getCookie('session')){
+        document.cookie = "group=driver;";
+        document.cookie = "name=" + name+";";
+        return "driver";
     }else {
-        return 0;
+        return "not_login";
     }
 }
 
@@ -40,16 +44,14 @@ function setUserName(paramName, paramType) {
     }
     access_priority = getPriority(paramName, paramType);
 
-    if(access_priority == 2 ) {
-        $('#make_reservation').show(0);
-        $('#confirm_reservation').show(0);
-        $('#show_statistics').show(0);
-        $('#add_new_garage').show(0);        
-    } else if (access_priority == 1) {
-        $('#make_reservation').show(0);
-        $('#confirm_reservation').show(0);
+    if(access_priority == "owner" ) {
+        $('.owner').show(0);
+    } else if (access_priority == "attendant") {
+        $('.attendant').show(0);
+    } else if (access_priority == "driver") {
+        $('.driver').show(0);
     } else {
-        $('#make_reservation').show(0);
+        $('not_login').show(0);
     }
 }
 
