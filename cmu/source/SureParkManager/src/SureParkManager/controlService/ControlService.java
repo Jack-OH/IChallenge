@@ -7,9 +7,6 @@ import sureParkManager.managementService.IManagementFacility;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
-//import java.util.concurrent.LinkedBlockingQueue;
-
-
 
 public class ControlService extends Thread {
 	public static final int kConnectionRetryCount = 3;
@@ -29,7 +26,7 @@ public class ControlService extends Thread {
 			 info.facilityId = gInfo.id;
 			 mClientInfo.add(info);
 			 
-			// mConnectionQueue.put(info.facilityId);
+
 			 
 			 //createClient(info, info.ip, 5001, info.facilityId); 
 		 }
@@ -101,8 +98,6 @@ public class ControlService extends Thread {
 	public void run() {
 		try{
 			while(!isInterrupted() ) {
-				
-				//Integer id = (Integer) mConnectionQueue.take();
 				
 				for( FacilityClientInfo info : mClientInfo ) {
 					if( info.needtocheck == false && info.mClientSocket == null ) {

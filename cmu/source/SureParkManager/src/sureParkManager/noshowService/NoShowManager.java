@@ -1,6 +1,5 @@
 package sureParkManager.noshowService;
 
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -13,7 +12,9 @@ public class NoShowManager extends Thread {
 	private static Calendar now;
 	
 	public NoShowManager() {
+		now = Calendar.getInstance();
 		now.setTimeInMillis(System.currentTimeMillis());
+		System.out.println("now=" + now.getTime());		
 	}
 	
 	public void run() {
@@ -24,14 +25,20 @@ public class NoShowManager extends Thread {
 				ManagementDBTransaction mgrDB = ManagementDBTransaction.getInstance();
 				
 				ArrayList<ReservationInfo> info = mgrDB.getReservationInfo();
-				
-				for( ReservationInfo r : info ) {
-					Date current = (Date) now.getTime();
-					
-					if( r.reservationTime.compareTo(current) > 0 ) {
-						// TODO:: remove db
-					}
+				if( info != null ) {
+					for( ReservationInfo r : info ) {
+						
+						Calendar reserveTime = Calendar.getInstance(); 
+						reserveTime.setTime(r.reservationTime);
+						reserveTime.add(Calendar.MINUTE, r.gracePeriod);
+						
+						if( now.after(reserveTime) ) {
+							// TODO: reservation has to be canceled. db update!!!
+							System.out.println("Reservation canceled " + r.confirmInformation);
+						}
+					}					
 				}
+
 
 				Thread.sleep(kNectCheckTime);
 
