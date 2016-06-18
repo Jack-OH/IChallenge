@@ -1,6 +1,6 @@
 package sureParkManager;
 
-import sureParkManager.managementService.AbstractManagementFacility;
+import sureParkManager.managementService.IManagementFacility;
 import sureParkManager.managementService.ManagementFacility;
 
 import java.io.BufferedReader;
@@ -8,7 +8,7 @@ import java.io.InputStreamReader;
 
 import sureParkManager.common.SureParkConfig;
 import sureParkManager.controlService.ControlService;
-import sureParkManager.managementService.ServerReceiver;
+import sureParkManager.managementService.ManagementServer;
 
 public class SureParkManager {
 
@@ -22,14 +22,15 @@ public class SureParkManager {
         config.printGarageList();
 
         // Create ManagementFacility;
-        AbstractManagementFacility mgrFacility = new ManagementFacility();
+        IManagementFacility mgtFacility = new ManagementFacility();
                 
         // Create ControlService
-        ControlService ctlService = new ControlService(mgrFacility);
+        ControlService ctlService = new ControlService(mgtFacility);
         
         // Start server thread
-		ServerReceiver commRecv = new ServerReceiver(ctlService);
-        commRecv.start();
+		ManagementServer mgtServer = ManagementServer.getInstance();
+        mgtServer.setControlService(ctlService);
+        mgtServer.start();
         
         // Example for update status
         /* ArrayList<Integer> slotStatus = new ArrayList<Integer>();

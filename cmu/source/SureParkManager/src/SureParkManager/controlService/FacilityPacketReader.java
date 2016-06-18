@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import sureParkManager.common.GarageInfo;
 import sureParkManager.common.SureParkConfig;
-import sureParkManager.managementService.AbstractManagementFacility;
+import sureParkManager.managementService.IManagementFacility;
 
 public class FacilityPacketReader extends Thread {
 	
@@ -18,7 +18,7 @@ public class FacilityPacketReader extends Thread {
 	private int facilityId = 0;
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	volatile private ScheduledFuture<?> noPacketHandle;
-	private AbstractManagementFacility mgrFacility = null;
+	private IManagementFacility mgrFacility = null;
 	private boolean isFirstStatus = true;
 	private boolean runningTread = true;
 	
@@ -28,7 +28,7 @@ public class FacilityPacketReader extends Thread {
 		facilityId = id;
 	}
 	
-	public void setManager(AbstractManagementFacility mgr) {
+	public void setManager(IManagementFacility mgr) {
 		mgrFacility = mgr;
 	}
 	

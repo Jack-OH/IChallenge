@@ -8,6 +8,8 @@ public class GarageInfo {
 	public static final int kGarageInfoSlotStatusBroken = 2;
 	public static final int kGarageInfoSlotStatusReserved = 3;
 
+	private static final int kFacilitySlotNumberBase = 0;
+
 	public int id;
 	public String name;
 	public String ip;

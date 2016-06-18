@@ -1,7 +1,7 @@
 package sureParkManager.controlService;
-import sureParkManager.managementService.AbstractManagementFacility;
 import sureParkManager.common.GarageInfo;
 import sureParkManager.common.SureParkConfig;
+import sureParkManager.managementService.IManagementFacility;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -11,16 +11,11 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 
-
-
 public class ControlService {
-
-	private static final int kFacilitySlotNumberBase = 0;
-
 	private ArrayList<FacilityClientInfo> mClientInfo = new ArrayList<FacilityClientInfo>();
-	private AbstractManagementFacility mgrFacility = null;
+	private IManagementFacility mgrFacility = null;
 	
-	public ControlService(AbstractManagementFacility mgrFacility) throws Exception {
+	public ControlService(IManagementFacility mgrFacility) throws Exception {
 
 		 SureParkConfig config = SureParkConfig.getInstance();
          this.mgrFacility = mgrFacility;
@@ -30,7 +25,7 @@ public class ControlService {
 			 mClientInfo.add(info);
 			 
 			 GarageInfo gInfo = config.getGarageInfoFromIndex(i);
-			 createClient(info, gInfo.ip, 5001, gInfo.id); 
+			 createClient(info, gInfo.ip, 5001, gInfo.id);
 		 }
 		 
 		 System.err.println("ctor ControlService");

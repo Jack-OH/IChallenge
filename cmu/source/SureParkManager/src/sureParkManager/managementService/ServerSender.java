@@ -3,17 +3,16 @@ package sureParkManager.managementService;
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.net.*;
+import java.util.ArrayList;
 
 /**
  * Created by jaeheonkim on 2016. 6. 14..
  */
 public class ServerSender {
-    ManagementServer mgtServer = null;
     Socket clientSocket = null;
 
-    public ServerSender() {
-        mgtServer = ManagementServer.getInstance();
-        clientSocket = mgtServer.getClientSocket();
+    public ServerSender(Socket socket) {
+        clientSocket = socket;
     }
 
     public int write(String str) throws Exception {

@@ -2,14 +2,14 @@ package sureParkManager.managementService;
 
 import java.net.*;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
 import sureParkManager.controlService.ControlService;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class ManagementServer {
+public class ManagementServer extends Thread {
 	// Definitions
 	static final int kNoError        = 0;
 	static final int kNoClientSocket = -8000;
@@ -18,22 +18,19 @@ public class ManagementServer {
 	// Attributes
 	private static ManagementServer instance = null;
 	private static ServerSocket serverSocket = null;
-	private static Socket clientSocket = null;
 	final int portNum = 3333;
 
+    private static ManagementServer mgtServer;
+
+    /**
+     * This executor service has 10 threads.
+     * So it means your server can process max 10 concurrent requests.
+     */
+    private ExecutorService executorService = Executors.newFixedThreadPool(10);
+
+    ControlService ctlService = null;
+
 	public ManagementServer() {
-		// TODO Auto-generated constructor stub
-		/*****************************************************************************
-		 * First we instantiate the server socket. The ServerSocket class also
-		 * does the listen()on the specified port.
-		 *****************************************************************************/
-		try {
-			serverSocket = new ServerSocket(portNum);
-			System.out.println("\n\nWaiting for connection on port " + portNum + ".");
-		} catch (IOException e) {
-			System.err.println("\n\nCould not instantiate socket on port: " + portNum + " " + e);
-			System.exit(1);
-		}
 	}
 
 	public static ManagementServer getInstance() {
@@ -47,15 +44,50 @@ public class ManagementServer {
 		return instance;
 	}
 
-	public ServerSocket getServerSocket() {
-		return serverSocket;
+	public void setControlService(ControlService ctlService) {
+		this.ctlService = ctlService;
 	}
 
-	public Socket getClientSocket() {
-		return clientSocket;
+	public ControlService getControlService() {
+		return this.ctlService;
 	}
 
-	public void setClientSocket(Socket pClientSocket) {
-		clientSocket = pClientSocket;
-	}
+	public void run() {
+        // TODO Auto-generated constructor stub
+        /*****************************************************************************
+         * First we instantiate the server socket. The ServerSocket class also
+         * does the listen()on the specified port.
+         *****************************************************************************/
+        try {
+            System.out.println("\n\nStarting Server");
+            serverSocket = new ServerSocket(portNum);
+        } catch (IOException e) {
+            System.err.println("\n\nCould not instantiate socket on port: " + portNum + " " + e);
+
+        }
+
+        while (true) {
+            try {
+                System.out.println("\n\nWaiting for connection on port " + portNum + ".");
+                Socket clientSocket = serverSocket.accept();
+                executorService.submit(new ManagementComm(this.ctlService, clientSocket));
+            } catch (Exception e) {
+                System.err.println("Accept failed.");
+            }
+        }
+    }
+
+    //Call the method when you want to stop your server
+    private void stopServer() {
+        //Stop the executor service.
+        executorService.shutdownNow();
+        try {
+            //Stop accepting requests.
+            serverSocket.close();
+        } catch (IOException e) {
+            System.out.println("Error in server shutdown");
+            e.printStackTrace();
+        }
+        System.exit(0);
+    }
 } // class

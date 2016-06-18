@@ -4,7 +4,6 @@ import sureParkManager.managementService.ManagementDBTransaction;
 import java.util.ArrayList;
 
 public class SureParkConfig {
-
 	private static SureParkConfig instance = null;
 	private ArrayList<GarageInfo> garageArray;
 

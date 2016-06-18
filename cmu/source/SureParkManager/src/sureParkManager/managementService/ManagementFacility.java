@@ -3,11 +3,13 @@ package sureParkManager.managementService;
 import org.json.simple.JSONObject;
 import sureParkManager.common.SureParkConfig;
 
-public class ManagementFacility extends AbstractManagementFacility {
-	ServerSender serverSender = null;
+import java.io.IOException;
 
-	public ManagementFacility(){
-		serverSender = new ServerSender();
+public class ManagementFacility implements IManagementFacility {
+	ManagementComm comm = null;
+
+	public ManagementFacility() throws IOException {
+		comm = new ManagementComm();
 	}
 
 	// CS -> MS
@@ -20,7 +22,7 @@ public class ManagementFacility extends AbstractManagementFacility {
 
 		jsonObject.put("updateSlotStatus", new JSONObject().put("garageID", garageID));
 
-		serverSender.write(jsonObject.toJSONString());
+		comm.broadcast(jsonObject.toJSONString());
 		
 		System.out.println("update slot state, garageID : " + garageID + ", slot Index : " + slotIdx + ", slot Status : " + slotStatus);
 	}
@@ -36,7 +38,7 @@ public class ManagementFacility extends AbstractManagementFacility {
 
 		jsonObject.put("detectFailure", new JSONObject().put("garageID", garageID));
 
-		serverSender.write(jsonObject.toJSONString());
+		comm.broadcast(jsonObject.toJSONString());
 
 	}
 }
