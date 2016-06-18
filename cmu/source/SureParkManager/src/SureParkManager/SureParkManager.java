@@ -34,8 +34,8 @@ public class SureParkManager {
         mgtServer.setControlService(ctlService);
         mgtServer.start();
         
-        NoShowManager noshowMgr = new NoShowManager();
-        noshowMgr.start();
+        //NoShowManager noshowMgr = new NoShowManager();
+        //noshowMgr.start();
         
         // Example for update status
         /* ArrayList<Integer> slotStatus = new ArrayList<Integer>();
