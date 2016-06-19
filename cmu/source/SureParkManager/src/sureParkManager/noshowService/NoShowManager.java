@@ -13,8 +13,6 @@ public class NoShowManager extends Thread {
 	
 	public NoShowManager() {
 		now = Calendar.getInstance();
-		now.setTimeInMillis(System.currentTimeMillis());
-		System.out.println("now=" + now.getTime());		
 	}
 	
 	public void run() {
@@ -26,14 +24,16 @@ public class NoShowManager extends Thread {
 				
 				ArrayList<ReservationInfo> info = mgrDB.getReservationInfo();
 				if( info != null ) {
-					for( ReservationInfo r : info ) {
-						
+					for( ReservationInfo r : info ) {						
 						Calendar reserveTime = Calendar.getInstance(); 
 						reserveTime.setTime(r.reservationTime);
 						reserveTime.add(Calendar.MINUTE, r.gracePeriod);
-						
+						now.setTimeInMillis(System.currentTimeMillis());
+						System.out.println("now=" + now.getTime() + ", gracePeriod=" + r.gracePeriod);		
+
 						if( now.after(reserveTime) ) {
-							// TODO: reservation has to be canceled. db update!!!
+							mgrDB.cancelReservation(r.confirmInformation);
+							
 							System.out.println("Reservation canceled " + r.confirmInformation);
 						}
 					}					
