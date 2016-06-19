@@ -112,7 +112,7 @@ public class ManagementDBTransaction {
         doc.append("reservationStatus", "waiting");
         doc.append("parkingFee", 5);
         doc.append("usingGarage", dbObject.get("usingGarage"));
-        doc.append("usingGarageNunber", -1);
+        doc.append("usingGarageNumber", -1);
         doc.append("usingSlot", -1);
         doc.append("parkingTime", "null");
         doc.append("leaveTime", "null");
