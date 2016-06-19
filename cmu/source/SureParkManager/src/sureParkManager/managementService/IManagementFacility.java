@@ -8,7 +8,7 @@ public interface IManagementFacility {
 	// CS -> MS 
 	void setFacilityFailure(int garageID, boolean isFail) throws Exception;
 
-	void leaveSlotStatus(int garageID, int slotIdx) throws Exception;
+	void leaveWithParking(int garageID, int slotIdx) throws Exception;
 
 	void updateWrongParking(int garageID, int slot) throws Exception;
 }

@@ -1,6 +1,5 @@
 package sureParkManager.managementService;
 
-import com.mongodb.util.JSON;
 import org.json.simple.JSONObject;
 import sureParkManager.common.GarageInfo;
 import sureParkManager.common.SureParkConfig;
@@ -23,7 +22,7 @@ public class ManagementFacility implements IManagementFacility {
 		JSONObject jsonObject = new JSONObject();
         JSONObject jsonObject1 = new JSONObject();
 
-        jsonObject1.put("garageID", garageID);
+        jsonObject1.put("garageNumber", garageID);
 
 		jsonObject.put("updateSlotStatus", jsonObject1);
 
@@ -31,19 +30,6 @@ public class ManagementFacility implements IManagementFacility {
 		
 		System.out.println("update slot state, garageID : " + garageID + ", slot Index : " + slotIdx + ", slot Status : " + slotStatus);
 	}
-
-    public void leaveSlotStatus(int garageID, int slotIdx)  throws Exception
-    {
-        SureParkConfig config = SureParkConfig.getInstance();
-        ManagementDBTransaction mgtDB = ManagementDBTransaction.getInstance();
-
-        // slot status update
-        config.setGarageSlotState(garageID, slotIdx, GarageInfo.kGarageInfoSlotStatusOpen);
-
-        // parking fee calculation
-        mgtDB.leaveCar(garageID, slotIdx);
-
-    }
 	
 	// CS -> MS
 	public void setFacilityFailure(int garageID, boolean isFail) throws Exception {
@@ -64,7 +50,36 @@ public class ManagementFacility implements IManagementFacility {
 
 	}
 
-    public void updateWrongParking(int garageID, int slotIdx) {
+    public void updateWrongParking(int garageID, int slotIdx) throws Exception {
+        ManagementDBTransaction mgtDB = ManagementDBTransaction.getInstance();
 
+        mgtDB.updatePakingSlot(garageID, slotIdx);
+
+        JSONObject jsonObject = new JSONObject();
+        JSONObject jsonObject1 = new JSONObject();
+        jsonObject1.put("garageNumber", garageID);
+
+        jsonObject.put("wrongParking", jsonObject1);
+
+        System.out.println(jsonObject.toJSONString());
+
+        comm.broadcast(jsonObject.toJSONString() + "\n");
+    }
+
+    public void leaveWithParking(int garageID, int slotIdx)  throws Exception {
+        SureParkConfig config = SureParkConfig.getInstance();
+        ManagementDBTransaction mgtDB = ManagementDBTransaction.getInstance();
+
+        // slot status update
+        config.setGarageSlotState(garageID, slotIdx, GarageInfo.kGarageInfoSlotStatusOpen);
+
+        // parking fee calculation
+        mgtDB.leaveWithParking(garageID, slotIdx);
+    }
+
+    public void leaveWithoutParking(int garageID, int slotIdx)  throws Exception {
+        ManagementDBTransaction mgtDB = ManagementDBTransaction.getInstance();
+
+        mgtDB.leaveWithoutParking(garageID, slotIdx);
     }
 }

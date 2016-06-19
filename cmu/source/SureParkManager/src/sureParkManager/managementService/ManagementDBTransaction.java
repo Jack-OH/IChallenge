@@ -295,7 +295,7 @@ public class ManagementDBTransaction {
         }
     }
 
-    public void leaveCar(int garageID, int slot) {
+    public void leaveWithParking(int garageID, int slot) {
         DBCollection coll = db.getCollection("reservations");
 
         SimpleDateFormat format = new SimpleDateFormat(simpleDateFormat, Locale.US);
@@ -336,6 +336,30 @@ public class ManagementDBTransaction {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void leaveWithoutParking(int garageID, int slot) {
+        DBCollection coll = db.getCollection("reservations");
+
+        BasicDBObject whereQuery = new BasicDBObject();
+
+        whereQuery.append("reservationStatus", "parked");
+        whereQuery.append("usingGarageNumber", garageID);
+        whereQuery.append("usingSlot", slot);
+
+        DBCursor cursor = coll.find(whereQuery);
+
+        if (cursor.hasNext()) {
+            Date leaveTime = new Date();
+
+            BasicDBObject reservationStatusObj = new BasicDBObject("$set", new BasicDBObject("reservationStatus", "cancelled"));
+            BasicDBObject chargingFeeObj = new BasicDBObject("$set", new BasicDBObject("chargingFee", 0));
+            BasicDBObject leaveTimeObj = new BasicDBObject("$set", new BasicDBObject("leaveTime", leaveTime));
+
+            coll.update(whereQuery, leaveTimeObj);
+            coll.update(whereQuery, chargingFeeObj);
+            coll.update(whereQuery, reservationStatusObj);
         }
     }
 
