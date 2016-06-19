@@ -2,7 +2,8 @@ package sureParkManager.controlService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.InputStreamReader;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -15,66 +16,64 @@ import sureParkManager.managementService.IManagementFacility;
 public class FacilityPacketReader extends Thread {
 	
 	private BufferedReader mIn = null;
-	private int facilityId = 0;
+	private FacilityClientInfo mInfo = null;
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	volatile private ScheduledFuture<?> noPacketHandle;
 	private IManagementFacility mgrFacility = null;
 	private boolean isFirstStatus = true;
-	private boolean runningTread = true;
 	
 	
-	public FacilityPacketReader(BufferedReader in, int id) {
-		mIn = in;
-		facilityId = id;
+	public FacilityPacketReader(FacilityClientInfo info) throws IOException {
+		mInfo = info;
+		mIn = new BufferedReader(new InputStreamReader(mInfo.mClientSocket.getInputStream()));
 	}
 	
 	public void setManager(IManagementFacility mgr) {
 		mgrFacility = mgr;
 	}
 	
-	public void stopThread() {
-		runningTread = false;
-	}
 	
 	public void parse(String packet) throws Exception {
 		if( packet.charAt(0) != '$' ) {
-			System.out.println("invalid packet. through it $");
+			System.out.println("No $, invalid packet");
 			return;
 		}
 		
-		int length = packet.length();
+		int length = packet.length();		
 		String strGarageId = packet.substring(1, 5);
 		int id = Integer.valueOf(strGarageId);
-		String strCode = packet.substring(5, 6);
 		
-		System.out.println("code=" + strCode + ", GarageId=" + id );
-		
-		if( strCode.equals("S") ) {
-			// Slot Status
-			String slotStatus = packet.substring(6, length);
-			System.out.println(slotStatus);
+		if( length > 5 ) {
+			String strCode = packet.substring(5, 6);
 			
-			SureParkConfig c = SureParkConfig.getInstance();
-			//SureParkConfig info = c.getGarageInfo(id);
-			GarageInfo info = c.getGarageInfoFromGarageID(facilityId);
+			System.out.println("code=" + strCode + ", GarageId=" + id );
 			
-			for( int i = 0 ; i < info.slotNum ; i++ ) {
-				int status = Integer.valueOf(slotStatus.charAt(i))-'0';
-				if( isFirstStatus || status != info.slotStatus.get(i) ) {
-					//evtMgr.updateSlotStatus(facilityId, i, status);
-					mgrFacility.updateSlotStatus(facilityId, i, status);
+			if( strCode.equals("S") ) {
+				// Slot Status
+				String slotStatus = packet.substring(6, length);
+				System.out.println(slotStatus);
+				
+				SureParkConfig c = SureParkConfig.getInstance();
+				GarageInfo info = c.getGarageInfoFromGarageID(mInfo.facilityId);
+				
+				for( int i = 0 ; i < info.slotNum ; i++ ) {
+					int status = Integer.valueOf(slotStatus.charAt(i))-'0';
+					if( isFirstStatus || status != info.slotStatus.get(i) ) {
+						mgrFacility.updateSlotStatus(mInfo.facilityId, i, status);
+					}
 				}
-			}
-			
-			isFirstStatus = false;
-			
-
-			
-			
+				
+				isFirstStatus = false;
+				
+				
+			} else {
+				// Invalid Packet
+				System.out.println("invalid packet. through it ");
+			}				
 		} else {
-			// Invalid Packet
-			System.out.println("invalid packet. through it ");
-		}	
+			System.out.println("Heartbeat packet");
+		}
+
 		
 	}
 	
@@ -82,9 +81,13 @@ public class FacilityPacketReader extends Thread {
 	final Runnable handler = new Runnable() {
 	       public void run() { 
 	    	   System.out.println("no heartbeat from facility"); 
-	    	   //evtMgr.setFacilityFailure(facilityId, true);
 	    	   try {
-				mgrFacility.setFacilityFailure(facilityId, true);
+	    		   if( mgrFacility != null ) {
+	    			   // if no heartbeat packet, we try to reconnection....
+	    			   mInfo.close();
+	    			   //mInfo.setNeedtoCheck();
+	    			   //mgrFacility.setFacilityFailure(mInfo.facilityId, true);
+	    		   }
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -95,8 +98,11 @@ public class FacilityPacketReader extends Thread {
 	public void run() {
 		// display read message from server
 		try {
-			String message;
-			while ( runningTread && (message = mIn.readLine()) != null) {
+			
+			while ( !isInterrupted() ) {
+				String message = mIn.readLine();
+				if( message == null ) break;
+				
 				System.out.println(message + ", length=" + message.length());
 				
 				if( message.length() > 0 ) {
@@ -110,17 +116,28 @@ public class FacilityPacketReader extends Thread {
 				}
 			}
 			
-			System.out.println("FacilityPacketReader thread stopped");
+			
 		} catch (IOException ioe) {
-			System.err.println("Connection to server broken");
-			
-			
+			System.err.println("Connection to server broken, facilityId=" + mInfo.facilityId);
+	
+			try {
+				mInfo.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 			// ¼­¹ö Ä¿³Ø¼Ç ²÷¾îÁú¶§ È£ÃâµÊ. 
-			ioe.printStackTrace();
+			//ioe.printStackTrace();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			
+			if( noPacketHandle != null ) {
+				noPacketHandle.cancel(true);
+			}
+			System.out.println("FacilityPacketReader thread stopped");
 		}
 		
 	}
