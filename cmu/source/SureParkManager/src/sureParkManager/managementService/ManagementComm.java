@@ -36,6 +36,89 @@ public class ManagementComm extends Thread {
         out = new BufferedWriter(new OutputStreamWriter(this.clientSocket.getOutputStream()));
     }
 
+    public String parseJson(String inputLine) throws Exception {
+        ManagementDBTransaction mgtDBtr = ManagementDBTransaction.getInstance();
+
+        JSONParser parser = new JSONParser();
+        Object obj = parser.parse(inputLine);
+        JSONObject jsonObject = (JSONObject) obj;
+
+        System.out.println("\nnow json parsing...\n");
+
+        // json parsing...
+        JSONObject subJsonObject;
+        JSONObject retJsonObj = new JSONObject();
+        subJsonObject = (JSONObject) jsonObject.get("newGarage");
+
+        if (subJsonObject != null) {
+            mgtDBtr.addNewGarage(subJsonObject.toJSONString());
+            retJsonObj.put("newGarage", "OK");
+
+            // Update Config.
+            SureParkConfig config = SureParkConfig.getInstance();
+            config.updateGarageInfo(); // update from DB
+
+            // Notify Garage Info updated.
+            ctlService.addFacility((int)subJsonObject.get("garageName"));
+        }
+
+        subJsonObject = (JSONObject) jsonObject.get("newReservation");
+        if (subJsonObject != null) {
+            mgtDBtr.addNewReservation(subJsonObject.toJSONString());
+            retJsonObj.put("newReservation", "OK");
+        }
+
+        subJsonObject = (JSONObject) jsonObject.get("newUser");
+        if (subJsonObject != null) {
+            mgtDBtr.addNewUser(subJsonObject.toJSONString());
+            retJsonObj.put("newUser", "OK");
+        }
+
+        subJsonObject = (JSONObject) jsonObject.get("cancelReservation");
+        if (subJsonObject != null) {
+            retJsonObj.put("cancelReservation", "OK");
+        }
+
+        subJsonObject = (JSONObject) jsonObject.get("parkingCar");
+        if (subJsonObject != null) {
+            int garageID, slot;
+
+            garageID = mgtDBtr.getEmptyGarageID((String)subJsonObject.get("usingGarage"));
+            if (garageID < 0) {
+                retJsonObj.put("parkingCar", "FAIL");
+            } else {
+
+                slot = mgtDBtr.getEmptyGarageSlotNum(garageID);
+                if (slot < 0) {
+                    retJsonObj.put("parkingCar", "FAIL");
+                } else {
+                    // DB Update
+                    boolean ret = mgtDBtr.parkingCar(subJsonObject.toJSONString(), garageID, slot);
+
+                    if (ret) {
+                        System.out.println("Garage ID " + garageID + ", Empty slot number is " + slot);
+
+                        // open gate
+//                        ctlService.openEntryGate(garageID, slot);
+
+                        retJsonObj.put("parkingCar", "OK");
+                    }
+                    else
+                        retJsonObj.put("parkingCar", "FAIL");
+                }
+            }
+        }
+
+        // Send response
+        if (!retJsonObj.isEmpty()) {
+            String outStr = retJsonObj.toJSONString() + "\n";
+            System.out.println(outStr);
+            return outStr;
+        }
+        else
+            return retJsonObj.toJSONString();
+    }
+
     public void run() {
         try {
             /*****************************************************************************
@@ -50,8 +133,6 @@ public class ManagementComm extends Thread {
              * accept the connection.
              *****************************************************************************/
 
-            ManagementDBTransaction mgtDBtr = ManagementDBTransaction.getInstance();
-
             String inputLine; // Data from client
             try {
                 handlers.addElement(this);
@@ -64,76 +145,12 @@ public class ManagementComm extends Thread {
                         if (inputLine == null)  break;
 
                         System.out.println("readLine start::");
-                        JSONParser parser = new JSONParser();
-                        Object obj = parser.parse(inputLine);
-                        JSONObject jsonObject = (JSONObject) obj;
 
-                        System.out.println("now json parsing...");
-
-                        // json parsing...
-                        JSONObject subJsonObject;
-                        JSONObject retJsonObj = new JSONObject();
-                        subJsonObject = (JSONObject) jsonObject.get("newGarage");
-
-                        if (subJsonObject != null) {
-                            mgtDBtr.addNewGarage(subJsonObject.toJSONString());
-                            retJsonObj.put("newGarage", "OK");
-
-                            // Update Config.
-                            SureParkConfig config = SureParkConfig.getInstance();
-                            config.updateGarageInfo(); // update from DB
-
-                            // Notify Garage Info updated.
-                            ctlService.addFacility((int)subJsonObject.get("garageName"));
+                        String outStr = parseJson(inputLine);
+                        if (!outStr.isEmpty()) {
+                            out.write(outStr);
+                            out.flush();
                         }
-
-                        subJsonObject = (JSONObject) jsonObject.get("newReservation");
-                        if (subJsonObject != null) {
-                            mgtDBtr.addNewReservation(subJsonObject.toJSONString());
-                            retJsonObj.put("newReservation", "OK");
-                        }
-
-                        subJsonObject = (JSONObject) jsonObject.get("newUser");
-                        if (subJsonObject != null) {
-                            mgtDBtr.addNewUser(subJsonObject.toJSONString());
-                            retJsonObj.put("newUser", "OK");
-                        }
-
-                        subJsonObject = (JSONObject) jsonObject.get("cancelReservation");
-                        if (subJsonObject != null) {
-                            retJsonObj.put("cancelReservation", "OK");
-                        }
-
-                        subJsonObject = (JSONObject) jsonObject.get("parkingCar");
-                        if (subJsonObject != null) {
-                            int garageID, slot;
-
-                            garageID = mgtDBtr.getEmptyGarageID((String)subJsonObject.get("usingGarage"));
-                            if (garageID < 0) continue;
-
-                            slot = mgtDBtr.getEmptyGarageSlotNum(garageID);
-                            if (slot < 0) continue;
-
-                            // DB Update
-                            boolean ret = mgtDBtr.parkingCar(subJsonObject.toJSONString(), garageID, slot);
-
-                            if (ret) {
-                                System.out.println("Garage ID " + garageID + ", Empty slot number is " + slot);
-
-                                // open gate
-                                ctlService.openEntryGate(garageID, slot);
-
-                                retJsonObj.put("parkingCar", "OK");
-                            }
-                            else
-                                retJsonObj.put("parkingCar", "FAIL");
-                        }
-
-                        // Send response
-                        String outStr = retJsonObj.toJSONString() + "\n";
-                        System.out.println(outStr);
-                        out.write(outStr);
-                        out.flush();
                     } catch (IOException e) {
                         System.err.println("readLine failed::");
                         break;
