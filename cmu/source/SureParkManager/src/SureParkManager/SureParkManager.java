@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import sureParkManager.common.SureParkConfig;
 import sureParkManager.controlService.ControlService;
 import sureParkManager.managementService.ManagementServer;
+import sureParkManager.noshowService.NoShowManager;
 
 public class SureParkManager {
 
@@ -26,11 +27,15 @@ public class SureParkManager {
                 
         // Create ControlService
         ControlService ctlService = new ControlService(mgtFacility);
+        ctlService.start();
         
         // Start server thread
 		ManagementServer mgtServer = ManagementServer.getInstance();
         mgtServer.setControlService(ctlService);
         mgtServer.start();
+        
+        //NoShowManager noshowMgr = new NoShowManager();
+        //noshowMgr.start();
         
         // Example for update status
         /* ArrayList<Integer> slotStatus = new ArrayList<Integer>();
@@ -51,8 +56,13 @@ public class SureParkManager {
 			String message = in.readLine();
 			
 			if( message.equals("g") ) {
-				ctlService.openEntryGate(1001, 1);
+                ctlService.openEntryGate(1001, 1);
+            } else if(message.equals("0")) {
+                mgtFacility.setFacilityFailure(1001, false);
+            } else if(message.equals("1")) {
+                mgtFacility.setFacilityFailure(1001, true);
 			} else if(message.equals("EXIT")) {
+				ctlService.interrupt();
 				break;
 			}	
             // Wait maximum of 1 second

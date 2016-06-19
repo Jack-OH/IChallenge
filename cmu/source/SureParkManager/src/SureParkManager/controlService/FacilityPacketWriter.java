@@ -3,6 +3,7 @@ import sureParkManager.common.SureParkConfig;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.concurrent.LinkedBlockingQueue;
 
 
@@ -10,26 +11,22 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class FacilityPacketWriter extends Thread {
 	
 	private BufferedWriter mOut = null;
-	private int facilityId = 0;
+	private FacilityClientInfo mInfo = null;
 	private LinkedBlockingQueue<String> mMessageQueue = new LinkedBlockingQueue<String>();
-	private boolean runningTread = true;
 	
-	public FacilityPacketWriter(BufferedWriter out, int id) {
-		mOut = out;	
-		facilityId = id;
+	public FacilityPacketWriter(FacilityClientInfo info) throws IOException {
+		mInfo = info;
+    	mOut = new BufferedWriter(new OutputStreamWriter(mInfo.mClientSocket.getOutputStream()));
 
 	}
 	
-	public void stopThread() {
-		runningTread = false;
-	}
 	
 	public void sendInformation() throws Exception {
 		//$0001I4\n
 		SureParkConfig c = SureParkConfig.getInstance();
-		int slotNum = c.getGarageInfoFromGarageID(facilityId).slotNum;
+		int slotNum = c.getGarageInfoFromGarageID(mInfo.facilityId).slotNum;
 		
-		String packet = String.format("$%04dI%d\n", facilityId, slotNum);
+		String packet = String.format("$%04dI%d\n", mInfo.facilityId, slotNum);
 
 		try {
 			mMessageQueue.put(packet);
@@ -41,7 +38,7 @@ public class FacilityPacketWriter extends Thread {
 	
 	public void request2openEntryGate() {
 		//$0001G1\n
-		String packet = String.format("$%04dG1\n", facilityId);
+		String packet = String.format("$%04dG1\n", mInfo.facilityId);
 
 		try {
 			mMessageQueue.put(packet);
@@ -54,50 +51,41 @@ public class FacilityPacketWriter extends Thread {
 	
 	public void request2turnOnStallLED(int stallIndex) {
 		//$0001L4\n
-		String packet = String.format("$%04dL%d\n", facilityId, stallIndex);
+		String packet = String.format("$%04dL%d\n", mInfo.facilityId, stallIndex);
 		try {
 			mMessageQueue.put(packet);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
-	
-//	private synchronized String getNextMessageFromQueue() throws InterruptedException {
-//		while(mMessageQueue.size() == 0 ) {
-//			wait();
-//		}
-//		String message = (String) mMessageQueue.take();
-//		mMessageQueue.removeElementAt(0);
-//		return message;
-//	}
 	
 	public void run() {
 		try {
-			// read cmd message
-			//BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-			
-			while (runningTread && !isInterrupted()) {
-				//String message = in.readLine() + '\n';
-				//message = "$0001I4\n";
-				//System.out.println("length=" +  message.length() );
-				//String message = getNextMessageFromQueue();
+			while (!isInterrupted()) {
 				String message = (String) mMessageQueue.take();
-				mOut.write(message, 0, message.length());
-				mOut.flush();
+				if( message != null ) {
+					mOut.write(message, 0, message.length());
+					mOut.flush();					
+				}
 			}
-			
-			System.out.println("FacilityPacketReader thread stopped");
+		
 			
 		} catch (InterruptedException ioe) {
+			try {
+				mInfo.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
+		} finally {
+			System.out.println("FacilityPacketWriter thread stopped");
 		}
-							
-	
+								
 	}
 
 }
