@@ -7,6 +7,16 @@ public class SureParkConfig {
 	private static SureParkConfig instance = null;
 	private ArrayList<GarageInfo> garageArray;
 
+    public String getLastConfirmInfo() {
+        return lastConfirmInfo;
+    }
+
+    public void setLastConfirmInfo(String lastConfirmInfo) {
+        this.lastConfirmInfo = lastConfirmInfo;
+    }
+
+    private String lastConfirmInfo = null;
+
 	private SureParkConfig() throws Exception {
 		garageArray = new ArrayList<GarageInfo>();
 	}
@@ -53,6 +63,19 @@ public class SureParkConfig {
 			this.garageArray = mgtDB.getGaragesInfo();
 		}
 	}
+
+	public int getGarageSlotState(int garageID, int slotIdx) throws Exception {
+        int ret = -1;
+        updateGarageInfo();
+
+        for (GarageInfo info : this.garageArray) {
+            if ( info.id == garageID ) {
+                ret = info.slotStatus.get(slotIdx);
+            }
+        }
+
+        return ret;
+    }
 	
 	public void setGarageSlotState(int garageID, int slotIdx, int slotStatus) throws Exception {
 		ManagementDBTransaction mgtDB = ManagementDBTransaction.getInstance();

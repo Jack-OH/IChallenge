@@ -2,6 +2,7 @@ package sureParkManager.managementService;
 
 import com.mongodb.util.JSON;
 import org.json.simple.JSONObject;
+import sureParkManager.common.GarageInfo;
 import sureParkManager.common.SureParkConfig;
 
 import java.io.IOException;
@@ -30,6 +31,19 @@ public class ManagementFacility implements IManagementFacility {
 		
 		System.out.println("update slot state, garageID : " + garageID + ", slot Index : " + slotIdx + ", slot Status : " + slotStatus);
 	}
+
+    public void leaveSlotStatus(int garageID, int slotIdx)  throws Exception
+    {
+        SureParkConfig config = SureParkConfig.getInstance();
+        ManagementDBTransaction mgtDB = ManagementDBTransaction.getInstance();
+
+        // slot status update
+        config.setGarageSlotState(garageID, slotIdx, GarageInfo.kGarageInfoSlotStatusOpen);
+
+        // parking fee calculation
+        mgtDB.leaveCar(garageID, slotIdx);
+
+    }
 	
 	// CS -> MS
 	public void setFacilityFailure(int garageID, boolean isFail) throws Exception {
@@ -49,4 +63,8 @@ public class ManagementFacility implements IManagementFacility {
 		comm.broadcast(jsonObject.toJSONString() + "\n");
 
 	}
+
+    public void updateWrongParking(int garageID, int slotIdx) {
+
+    }
 }

@@ -50,6 +50,8 @@ public class ManagementComm extends Thread {
         JSONObject retJsonObj = new JSONObject();
         subJsonObject = (JSONObject) jsonObject.get("newGarage");
 
+        //System.out.println(subJsonObject.toJSONString());
+
         if (subJsonObject != null) {
             mgtDBtr.addNewGarage(subJsonObject.toJSONString());
             retJsonObj.put("newGarage", "OK");
@@ -99,7 +101,11 @@ public class ManagementComm extends Thread {
                         System.out.println("Garage ID " + garageID + ", Empty slot number is " + slot);
 
                         // open gate
-//                        ctlService.openEntryGate(garageID, slot);
+                        ctlService.openEntryGate(garageID, slot);
+
+                        SureParkConfig config = SureParkConfig.getInstance();
+
+                        config.setLastConfirmInfo((String)subJsonObject.get("confirmInformation"));
 
                         retJsonObj.put("parkingCar", "OK");
                     }

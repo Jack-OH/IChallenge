@@ -20,10 +20,11 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.DBCursor;
 import sureParkManager.common.ReservationInfo;
+import sureParkManager.common.SureParkConfig;
 
 public class ManagementDBTransaction {
 
-    private static final String simpleDateFormat = "yyyy-MM-dd'T'HH:mm:ssZ";
+    private static final String simpleDateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
 	private static ManagementDBTransaction instance = null;
 
@@ -82,15 +83,15 @@ public class ManagementDBTransaction {
 		DBObject dbObject = (DBObject) JSON.parse(str);
         BasicDBObject doc = new BasicDBObject();
         doc.append("garageName", dbObject.get("garageName"));
-        doc.append("garageNumber", dbObject.get("garageNumber"));
-        doc.append("slotNumber", dbObject.get("slotNumber"));
+        doc.append("garageNumber", Integer.parseInt((String)dbObject.get("garageNumber")));
+        doc.append("slotNumber", Integer.parseInt((String)dbObject.get("slotNumber")));
         BasicDBList docList = new BasicDBList();
-        for(int i=0; i < (int)dbObject.get("slotNumber"); i++) {
+        for(int i=0; i < Integer.parseInt((String)dbObject.get("slotNumber")); i++) {
             docList.add("Open");
         }
         doc.append("slotStatus", docList);
         doc.append("updateTime", new Date());
-        doc.append("gracePeriod", dbObject.get("gracePeriod"));
+        doc.append("gracePeriod", Integer.parseInt((String)dbObject.get("gracePeriod")));
         doc.append("parkingFee", 5);
         doc.append("garageIP", dbObject.get("garageIP"));
         doc.append("isAvailable", dbObject.get("isAvailable"));
@@ -99,18 +100,25 @@ public class ManagementDBTransaction {
 	}
 
 	public void addNewReservation(String str) throws Exception {
+        SimpleDateFormat format = new SimpleDateFormat(simpleDateFormat, Locale.US);
 		DBCollection coll = db.getCollection("reservations");
 
 		DBObject dbObject = (DBObject) JSON.parse(str);
 		BasicDBObject doc = new BasicDBObject();
 
         doc.append("userID", dbObject.get("userID"));
-        doc.append("reservationTime", dbObject.get("reservationTime"));
+
+//        String formatted = (String)dbObject.get("reservationTime");
+        String strDate = (String)dbObject.get("reservationTime");
+        System.out.println(strDate);
+        Date date = format.parse(strDate);
+        doc.append("reservationTime", date);
+//        doc.append("reservationTime", new Date());
         doc.append("cardInfo", dbObject.get("cardInfo"));
         doc.append("confirmInformation", dbObject.get("confirmInformation"));
-        doc.append("gracePeriod", dbObject.get("gracePeriod"));
+        doc.append("gracePeriod", Integer.parseInt((String)dbObject.get("gracePeriod")));
         doc.append("reservationStatus", "waiting");
-        doc.append("parkingFee", 5);
+        doc.append("parkingFee", Integer.parseInt((String)dbObject.get("parkingFee")));
         doc.append("usingGarage", dbObject.get("usingGarage"));
         doc.append("usingGarageNumber", -1);
         doc.append("usingSlot", -1);
@@ -141,16 +149,19 @@ public class ManagementDBTransaction {
 	public void updateGarageSlot(int garageID, ArrayList<Integer> slotStatus) {
 		DBCollection coll = db.getCollection("garages");
 		GarageInfo garageInfo = new GarageInfo();
-		BasicDBObject updateObj= new BasicDBObject();
+		BasicDBObject statusObj= new BasicDBObject();
         BasicDBList slotStatusList = new BasicDBList();
+        BasicDBObject updateTimeObj = new BasicDBObject();
 
     	for(int i=0; i<slotStatus.size();i++) {
     		slotStatusList.add(garageInfo.GarageSlotStatusIntToString(slotStatus.get(i)));
     	}
     	
-    	updateObj.append("$set", new BasicDBObject().append("slotStatus", slotStatusList));
+    	statusObj.append("$set", new BasicDBObject().append("slotStatus", slotStatusList));
+        updateTimeObj.append("$set", new BasicDBObject().append("updateTime", new Date()));
 
-		coll.update(new BasicDBObject().append("garageID", garageID), updateObj);
+		coll.update(new BasicDBObject().append("garageNumber", garageID), statusObj);
+        coll.update(new BasicDBObject().append("garageNumber", garageID), updateTimeObj);
 	}
 
     public ArrayList<ReservationInfo> getReservationInfo() {
@@ -165,18 +176,17 @@ public class ManagementDBTransaction {
 
         while(cursor.hasNext()) {
             DBObject dbObj = cursor.next();
-			Date dt = (Date)dbObj.get("reservationTime");
-			String strDate = dt.toString();
-            SimpleDateFormat format = new SimpleDateFormat(simpleDateFormat);
+
+            SimpleDateFormat format = new SimpleDateFormat(simpleDateFormat, Locale.US);
 
 			String formatted = format.format(dbObj.get("reservationTime"));
 
             try {
                 Date date = format.parse(formatted);
 
-                System.out.println(strDate);
-                System.out.println((int)dbObj.get("gracePeriod"));
-                System.out.println((String)dbObj.get("confirmInformation"));
+//                System.out.println(date.toString());
+//                System.out.println((int)dbObj.get("gracePeriod"));
+//                System.out.println((String)dbObj.get("confirmInformation"));
 
                 ReservationInfo info = new ReservationInfo(
                         date,
@@ -283,6 +293,62 @@ public class ManagementDBTransaction {
         if (cursor.hasNext()) {
             coll.update(whereQuery, rsvStatusObj);
         }
+    }
+
+    public void leaveCar(int garageID, int slot) {
+        DBCollection coll = db.getCollection("reservations");
+
+        SimpleDateFormat format = new SimpleDateFormat(simpleDateFormat, Locale.US);
+
+        BasicDBObject whereQuery = new BasicDBObject();
+
+        whereQuery.append("reservationStatus", "parked");
+        whereQuery.append("usingGarageNumber", garageID);
+        whereQuery.append("usingSlot", slot);
+
+
+        DBCursor cursor = coll.find(whereQuery);
+
+        if (cursor.hasNext()) {
+            DBObject dbObj = cursor.next();
+
+            String formatted = format.format(dbObj.get("reservationTime"));
+            int parkingFee = (int)dbObj.get("parkingFee");
+
+            try {
+                Date parkingTime = format.parse(formatted);
+                Date leaveTime = new Date();
+
+                long diff = leaveTime.getTime() - parkingTime.getTime();
+
+                // TODO : calculate parking fee...
+
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    public void updatePakingSlot(int garageID, int slot) throws Exception {
+        DBCollection coll = db.getCollection("reservations");
+        SureParkConfig config = SureParkConfig.getInstance();
+        SimpleDateFormat format = new SimpleDateFormat(simpleDateFormat, Locale.US);
+
+        BasicDBObject whereQuery = new BasicDBObject();
+
+        whereQuery.append("reservationStatus", "parked");
+        whereQuery.append("usingGarageNumber", garageID);
+        whereQuery.append("confirmInformation", config.getLastConfirmInfo());
+
+        DBCursor cursor = coll.find(whereQuery);
+
+        if (cursor.hasNext()) {
+            BasicDBObject slotObj= new BasicDBObject("$set", new BasicDBObject("usingSlot", slot));
+
+            coll.update(whereQuery, slotObj);
+        }
+
     }
 
 	public void disconnectDB() throws Exception {
