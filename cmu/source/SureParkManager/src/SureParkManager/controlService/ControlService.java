@@ -65,6 +65,8 @@ public class ControlService extends Thread {
 		 info.ip = gInfo.ip;
 		 info.facilityId = gInfo.id;
 		 mClientInfo.add(info);
+		 
+		 System.out.println("add facility id=" + info.facilityId);
 	}
 	
 	public void deleteFacility(int facilityId) {
