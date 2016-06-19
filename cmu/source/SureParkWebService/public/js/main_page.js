@@ -88,7 +88,7 @@ $('#makeReserveDoneBtn').click(function(){
 
                         newReservation = 
                             {"newReservation": {"userID":userID, "cardInfo":cardInfo, "confirmInformation":confirmInformation, 
-                             "gracePeriod":gracePeriod, "parkingFee":parkingFee, "usingGarage":garageName }}; 
+                             "reservationTime":date, "gracePeriod":gracePeriod, "parkingFee":parkingFee, "usingGarage":garageName }}; 
 
                         console.log(newReservation);
                         $.post("newReservation", newReservation, function(resdata){
