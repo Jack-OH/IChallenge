@@ -197,11 +197,11 @@ public class ManagementDBTransaction {
 
         DBCollection garageColl = db.getCollection("garages");
 
-        BasicDBObject whereQuery2 = new BasicDBObject("garageName", garageName);
-        DBCursor cursor2 = garageColl.find(whereQuery2);
+        BasicDBObject whereQuery = new BasicDBObject("garageName", garageName);
+        DBCursor cursor = garageColl.find(whereQuery);
 
-        while(cursor2.hasNext()) {
-            DBObject dbObj = cursor2.next();
+        while(cursor.hasNext()) {
+            DBObject dbObj = cursor.next();
 
             BasicDBList dbList = (BasicDBList)dbObj.get("slotStatus");
 
@@ -222,11 +222,11 @@ public class ManagementDBTransaction {
 
         DBCollection garageColl = db.getCollection("garages");
 
-        BasicDBObject whereQuery2 = new BasicDBObject("garageNumber", garageID);
-        DBCursor cursor2 = garageColl.find(whereQuery2);
+        BasicDBObject whereQuery = new BasicDBObject("garageNumber", garageID);
+        DBCursor cursor = garageColl.find(whereQuery);
 
-        while(cursor2.hasNext()) {
-            DBObject dbObj = cursor2.next();
+        while(cursor.hasNext()) {
+            DBObject dbObj = cursor.next();
 
             BasicDBList dbList = (BasicDBList)dbObj.get("slotStatus");
 
@@ -247,7 +247,7 @@ public class ManagementDBTransaction {
 
         DBObject dbObject = (DBObject) JSON.parse(str);
 
-        DBCollection rsvColl = db.getCollection("reservations");
+        DBCollection coll = db.getCollection("reservations");
 
         BasicDBObject whereQuery = new BasicDBObject("confirmInformation", dbObject.get("confirmInformation"));
 
@@ -256,19 +256,33 @@ public class ManagementDBTransaction {
         BasicDBObject usingGarageIDObj = new BasicDBObject("$set", new BasicDBObject("usingGarageNumber", garageID));
         BasicDBObject usingSlotObj = new BasicDBObject("$set", new BasicDBObject("usingSlot", slot));
 
-        DBCursor cursor = rsvColl.find(whereQuery);
+        DBCursor cursor = coll.find(whereQuery);
 
         if (cursor.hasNext()) {
 
-            rsvColl.update(whereQuery, rsvStatusObj);
-            rsvColl.update(whereQuery, parkingTimeObj);
-            rsvColl.update(whereQuery, usingGarageIDObj);
-            rsvColl.update(whereQuery, usingSlotObj);
+            coll.update(whereQuery, rsvStatusObj);
+            coll.update(whereQuery, parkingTimeObj);
+            coll.update(whereQuery, usingGarageIDObj);
+            coll.update(whereQuery, usingSlotObj);
 
             ret = true;
         }
 
         return ret;
+    }
+
+    public void cancelReservation(String confirmInformation)
+    {
+        DBCollection coll = db.getCollection("reservations");
+
+        BasicDBObject whereQuery = new BasicDBObject("confirmInformation", confirmInformation);
+        BasicDBObject rsvStatusObj= new BasicDBObject("$set", new BasicDBObject("reservationStatus", "cancelled"));
+
+        DBCursor cursor = coll.find(whereQuery);
+
+        if (cursor.hasNext()) {
+            coll.update(whereQuery, rsvStatusObj);
+        }
     }
 
 	public void disconnectDB() throws Exception {
