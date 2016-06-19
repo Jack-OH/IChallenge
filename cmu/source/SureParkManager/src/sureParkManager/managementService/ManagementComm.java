@@ -2,10 +2,13 @@ package sureParkManager.managementService;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import sureParkManager.common.ReservationInfo;
+import sureParkManager.common.SureParkConfig;
 import sureParkManager.controlService.ControlService;
 
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -75,6 +78,13 @@ public class ManagementComm extends Thread {
                         if (subJsonObject != null) {
                             mgtDBtr.addNewGarage(subJsonObject.toJSONString());
                             retJsonObj.put("newGarage", "OK");
+
+                            // Update Config.
+                            SureParkConfig config = SureParkConfig.getInstance();
+                            config.updateGarageInfo(); // update from DB
+
+                            // Notify Garage Info updated.
+                            ctlService.addFacility((int)subJsonObject.get("garageName"));
                         }
 
                         subJsonObject = (JSONObject) jsonObject.get("newReservation");
@@ -96,12 +106,27 @@ public class ManagementComm extends Thread {
 
                         subJsonObject = (JSONObject) jsonObject.get("parkingCar");
                         if (subJsonObject != null) {
+                            int garageID, slot;
+
+                            garageID = mgtDBtr.getEmptyGarageID((String)subJsonObject.get("usingGarage"));
+                            if (garageID < 0) continue;
+
+                            slot = mgtDBtr.getEmptyGarageSlotNum(garageID);
+                            if (slot < 0) continue;
+
                             // DB Update
+                            boolean ret = mgtDBtr.parkingCar(subJsonObject.toJSONString(), garageID, slot);
 
-                            // open gate
-                            this.ctlService.openEntryGate(1001, 0);
+                            if (ret) {
+                                System.out.println("Garage ID " + garageID + ", Empty slot number is " + slot);
 
-                            retJsonObj.put("parkingCar", "OK");
+                                // open gate
+                                ctlService.openEntryGate(garageID, slot);
+
+                                retJsonObj.put("parkingCar", "OK");
+                            }
+                            else
+                                retJsonObj.put("parkingCar", "FAIL");
                         }
 
                         // Send response

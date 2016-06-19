@@ -63,6 +63,7 @@ public class ManagementServer extends Thread {
             serverSocket = new ServerSocket(portNum);
         } catch (IOException e) {
             System.err.println("\n\nCould not instantiate socket on port: " + portNum + " " + e);
+            System.exit(1);
 
         }
 

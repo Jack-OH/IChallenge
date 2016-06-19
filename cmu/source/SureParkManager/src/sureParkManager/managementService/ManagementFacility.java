@@ -1,5 +1,6 @@
 package sureParkManager.managementService;
 
+import com.mongodb.util.JSON;
 import org.json.simple.JSONObject;
 import sureParkManager.common.SureParkConfig;
 
@@ -19,10 +20,13 @@ public class ManagementFacility implements IManagementFacility {
 		config.setGarageSlotState(garageID, slotIdx, slotStatus);
 
 		JSONObject jsonObject = new JSONObject();
+        JSONObject jsonObject1 = new JSONObject();
 
-		jsonObject.put("updateSlotStatus", new JSONObject().put("garageID", garageID));
+        jsonObject1.put("garageID", garageID);
 
-		comm.broadcast(jsonObject.toJSONString());
+		jsonObject.put("updateSlotStatus", jsonObject1);
+
+		comm.broadcast(jsonObject.toJSONString() + "\n");
 		
 		System.out.println("update slot state, garageID : " + garageID + ", slot Index : " + slotIdx + ", slot Status : " + slotStatus);
 	}
@@ -35,10 +39,14 @@ public class ManagementFacility implements IManagementFacility {
 			System.out.println("EVENT : " + garageID +" facility is fixed...");
 
 		JSONObject jsonObject = new JSONObject();
+        JSONObject jsonObject1 = new JSONObject();
+        jsonObject1.put("garageNumber", garageID);
 
-		jsonObject.put("detectFailure", new JSONObject().put("garageID", garageID));
+		jsonObject.put("detectFailure", jsonObject1);
 
-		comm.broadcast(jsonObject.toJSONString());
+        System.out.println(jsonObject.toJSONString());
+
+		comm.broadcast(jsonObject.toJSONString() + "\n");
 
 	}
 }

@@ -8,7 +8,7 @@ import java.util.Date;
 public class ReservationInfo {
 
     public Date     reservationTime;
-    public int      gracePeriod;
+    public int      gracePeriod;        // Unit : minute
     public String   confirmInformation;
 
     public ReservationInfo (Date reservationTime, int gracePeriod, String confirmInformation) {

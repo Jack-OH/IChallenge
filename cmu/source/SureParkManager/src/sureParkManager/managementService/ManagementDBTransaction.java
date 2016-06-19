@@ -6,7 +6,9 @@ import com.mongodb.util.JSON;
 import sureParkManager.common.GarageInfo;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
@@ -20,6 +22,9 @@ import com.mongodb.DBCursor;
 import sureParkManager.common.ReservationInfo;
 
 public class ManagementDBTransaction {
+
+    private static final String simpleDateFormat = "yyyy-MM-dd'T'HH:mm:ssZ";
+
 	private static ManagementDBTransaction instance = null;
 
 	private static MongoClient mongoClient = null;
@@ -100,14 +105,15 @@ public class ManagementDBTransaction {
 		BasicDBObject doc = new BasicDBObject();
 
         doc.append("userID", dbObject.get("userID"));
-        doc.append("reservationTime", new Date());
+        doc.append("reservationTime", dbObject.get("reservationTime"));
         doc.append("cardInfo", dbObject.get("cardInfo"));
         doc.append("confirmInformation", dbObject.get("confirmInformation"));
         doc.append("gracePeriod", dbObject.get("gracePeriod"));
         doc.append("reservationStatus", "waiting");
         doc.append("parkingFee", 5);
         doc.append("usingGarage", dbObject.get("usingGarage"));
-        doc.append("usingSlot", dbObject.get("usingSlot"));
+        doc.append("usingGarageNunber", -1);
+        doc.append("usingSlot", -1);
         doc.append("parkingTime", "null");
         doc.append("leaveTime", "null");
         doc.append("chargingFee", 0);
@@ -148,11 +154,121 @@ public class ManagementDBTransaction {
 	}
 
     public ArrayList<ReservationInfo> getReservationInfo() {
-        ArrayList<ReservationInfo> reservationInfoList = null;
+        DBCollection coll = db.getCollection("reservations");
+        BasicDBObject whereQuery = new BasicDBObject();
 
-        // TODO: implement this function.
+        ArrayList<ReservationInfo> reservationInfoList = new ArrayList<ReservationInfo>();
+
+        whereQuery.put("reservationStatus", "waiting");
+
+        DBCursor cursor = coll.find(whereQuery);
+
+        while(cursor.hasNext()) {
+            DBObject dbObj = cursor.next();
+			Date dt = (Date)dbObj.get("reservationTime");
+			String strDate = dt.toString();
+            SimpleDateFormat format = new SimpleDateFormat(simpleDateFormat);
+
+			String formatted = format.format(dbObj.get("reservationTime"));
+
+            try {
+                Date date = format.parse(formatted);
+
+                System.out.println(strDate);
+                System.out.println((int)dbObj.get("gracePeriod"));
+                System.out.println((String)dbObj.get("confirmInformation"));
+
+                ReservationInfo info = new ReservationInfo(
+                        date,
+                        (int)dbObj.get("gracePeriod"),
+                        (String)dbObj.get("confirmInformation"));
+
+                reservationInfoList.add(info);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
 
         return reservationInfoList;
+    }
+
+    public int getEmptyGarageID(String garageName) {
+        int ret = -1;
+
+        DBCollection garageColl = db.getCollection("garages");
+
+        BasicDBObject whereQuery2 = new BasicDBObject("garageName", garageName);
+        DBCursor cursor2 = garageColl.find(whereQuery2);
+
+        while(cursor2.hasNext()) {
+            DBObject dbObj = cursor2.next();
+
+            BasicDBList dbList = (BasicDBList)dbObj.get("slotStatus");
+
+            int index = dbList.indexOf("Open");
+
+            if (index < 0)
+                continue;
+
+            ret = (int)dbObj.get("garageNumber");
+            break;
+        }
+
+        return ret;
+    }
+
+    public int getEmptyGarageSlotNum(int garageID) {
+        int ret = -1;
+
+        DBCollection garageColl = db.getCollection("garages");
+
+        BasicDBObject whereQuery2 = new BasicDBObject("garageNumber", garageID);
+        DBCursor cursor2 = garageColl.find(whereQuery2);
+
+        while(cursor2.hasNext()) {
+            DBObject dbObj = cursor2.next();
+
+            BasicDBList dbList = (BasicDBList)dbObj.get("slotStatus");
+
+            int index = dbList.indexOf("Open");
+
+            if (index < 0)
+                continue;
+
+            ret = index;
+            break;
+        }
+
+        return ret;
+    }
+
+    public boolean parkingCar(String str, int garageID, int slot) {
+        boolean ret = false;
+
+        DBObject dbObject = (DBObject) JSON.parse(str);
+
+        DBCollection rsvColl = db.getCollection("reservations");
+
+        BasicDBObject whereQuery = new BasicDBObject("confirmInformation", dbObject.get("confirmInformation"));
+
+        BasicDBObject rsvStatusObj= new BasicDBObject("$set", new BasicDBObject("reservationStatus", "parked"));
+        BasicDBObject parkingTimeObj = new BasicDBObject("$set", new BasicDBObject("parkingTime", new Date()));
+        BasicDBObject usingGarageIDObj = new BasicDBObject("$set", new BasicDBObject("usingGarageNumber", garageID));
+        BasicDBObject usingSlotObj = new BasicDBObject("$set", new BasicDBObject("usingSlot", slot));
+
+        DBCursor cursor = rsvColl.find(whereQuery);
+
+        if (cursor.hasNext()) {
+
+            rsvColl.update(whereQuery, rsvStatusObj);
+            rsvColl.update(whereQuery, parkingTimeObj);
+            rsvColl.update(whereQuery, usingGarageIDObj);
+            rsvColl.update(whereQuery, usingSlotObj);
+
+            ret = true;
+        }
+
+        return ret;
     }
 
 	public void disconnectDB() throws Exception {

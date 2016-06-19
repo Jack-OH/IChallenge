@@ -56,7 +56,11 @@ public class SureParkManager {
 			String message = in.readLine();
 			
 			if( message.equals("g") ) {
-				ctlService.openEntryGate(1001, 1);
+                ctlService.openEntryGate(1001, 1);
+            } else if(message.equals("0")) {
+                mgtFacility.setFacilityFailure(1001, false);
+            } else if(message.equals("1")) {
+                mgtFacility.setFacilityFailure(1001, true);
 			} else if(message.equals("EXIT")) {
 				ctlService.interrupt();
 				break;
