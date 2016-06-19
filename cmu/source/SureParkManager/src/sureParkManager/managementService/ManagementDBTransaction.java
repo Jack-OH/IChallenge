@@ -306,34 +306,42 @@ public class ManagementDBTransaction {
         whereQuery.append("usingGarageNumber", garageID);
         whereQuery.append("usingSlot", slot);
 
-
         DBCursor cursor = coll.find(whereQuery);
 
         if (cursor.hasNext()) {
             DBObject dbObj = cursor.next();
 
-            String formatted = format.format(dbObj.get("reservationTime"));
-            int parkingFee = (int)dbObj.get("parkingFee");
+            String formatted = format.format(dbObj.get("parkingTime"));
 
             try {
                 Date parkingTime = format.parse(formatted);
                 Date leaveTime = new Date();
+                int parkingFee = (int)dbObj.get("parkingFee");
 
                 long diff = leaveTime.getTime() - parkingTime.getTime();
+                long diffHour = diff / (60 * 60 * 1000); // Calculate hour unit.
 
-                // TODO : calculate parking fee...
+                int chargingFee = (int)(parkingFee * (diffHour+1)); // per 1 hour..
+
+                BasicDBObject leaveTimeObj = new BasicDBObject("$set", new BasicDBObject("leaveTime", leaveTime));
+                BasicDBObject chargingFeeObj = new BasicDBObject("$set", new BasicDBObject("chargingFee", chargingFee));
+                BasicDBObject reservationStatusObj = new BasicDBObject("$set", new BasicDBObject("reservationStatus", "leaved"));
+
+                coll.update(whereQuery, leaveTimeObj);
+                coll.update(whereQuery, chargingFeeObj);
+                coll.update(whereQuery, reservationStatusObj);
+
+                System.out.println("Charging Fee is $"+chargingFee);
 
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-
         }
     }
 
     public void updatePakingSlot(int garageID, int slot) throws Exception {
         DBCollection coll = db.getCollection("reservations");
         SureParkConfig config = SureParkConfig.getInstance();
-        SimpleDateFormat format = new SimpleDateFormat(simpleDateFormat, Locale.US);
 
         BasicDBObject whereQuery = new BasicDBObject();
 
