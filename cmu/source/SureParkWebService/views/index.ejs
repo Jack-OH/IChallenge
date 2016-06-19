@@ -195,28 +195,28 @@
         <div id="showStatistics">
             <div class="well well-sm"> Statistics </div>
             <div class="row">
-                <div class="panel-group col-sm-6" style="padding-left:2px">
+                <div class="panel-group col-sm-6">
                     <div class="panel panel-default">
-                        <div class="panel-heading"> Will be displayed the average occupancy </div>
-                        <div class="panel-body">average occupancy</div>
+                        <!--div class="panel-heading"> Will be displayed the average occupancy </div-->
+                        <div id="average_occupancy" class="panel-body" style="height: 400px;">average occupancy</div>
                     </div>                    
                 </div>
-                <div class="panel-group col-sm-6" style="background-color:lightgreen">
+                <div class="panel-group col-sm-6" style="background-color:lightgreen;">
                     <div class="panel panel-default">
-                        <div class="panel-heading">Will be display peak usage hour</div>
-                        <div class="panel-body">Peak usage hour</div>
+                        <!--div class="panel-heading">Will be display peak usage hour</div-->
+                        <div id="peak_usage_hours" class="panel-body" style="height: 400px;">Peak usage hour</div>
                     </div>      
                 </div>
                 <div class="panel-group col-sm-6">
                     <div class="panel panel-default">
-                        <div class="panel-heading"> Will be displayed parking hour </div>
-                        <div class="panel-body">Parking hour</div>
+                        <!--div class="panel-heading"> Will be displayed parking hour </div-->
+                        <div id="parking_hours" class="panel-body" style="height: 400px;">Parking hour</div>
                     </div>                    
                 </div>
                 <div class="panel-group col-sm-6" style="background-color:lavenderblush;">
-                    <div class="panel panel-default">
-                        <div class="panel-heading"> Will be displayed heavy users </div>
-                        <div class="panel-body">  Heavy users</div>
+                    <!--div class="panel panel-default">
+                        <div class="panel-heading"> Will be displayed heavy users </div-->
+                        <div id="heavy_users" class="panel-body" style="height: 400px; background-color:white;">  Heavy users</div>
                     </div>      
                 </div>
             </div>
@@ -274,10 +274,12 @@
     <script src="/jquery/jquery-2.1.3.min.js"></script>
     <script src="/jquery/combodate.js"></script>
     <script src="/jquery/moment.js"></script>
+    <script src="/jquery/loader.js"></script>
     <script src="/jquery/jquery.nice-select.js"></script>
     <script src="/jquery-ui-1.11.4.custom/jquery-ui.min.js"></script>
     <script src="/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="/js/session_infomation.js"></script>
     <script src="/js/main_page.js"></script>  
+    <!--script src="/js/show_statistics.js"></script--> 
 </body>
 </html>
