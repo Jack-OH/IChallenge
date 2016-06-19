@@ -1,4 +1,8 @@
 
+//google.charts.load('current', {'packages':['bar', 'corechart', 'line', 'table' ]});
+google.charts.load('visualization', '1', {'packages':['bar', 'corechart', 'line', 'table']});
+//google.charts.setOnLoadCallback(drawChart);
+
 var gGarages = [];
 
 $('#usernameBtn').click(function(){
@@ -62,6 +66,9 @@ $('#makeReserveDoneBtn').click(function(){
         alert("To make reservation, you need to log-in first.");
         return;
     }
+
+    date = date + ":00.000Z";
+    console.log(date);
 
     $.get('getUsers', {'displayName':userName}, function(userdata) {
         userdata.forEach(function(useritem){
@@ -271,9 +278,82 @@ $('#show_statistics').click(function() {
         $('.inputForm').hide(0);
         $('#showStatistics').slideDown('slow');
         $('#showStatistics').focus();
+
+
+        drawBarChart(document.getElementById('average_occupancy'));
+        drawLineChart(document.getElementById('peak_usage_hours'));
+        drawBarChart1(document.getElementById("parking_hours"));
+        drawBarChart(document.getElementById("heavy_users"));
     }
 });
 
+function drawBarChart(elementID) {
+    var data = google.visualization.arrayToDataTable([
+            ['Year', 'Sales', 'Expenses', 'Profit'],
+            ['2014', 1000, 400, 200],
+            ['2015', 1170, 460, 250],
+            ['2016', 660, 1120, 300],
+            ['2017', 1030, 540, 350]
+          ]);
+
+          var options = {
+            chart: {
+              title: 'Company Performance',
+                    subtitle: 'Sales, Expenses, and Profit: 2014-2017',
+            }
+          };
+
+          var chart = new google.charts.Bar(elementID);
+          chart.draw(data, options);
+}
+
+function drawLineChart(elementID) {
+        var data = google.visualization.arrayToDataTable([
+          ['Year', 'Sales', 'Expenses'],
+          ['2004',  1000,      400],
+          ['2005',  1170,      460],
+          ['2006',  660,       1120],
+          ['2007',  1030,      540]
+        ]);
+
+        var options = {
+          title: 'Company Performance',
+          curveType: 'function',
+          legend: { position: 'bottom' }
+        };
+
+        var chart = new google.visualization.LineChart(elementID);
+
+        chart.draw(data, options);
+}
+
+function drawBarChart1(elementID) {
+      var data = google.visualization.arrayToDataTable([
+        ["Element", "Density", { role: "style" } ],
+        ["Copper", 8.94, "#b87333"],
+        ["Silver", 10.49, "silver"],
+        ["Gold", 19.30, "gold"],
+        ["Platinum", 21.45, "color: #e5e4e2"]
+      ]);
+
+      var view = new google.visualization.DataView(data);
+      view.setColumns([0, 1,
+                       { calc: "stringify",
+                         sourceColumn: 1,
+                         type: "string",
+                         role: "annotation" },
+                       2]);
+
+      var options = {
+        title: "Density of Precious Metals, in g/cm^3",
+        width: 600,
+        height: 400,
+        bar: {groupWidth: "95%"},
+        legend: { position: "none" },
+      };
+      var chart = new google.visualization.BarChart(elementID);
+      chart.draw(view, options);
+}
 
 $('#show_statistics').click(function(){ 
 
@@ -430,7 +510,7 @@ function makeGarageTableList(garage_data, tbody){
                 if(access_priority=="attendant" || access_priority=="owner") {
                     tr1 = $('<tr></tr>').addClass('tableRow').appendTo(tbody);
                     tr2 = $('<tr></tr>').addClass('tableRow').appendTo(tbody);   
-                    $('<td rowspan="2">' + arr.garageName + '</td>').appendTo(tr1); 
+                    $('<td rowspan="2" valign="middle">' + arr.garageName + '</td>').appendTo(tr1); 
                 } else {
                     tr1 = $('<tr></tr>').addClass('tableRow').appendTo(tbody);
                     $('<td>' + arr.garageName + '</td>').appendTo(tr1); 
