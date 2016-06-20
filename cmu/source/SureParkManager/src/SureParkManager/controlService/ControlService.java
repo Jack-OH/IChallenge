@@ -9,10 +9,12 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 public class ControlService extends Thread {
-	public static final int kConnectionRetryCount = 3;
+	public static final int kConnectionRetryCount = 2;
 	
 	private ArrayList<FacilityClientInfo> mClientInfo = new ArrayList<FacilityClientInfo>();
 	private IManagementFacility mgrFacility = null;
+	private boolean isNewGarageAdded = false;
+	private int newFacilityId = 0;
 	
 	public ControlService(IManagementFacility mgrFacility) throws Exception {
 
@@ -25,17 +27,13 @@ public class ControlService extends Thread {
 			 info.ip = gInfo.ip;
 			 info.facilityId = gInfo.id;
 			 mClientInfo.add(info);
-			 
-
-			 
-			 //createClient(info, info.ip, 5001, info.facilityId); 
 		 }
 		 
 	}
 
 	public boolean createClient(FacilityClientInfo info, String host, int port, int facilityId) throws Exception {
 		try {
-			System.out.println("IP : " + host);
+			System.out.println("Try to connect IP : " + host);
 			info.mClientSocket = new Socket(host, port);
 			System.out.println("connected to serer");
 			
@@ -58,25 +56,11 @@ public class ControlService extends Thread {
 	}
 	
 	public void addFacility(int facilityId) throws Exception {
-		 SureParkConfig config = SureParkConfig.getInstance();
-        
-		 FacilityClientInfo info = new FacilityClientInfo();
-		 GarageInfo gInfo = config.getGarageInfoFromGarageID(facilityId);
-		 info.ip = gInfo.ip;
-		 info.facilityId = gInfo.id;
-		 mClientInfo.add(info);
-		 
-		 System.out.println("add facility id=" + info.facilityId);
-	}
-	
-	public void deleteFacility(int facilityId) {
 		
-		for( FacilityClientInfo i : mClientInfo ) {
-			if( i.facilityId == facilityId ) {
-				mClientInfo.remove(i);
-				break;
-			}
-		}
+		//mAddFacilityQueue.add(facilityId);
+		newFacilityId = facilityId;
+		System.out.println("add facility id=" + facilityId);
+		isNewGarageAdded = true;
 	}
 	
 	public void openEntryGate(int facilityId, int slotIndex ) {
@@ -102,6 +86,17 @@ public class ControlService extends Thread {
 		try{
 			while(!isInterrupted() ) {
 				
+				if( isNewGarageAdded ) {
+					 SureParkConfig config = SureParkConfig.getInstance();				        
+					 FacilityClientInfo info = new FacilityClientInfo();
+					 GarageInfo gInfo = config.getGarageInfoFromGarageID(newFacilityId);
+					 info.ip = gInfo.ip;
+					 info.facilityId = gInfo.id;
+					 mClientInfo.add(info);
+					 isNewGarageAdded = false;
+				}
+			
+				// connection
 				for( FacilityClientInfo info : mClientInfo ) {
 					if( info.needtocheck == false && info.mClientSocket == null ) {
 						int retryCount = kConnectionRetryCount;

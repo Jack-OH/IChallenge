@@ -3,30 +3,25 @@ package sureParkManager.controlService;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import sureParkManager.common.GarageInfo;
-import sureParkManager.common.ReservationInfo;
 import sureParkManager.common.SureParkConfig;
 import sureParkManager.managementService.IManagementFacility;
-import sureParkManager.managementService.ManagementDBTransaction;
 
 public class FacilityPacketReader extends Thread {
 	
+	public static final int kHeartBeatWatingTime = 20; 
 	private BufferedReader mIn = null;
 	private FacilityClientInfo mInfo = null;
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	volatile private ScheduledFuture<?> noPacketHandle;
 	private IManagementFacility mgrFacility = null;
 	private boolean isFirstStatus = true;
-	private boolean isParkingCar = false;
 	private int parkingSlotIndex = -1;
-	private int changedSlotIndex = -1;
 	
 	
 	public FacilityPacketReader(FacilityClientInfo info) throws IOException {
@@ -40,8 +35,6 @@ public class FacilityPacketReader extends Thread {
 	
 	public void setParkingSlotIndex( int slot ) {
 		parkingSlotIndex = slot;
-		if( parkingSlotIndex >= 0 )
-			isParkingCar = true;
 	}
 	
 	
@@ -52,18 +45,20 @@ public class FacilityPacketReader extends Thread {
 		}
 		
 		int length = packet.length();		
-		String strGarageId = packet.substring(1, 5);
-		int id = Integer.valueOf(strGarageId);
+		//String strGarageId = packet.substring(1, 5);
+		//int id = Integer.valueOf(strGarageId);
+		
+		System.out.println(packet);
 		
 		if( length > 5 ) {
 			String strCode = packet.substring(5, 6);
 			
-			System.out.println("code=" + strCode + ", GarageId=" + id );
+			//System.out.println("code=" + strCode + ", GarageId=" + id );
 			
 			if( strCode.equals("S") ) {
 				// Slot Status
 				String slotStatus = packet.substring(6, length);
-				System.out.println(slotStatus);
+				//System.out.println(slotStatus);
 				
 				SureParkConfig c = SureParkConfig.getInstance();
 				GarageInfo info = c.getGarageInfoFromGarageID(mInfo.facilityId);
@@ -74,45 +69,42 @@ public class FacilityPacketReader extends Thread {
 					if( isFirstStatus ) {
 						// Initial
 						mgrFacility.updateSlotStatus(mInfo.facilityId, i, status);
-					} else if ( isParkingCar && status != info.slotStatus.get(i) ) {
-						
-						// normal parking a car!! 
-						if( i == parkingSlotIndex ) {
-							mgrFacility.updateSlotStatus(mInfo.facilityId, i, status);
-							System.out.println("--------> normal parking slotid=" + i);
-						} else {
-						// wrong parking a car!!
-							mgrFacility.updateWrongParking(mInfo.facilityId, i);
-							System.out.println("--------> wrong parking slotid=" + i);
-						}
-						changedSlotIndex = i;
 					} else if ( status != info.slotStatus.get(i) ) {
+
 						mgrFacility.updateSlotStatus(mInfo.facilityId, i, status);
-						changedSlotIndex = i;
+						
+						if( status == 1 ) {
+							// parking a car!!
+							if( i == parkingSlotIndex ) {
+								System.out.println("--------> normal parking slotid=" + i);
+							} else {
+								mgrFacility.updateWrongParking(mInfo.facilityId, i);
+								System.out.println("--------> wrong parking slotid=" + i);
+							}
+							
+						} else {
+							// leaving a garage!!
+							mgrFacility.leaveWithParking(mInfo.facilityId, i);
+							System.out.println("------------> leave garage slotid=" + i);
+						}
 					}
-				}
+				} //end for
 				
 				isFirstStatus = false;
-				isParkingCar = false;
 				parkingSlotIndex = -1;
 				
 			} else if( strCode.equals("X") ) {
 				
-				System.out.println("eXit Car");
+				System.out.println("eXit Car");				
+				String strExitCode = packet.substring(6, 7);
 				
-				if( isParkingCar ) {
+				if( strExitCode.equals("2") && parkingSlotIndex >= 0 ) {
+					// bypass a car! no parking
 					System.out.println("----------> bypass slotid=" + parkingSlotIndex);
 					mgrFacility.leaveWithoutParking(mInfo.facilityId, parkingSlotIndex);
-					isParkingCar = false;
-					parkingSlotIndex = -1;					
-				} else if ( changedSlotIndex >= 0 ) {
-					mgrFacility.leaveWithParking(mInfo.facilityId, changedSlotIndex);
-					System.out.println("------------> leave garage slotid=" + changedSlotIndex);
-					changedSlotIndex = -1;
-				} 				
+					parkingSlotIndex = -1;
+				}
 				
-				
-
 			} else {
 				// Invalid Packet
 				System.out.println("invalid packet. no code ");
@@ -150,8 +142,6 @@ public class FacilityPacketReader extends Thread {
 				String message = mIn.readLine();
 				if( message == null ) break;
 				
-				//System.out.println(message + ", length=" + message.length());
-				
 				if( message.length() > 0 ) {
 					parse(message);
 					
@@ -159,7 +149,7 @@ public class FacilityPacketReader extends Thread {
 						noPacketHandle.cancel(true);
 					}
 					
-					noPacketHandle = scheduler.schedule(handler, 20, TimeUnit.SECONDS);
+					noPacketHandle = scheduler.schedule(handler, kHeartBeatWatingTime, TimeUnit.SECONDS);
 				}
 			}
 			
@@ -173,9 +163,7 @@ public class FacilityPacketReader extends Thread {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			// ¼­¹ö Ä¿³Ø¼Ç ²÷¾îÁú¶§ È£ÃâµÊ. 
-			//ioe.printStackTrace();
+			 //ioe.printStackTrace();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -20,7 +20,6 @@ public class FacilityPacketWriter extends Thread {
 
 	}
 	
-	
 	public void sendInformation() throws Exception {
 		//$0001I4\n
 		SureParkConfig c = SureParkConfig.getInstance();
@@ -64,6 +63,7 @@ public class FacilityPacketWriter extends Thread {
 		try {
 			while (!isInterrupted()) {
 				String message = (String) mMessageQueue.take();
+				System.out.println("send packet=" + message);
 				if( message != null ) {
 					mOut.write(message, 0, message.length());
 					mOut.flush();					
