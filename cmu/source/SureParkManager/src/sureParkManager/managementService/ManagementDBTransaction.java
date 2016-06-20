@@ -268,6 +268,23 @@ public class ManagementDBTransaction {
         return ret;
     }
 
+    public String getGarageName(int garageID) {
+        String ret = null;
+
+        DBCollection coll = db.getCollection("garages");
+
+        BasicDBObject whereQuery = new BasicDBObject("garageNumber", garageID);
+        DBCursor cursor = coll.find(whereQuery);
+
+        if (cursor.hasNext()) {
+            DBObject dbObj = cursor.next();
+
+            ret = (String) dbObj.get("garageName");
+        }
+
+        return ret;
+    }
+
     public boolean parkingCar(String str, int garageID, int slot) {
         boolean ret = false;
 
@@ -404,7 +421,22 @@ public class ManagementDBTransaction {
 
             coll.update(whereQuery, updateQuery);
         }
+    }
 
+    public void setFacilityAvailable(int garageID, boolean isAvail) {
+        DBCollection coll = db.getCollection("garages");
+
+        BasicDBObject whereQuery = new BasicDBObject();
+
+        whereQuery.append("garageNumber", garageID);
+
+        DBCursor cursor = coll.find(whereQuery);
+
+        if (cursor.hasNext()) {
+            BasicDBObject updateQuery = new BasicDBObject("$set", new BasicDBObject("isAvailable", isAvail));
+
+            coll.update(whereQuery, updateQuery);
+        }
     }
 
 	public void disconnectDB() throws Exception {

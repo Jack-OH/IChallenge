@@ -16,12 +16,15 @@ public class ManagementFacility implements IManagementFacility {
 	// CS -> MS
 	public void updateSlotStatus(int garageID, int slotIdx, int slotStatus)  throws Exception
 	{
+        ManagementDBTransaction mgtDB = ManagementDBTransaction.getInstance();
 		SureParkConfig config = SureParkConfig.getInstance();
+
 		config.setGarageSlotState(garageID, slotIdx, slotStatus);
 
 		JSONObject jsonObject = new JSONObject();
         JSONObject jsonObject1 = new JSONObject();
 
+        jsonObject1.put("garageName", mgtDB.getGarageName(garageID));
         jsonObject1.put("garageNumber", garageID);
 
 		jsonObject.put("updateSlotStatus", jsonObject1);
@@ -33,21 +36,28 @@ public class ManagementFacility implements IManagementFacility {
 	
 	// CS -> MS
 	public void setFacilityFailure(int garageID, boolean isFail) throws Exception {
-		if (isFail)
-			System.out.println("EVENT : " + garageID +" facility is broken...");
-		else
-			System.out.println("EVENT : " + garageID +" facility is fixed...");
+        ManagementDBTransaction mgtDB = ManagementDBTransaction.getInstance();
 
-		JSONObject jsonObject = new JSONObject();
-        JSONObject jsonObject1 = new JSONObject();
-        jsonObject1.put("garageNumber", garageID);
+        mgtDB.setFacilityAvailable(garageID, !isFail);
 
-		jsonObject.put("detectFailure", jsonObject1);
+		if (isFail) {
+            System.out.println("EVENT : " + garageID + " facility is broken...");
 
-        System.out.println(jsonObject.toJSONString());
+            JSONObject jsonObject = new JSONObject();
+            JSONObject jsonObject1 = new JSONObject();
 
-		comm.broadcast(jsonObject.toJSONString() + "\n");
+            jsonObject1.put("garageName", mgtDB.getGarageName(garageID));
+            jsonObject1.put("garageNumber", garageID);
 
+            jsonObject.put("detectFailure", jsonObject1);
+
+            System.out.println(jsonObject.toJSONString());
+
+            comm.broadcast(jsonObject.toJSONString() + "\n");
+        }
+		else {
+            System.out.println("EVENT : " + garageID + " facility is fixed...");
+        }
 	}
 
     public void updateWrongParking(int garageID, int slotIdx) throws Exception {
@@ -57,6 +67,7 @@ public class ManagementFacility implements IManagementFacility {
 
         JSONObject jsonObject = new JSONObject();
         JSONObject jsonObject1 = new JSONObject();
+        jsonObject1.put("garageName", mgtDB.getGarageName(garageID));
         jsonObject1.put("garageNumber", garageID);
 
         jsonObject.put("wrongParking", jsonObject1);
