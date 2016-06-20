@@ -37,8 +37,8 @@ public class FacilityPacketWriter extends Thread {
 	}
 	
 	public void request2openEntryGate() {
-		//$0001G1\n
-		String packet = String.format("$%04dG1\n", mInfo.facilityId);
+		//$0001E1\n
+		String packet = String.format("$%04dE1\n", mInfo.facilityId);
 
 		try {
 			mMessageQueue.put(packet);

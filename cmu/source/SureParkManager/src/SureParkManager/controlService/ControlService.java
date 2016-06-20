@@ -84,6 +84,7 @@ public class ControlService extends Thread {
 			if( i.facilityId == facilityId ) {
 				i.mfWriter.request2openEntryGate();
 				i.mfWriter.request2turnOnStallLED(slotIndex);
+				i.mfReader.setParkingSlotIndex(slotIndex);
 				break;
 			}
 		}
