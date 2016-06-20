@@ -63,6 +63,7 @@ long  Stall4SensorValOffset;
 int EntryBeamState;
 int ExitBeamState;
 int	heartBitCount;
+//int	ExitTimer;
 
 Servo EntryGateServo;
 Servo ExitGateServo;
@@ -106,6 +107,7 @@ SP_STALL_LED sp_stall_led;
 
 long StallSensorValAvg[4]={0,};
 char f_stallStateChange = 0; 
+char f_stallStateChange_save = 0;
 
 void setup() 
 { 
@@ -243,19 +245,19 @@ char ExitCheck(void)
 
 void LED_ControlEntry(void)
 {
-	int delayvalue = 0;
+	//int delayvalue = 0;
 
 	if(EntryCheck()==1 && sp_gate_state.entry == 1){ //detected customer!!
 		Serial.println( "Turn on entry green LED" );
 		digitalWrite(EntryGateGreenLED, LOW);
-		delay( delayvalue );
+		//delay( delayvalue );
 		digitalWrite(EntryGateRedLED, HIGH);
 	}
 	else
 	{
 		Serial.println( "Turn on entry red LED" );
 		digitalWrite(EntryGateRedLED, LOW);
-		delay( delayvalue );
+		//delay( delayvalue );
 		digitalWrite(EntryGateGreenLED, HIGH);
 	}
 }
@@ -364,20 +366,20 @@ void StallSensor(void)
 	Serial.print("  Stall 4 offset = ");
 	Serial.println(Stall4SensorValOffset);  
 	 
-	if(Stall1SensorValOffset - StallSensorValAvg[0] >= 15) 
+	if(Stall1SensorValOffset - StallSensorValAvg[0] >= 30) 
 	{
 		sp_stall_state.s1 = 1;  
 		
 	}
 	else sp_stall_state.s1 = 0;  
 	
-	if(Stall2SensorValOffset - StallSensorValAvg[1] >= 15) 
+	if(Stall2SensorValOffset - StallSensorValAvg[1] >= 30) 
 	{
 		sp_stall_state.s2 = 1; 
 	}
 	else sp_stall_state.s2 = 0;   
 	
-	if(Stall3SensorValOffset - StallSensorValAvg[2] >= 15) 
+	if(Stall3SensorValOffset - StallSensorValAvg[2] >= 30) 
 	{
 		sp_stall_state.s3 = 1;  
 	}
@@ -444,36 +446,49 @@ void EntryServo(void)
 		
 		Serial.println( "Open Entry Gate" );   //Here we open the entry gate
 		EntryGateServo.write(Open);
-		delayvalue = 1000;
+		//delayvalue = 1000;
 		//delay( delayvalue );
+	}
+	else if(f_stallStateChange == 1)
+	{
+		//delay( delayvalue );
+		//if(delayvalue == 1000)	sp_gate_state.entry = 0;
+		//delayvalue = 0;
+		Serial.println( "Close Entry Gate" );  //Here we close the entry gate
+		EntryGateServo.write(Close);		
 	}
 	else
 	{
-		delay( delayvalue );
-		if(delayvalue == 1000)	sp_gate_state.entry = 0;
-		delayvalue = 0;
-		Serial.println( "Close Entry Gate" );  //Here we close the entry gate
-		EntryGateServo.write(Close);		
+		
 	}
 }
 
 void ExitServo(void)
 {
-	static int delayvalue = 0;
+	static char f_closeAfterOpen = 0;
+	static int ExitTimer = 0;
 	if(ExitCheck()==1)	
 	{
 		Serial.println( "Open Exit Gate" );    //Here we open the exit gate
 		ExitGateServo.write(Open);
 		//delay( delayvalue );
-		delayvalue = 1000;
+		f_closeAfterOpen = 1;
+		EntryGateServo.write(Close);
+		sp_gate_state.entry = 0;
+		ExitTimer = 0;
 	}
 	else
 	{ 
-		delay( delayvalue ); 
-		delayvalue = 0;
-		Serial.println( "Close Exit Gate" );   //Here we close the exit gate
-		ExitGateServo.write(Close);
-		delay( delayvalue );
+		if(ExitTimer >= 5)
+		{
+			//delay( delayvalue ); 
+			if(f_closeAfterOpen == 1)	f_stallStateChange_save = 0;
+			f_closeAfterOpen = 0;
+			Serial.println( "Close Exit Gate" );   //Here we close the exit gate
+			ExitGateServo.write(Close);
+			//delay( delayvalue );
+		}
+		ExitTimer++;
 	}
 }
 
@@ -536,7 +551,7 @@ void Comm(void)
 					//Serial.println(inChar);  
 				}
 			}
-			if(readEnable == 1)
+			if(readEnable == 1) //receive
 			{
 				inChar = client.read();
 				if(firstConnect == 0){
@@ -573,6 +588,16 @@ void Comm(void)
 			  			Serial.println(inChar);
 			  			Serial.println("=============================="); 
 			  			stallNum = inChar - '0';
+			  			
+			  			strcpy(temp,spID); //initial stall state
+			        	temp[5] = 'S';
+			        	temp[6] = '0'+sp_stall_state.s1;
+			        	temp[7] = '0'+sp_stall_state.s2;
+			        	temp[8] = '0'+sp_stall_state.s3;
+			        	temp[9] = '0'+sp_stall_state.s4;
+			        	temp[10] = '\n';
+			        	client.println(temp);
+			        	
 			        	break; 
 			        
 			        case 'L':    
@@ -589,7 +614,7 @@ void Comm(void)
 			        	Serial.println(sp_stall_num.s4);
 			       		break; 
 			        
-			        case 'G':
+			        case 'E': //Entry Gate Commend
 			        	Serial.println("==============================");
 			        	if(inChar - '0' == 1)	sp_gate_state.entry = 1;
 			        	if(sp_gate_state.entry == 1) 	Serial.println("Received : Entry Gate Open");
@@ -639,23 +664,74 @@ void Comm(void)
      	
     }    
 
-	if(f_stallStateChange == 1 || heartBitCount >= 5)//heartbit send every about 3sec
+	if(ExitCheck() == 1) // broken
 	{
-		//client.flush();
-		//Serial.println(temp);
 		strcpy(temp,spID);
-		//Serial.println(temp); 
+		temp[5] = 'X';
+		if(f_stallStateChange_save == 1)	
+		{
+			temp[6] = '1'; //exitgate OPEN 0 close, 1 open, 2 bypass open
+		}
+		else	temp[6] = '2';
+		temp[7] = '0';
+		temp[8] = '0';
+		temp[9] = '0';
+		temp[10] = '0';	
+		
+		client.println(temp);
+		Serial.println("===========Gatechange===================");
+		Serial.println(temp); 
+		Serial.println("===========Gatechange===================");
+		
 		temp[5] = 'S';
 		temp[6] = '0'+sp_stall_state.s1;
 		temp[7] = '0'+sp_stall_state.s2;
 		temp[8] = '0'+sp_stall_state.s3;
 		temp[9] = '0'+sp_stall_state.s4;
-		temp[10] = '\n';
+		temp[10] = '\n';		
+		
 		client.println(temp);
 		Serial.println("===========statechange or heartbit===================");
 		Serial.println(temp); 
 		Serial.println("===========statechange or heartbit===================");
-		f_stallStateChange = 0;
+		
+		sp_stall_num.s1 = 0; //led
+		sp_stall_num.s2 = 0;
+		sp_stall_num.s3 = 0;
+		sp_stall_num.s4 = 0;
+	}
+	if(f_stallStateChange == 1 || heartBitCount >= 17)//heartbit send every about 10sec & send data
+	{
+		//client.flush();
+		//Serial.println(temp);
+		strcpy(temp,spID);
+		//Serial.println(temp); 
+		if(f_stallStateChange == 1)
+		{
+			temp[5] = 'S';
+			temp[6] = '0'+sp_stall_state.s1;
+			temp[7] = '0'+sp_stall_state.s2;
+			temp[8] = '0'+sp_stall_state.s3;
+			temp[9] = '0'+sp_stall_state.s4;
+			temp[10] = '\n';
+			EntryServo();
+			f_stallStateChange_save = f_stallStateChange;
+			f_stallStateChange = 0;			
+		}
+		else
+		{
+			temp[5] = '\n';
+			temp[6] = 0;
+			temp[7] = 0;
+			temp[8] = 0;
+			temp[9] = 0;
+			temp[10] = 0;
+		}
+
+		client.println(temp);
+		Serial.println("===========statechange or heartbit===================");
+		Serial.println(temp); 
+		Serial.println("===========statechange or heartbit===================");
 		//Serial.println(heartBitCount); 
 		heartBitCount = 0;
 	}
@@ -667,6 +743,10 @@ void heartBit(void)
 {
 	heartBitCount++;
 	if(heartBitCount>=100)	heartBitCount = 0;
+	
+	//ExitTimer++;
+	//if(ExitTimer>=100)	ExitTimer = 0;
+	
 }
 
 /*********************************************************************
