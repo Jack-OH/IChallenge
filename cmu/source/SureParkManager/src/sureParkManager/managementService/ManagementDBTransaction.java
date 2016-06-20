@@ -354,9 +354,14 @@ public class ManagementDBTransaction {
                 double parkingFee = (int)dbObj.get("parkingFee");
 
                 long diff = leaveTime.getTime() - parkingTime.getTime();
-                long diffHour = diff / (30 * 60 * 1000); // Calculate a half hour unit.
+                long diffMin = diff / (60 * 1000); // Calculate a minute unit.
+                int chargingFee = 0;
 
-                int chargingFee = (int)(parkingFee/2 * (diffHour+1)); // per 30 min..
+                if ((diffMin % 30) != 0) {
+                    chargingFee = (int) (parkingFee / 2 * ((diffMin/30)+1)); // per 30 min..
+                } else {
+                    chargingFee = (int) (parkingFee / 2 * (diffMin/30)); // per 30 min..
+                }
 
                 BasicDBObject updateQuery = new BasicDBObject();
                 BasicDBObject updateObj = new BasicDBObject();
@@ -369,7 +374,15 @@ public class ManagementDBTransaction {
 
                 coll.update(whereQuery, updateQuery);
 
-                System.out.println("Charging Fee is $"+chargingFee);
+                System.out.println("Charging Fee is $" + chargingFee);
+
+                MailService mail = new MailService();
+
+                try {
+                    mail.sendCharginFeeMail("acmoleg@gmailc.com", chargingFee);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
             } catch (ParseException e) {
                 e.printStackTrace();
@@ -404,15 +417,14 @@ public class ManagementDBTransaction {
         }
     }
 
-    public void updatePakingSlot(int garageID, int slot) throws Exception {
+    public void updatePakingSlot(int garageID, int slot, String lastConfirmInfo) throws Exception {
         DBCollection coll = db.getCollection("reservations");
-        SureParkConfig config = SureParkConfig.getInstance();
 
         BasicDBObject whereQuery = new BasicDBObject();
 
         whereQuery.append("reservationStatus", "parked");
         whereQuery.append("usingGarageNumber", garageID);
-        whereQuery.append("confirmInformation", config.getLastConfirmInfo());
+        whereQuery.append("confirmInformation", lastConfirmInfo);
 
         DBCursor cursor = coll.find(whereQuery);
 

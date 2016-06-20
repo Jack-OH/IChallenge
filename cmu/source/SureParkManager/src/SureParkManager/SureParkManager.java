@@ -1,15 +1,12 @@
 package sureParkManager;
 
-import sureParkManager.managementService.IManagementFacility;
-import sureParkManager.managementService.ManagementFacility;
+import sureParkManager.managementService.*;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 import sureParkManager.common.SureParkConfig;
 import sureParkManager.controlService.ControlService;
-import sureParkManager.managementService.ManagementServer;
-import sureParkManager.managementService.NoShowManager;
 
 public class SureParkManager {
 
@@ -48,7 +45,9 @@ public class SureParkManager {
         
         config.printGarageList();
         */
-        
+
+        MailService mail = new MailService();
+
         // It's test for Open gate
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         while (true) {
@@ -61,6 +60,9 @@ public class SureParkManager {
                 mgtFacility.setFacilityFailure(1001, false);
             } else if(message.equals("1")) {
                 mgtFacility.setFacilityFailure(1001, true);
+            } else if(message.equals("9")) {
+                mail.sendCharginFeeMail("acmoleg@gmail.com", 40);
+                System.out.println("charged");
 			} else if(message.equals("EXIT")) {
 				ctlService.interrupt();
 				break;

@@ -62,11 +62,13 @@ public class ManagementFacility implements IManagementFacility {
 
     public void updateWrongParking(int garageID, int slotIdx) throws Exception {
         ManagementDBTransaction mgtDB = ManagementDBTransaction.getInstance();
+        SureParkConfig config = SureParkConfig.getInstance();
 
-        mgtDB.updatePakingSlot(garageID, slotIdx);
+        mgtDB.updatePakingSlot(garageID, slotIdx, config.getLastConfirmInfo());
 
         JSONObject jsonObject = new JSONObject();
         JSONObject jsonObject1 = new JSONObject();
+
         jsonObject1.put("garageName", mgtDB.getGarageName(garageID));
         jsonObject1.put("garageNumber", garageID);
 
