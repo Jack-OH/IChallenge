@@ -11,14 +11,14 @@ import java.util.concurrent.Executors;
 
 public class ManagementServer extends Thread {
 	// Definitions
-	static final int kNoError        = 0;
-	static final int kNoClientSocket = -8000;
-	static final int kNoConnection   = -8001;
+	public static final int kNoError        = 0;
+    public static final int kNoClientSocket = -8000;
+    public static final int kNoConnection   = -8001;
 
 	// Attributes
 	private static ManagementServer instance = null;
 	private static ServerSocket serverSocket = null;
-	final int portNum = 3333;
+	private final int portNum = 3333;
 
     private static ManagementServer mgtServer;
 
@@ -28,7 +28,7 @@ public class ManagementServer extends Thread {
      */
     private ExecutorService executorService = Executors.newFixedThreadPool(10);
 
-    ControlService ctlService = null;
+    private ControlService ctlService = null;
 
 	public ManagementServer() {
 	}

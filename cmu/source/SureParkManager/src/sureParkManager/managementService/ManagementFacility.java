@@ -7,7 +7,7 @@ import sureParkManager.common.SureParkConfig;
 import java.io.IOException;
 
 public class ManagementFacility implements IManagementFacility {
-	ManagementComm comm = null;
+	private ManagementComm comm = null;
 
 	public ManagementFacility() throws IOException {
 		comm = new ManagementComm();

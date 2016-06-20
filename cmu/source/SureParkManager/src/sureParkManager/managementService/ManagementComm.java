@@ -17,10 +17,10 @@ import java.util.Vector;
  */
 public class ManagementComm extends Thread {
     private Socket clientSocket = null;
-    ControlService ctlService = null;
+    private ControlService ctlService = null;
 
-    BufferedReader in = null;
-    BufferedWriter out = null;
+    private BufferedReader in = null;
+    private BufferedWriter out = null;
 
     protected static Vector handlers = new Vector ();
 
