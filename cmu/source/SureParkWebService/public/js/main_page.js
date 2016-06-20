@@ -99,9 +99,9 @@ $('#makeReserveDoneBtn').click(function(){
                             }
                             else {
                                 console.log(resdata);
-                                location.reload();
+                                
                                 showPopup("Reservation Info.", "Your reservation id is " + 
-                                                confirmInformation + "Don't forget it!!" );
+                                                confirmInformation + "  Don't forget it!!" );
                                 
                             }
                         });
@@ -148,10 +148,6 @@ $('#confirmReserveDoneBtn').click(function(){
     var query = {"confirmInformation":confirmInfo, "userID":confirmUserID, "usingGarage": usingGarage };
     var parkingCar;
 
-    //$('#myModal').show(0);
-    
-    
-
     $.post("checkReservation", query, function(data) {
         if(data.length===0) {
             alert("Please check your reservation information ...");
@@ -169,7 +165,7 @@ $('#confirmReserveDoneBtn').click(function(){
                         }
                         else {
                             console.log(resdata);
-                            location.reload();
+                            showPopup("Confirm your reservation", "Successfully verified your reservation" );
                         }
                     });
 
@@ -224,14 +220,14 @@ $('#addGarageDoneBtn').click(function(){
         if(data.length > 0) {
             data.forEach(function(item){
                 console.log(item);
-                if(item.garageID > garageID) {
-                    garageID = item.garageID;
+                if(item.garageNumber > garageID) {
+                    garageID = item.garageNumber;
                 }
             });
             garageID++; 
         }
 
-        newGarage = {"newGarage": {"garageName":garageName, "garageID":garageID, "slotNumber":numberOfSlots, "slotStatus":slotStatus, 
+        newGarage = {"newGarage": {"garageName":garageName, "garageNumber":garageID, "slotNumber":numberOfSlots, "slotStatus":slotStatus, 
                       "gracePeriod":gracePeriod, "parkingFee":parkingFee, "garageIP":garageIP, "isAvailable":true}};
 
         console.log(newGarage);
@@ -242,7 +238,6 @@ $('#addGarageDoneBtn').click(function(){
             }
             else {
                 console.log(resdata);
-                location.reload();
                 showPopup("Adding new garage", "Successfully added your garage." );
             }
 
@@ -256,6 +251,10 @@ $('#addGarageCancelBtn').click(function(){
     if($('#addNewGarage').is(':visible')){
         $('#addNewGarage').slideUp('slow');
     }
+});
+
+$("#myModal_close").click(function(){
+   location.reload();
 });
 
 
