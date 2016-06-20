@@ -102,7 +102,7 @@ public class FacilityPacketReader extends Thread {
 				
 				if( isParkingCar ) {
 					System.out.println("----------> bypass slotid=" + parkingSlotIndex);
-					mgrFacility.leaveWithoutParking(mInfo.facilityId, changedSlotIndex);
+					mgrFacility.leaveWithoutParking(mInfo.facilityId, parkingSlotIndex);
 					isParkingCar = false;
 					parkingSlotIndex = -1;					
 				} else if ( changedSlotIndex >= 0 ) {
