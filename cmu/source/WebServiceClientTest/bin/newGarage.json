@@ -1,0 +1,17 @@
+{
+    "newGarage": {
+	    "garageName": "Sure-Park",
+	    "garageNumber": "1002",
+	    "slotNumber": "4",
+	    "slotStatus": [
+	        "Open",
+	        "Open",
+	        "Open",
+	        "Open"
+	    ],
+	    "gracePeriod": "90",
+	    "parkingFee": "5",
+	    "garageIP": "192.168.1.4",
+	    "isAvailable": true
+	}
+}
