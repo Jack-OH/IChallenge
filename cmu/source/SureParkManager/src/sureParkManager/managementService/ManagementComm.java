@@ -61,7 +61,11 @@ public class ManagementComm extends Thread {
             config.updateGarageInfo(); // update from DB
 
             // Notify Garage Info updated.
-            ctlService.addFacility(Integer.parseInt((String)subJsonObject.get("garageNumber")));
+            try {
+                ctlService.addFacility(Integer.parseInt((String) subJsonObject.get("garageNumber")));
+            } catch (Exception e){
+                System.out.println("Cannot add facility");
+            }
         }
 
         subJsonObject = (JSONObject) jsonObject.get("newReservation");
@@ -101,16 +105,23 @@ public class ManagementComm extends Thread {
                         System.out.println("Garage ID " + garageID + ", Empty slot number is " + slot);
 
                         // open gate
-                        ctlService.openEntryGate(garageID, slot);
+                        try {
+                            ctlService.openEntryGate(garageID, slot);
 
-                        SureParkConfig config = SureParkConfig.getInstance();
+                            SureParkConfig config = SureParkConfig.getInstance();
 
-                        config.setLastConfirmInfo((String)subJsonObject.get("confirmInformation"));
+                            config.setLastConfirmInfo((String)subJsonObject.get("confirmInformation"));
 
-                        retJsonObj.put("parkingCar", "OK");
+                            retJsonObj.put("parkingCar", "OK");
+                        } catch (Exception e) {
+                            System.err.println("Cannot control facility!!!");
+                            retJsonObj.put("parkingCar", "FAIL");
+                        }
                     }
                     else
+                    {
                         retJsonObj.put("parkingCar", "FAIL");
+                    }
                 }
             }
         }
