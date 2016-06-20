@@ -29,7 +29,7 @@ public class NoShowManager extends Thread {
 						reserveTime.setTime(r.reservationTime);
 						reserveTime.add(Calendar.MINUTE, r.gracePeriod);
 						now.setTimeInMillis(System.currentTimeMillis());
-						System.out.println("now=" + now.getTime() + ", gracePeriod=" + r.gracePeriod);		
+						System.out.println("reserve=" + reserveTime.getTime() + ", now=" + now.getTime() + ", gracePeriod=" + r.gracePeriod);
 
 						if( now.after(reserveTime) ) {
 							mgrDB.cancelReservation(r.confirmInformation);

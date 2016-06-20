@@ -61,7 +61,7 @@ public class ManagementComm extends Thread {
             config.updateGarageInfo(); // update from DB
 
             // Notify Garage Info updated.
-            ctlService.addFacility((int)subJsonObject.get("garageName"));
+            ctlService.addFacility(Integer.parseInt((String)subJsonObject.get("garageNumber")));
         }
 
         subJsonObject = (JSONObject) jsonObject.get("newReservation");

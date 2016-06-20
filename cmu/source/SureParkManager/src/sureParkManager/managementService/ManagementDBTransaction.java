@@ -108,12 +108,10 @@ public class ManagementDBTransaction {
 
         doc.append("userID", dbObject.get("userID"));
 
-//        String formatted = (String)dbObject.get("reservationTime");
         String strDate = (String)dbObject.get("reservationTime");
         System.out.println(strDate);
         Date date = format.parse(strDate);
         doc.append("reservationTime", date);
-//        doc.append("reservationTime", new Date());
         doc.append("cardInfo", dbObject.get("cardInfo"));
         doc.append("confirmInformation", dbObject.get("confirmInformation"));
         doc.append("gracePeriod", Integer.parseInt((String)dbObject.get("gracePeriod")));
@@ -316,12 +314,12 @@ public class ManagementDBTransaction {
             try {
                 Date parkingTime = format.parse(formatted);
                 Date leaveTime = new Date();
-                int parkingFee = (int)dbObj.get("parkingFee");
+                double parkingFee = (int)dbObj.get("parkingFee");
 
                 long diff = leaveTime.getTime() - parkingTime.getTime();
-                long diffHour = diff / (60 * 60 * 1000); // Calculate hour unit.
+                long diffHour = diff / (30 * 60 * 1000); // Calculate a half hour unit.
 
-                int chargingFee = (int)(parkingFee * (diffHour+1)); // per 1 hour..
+                int chargingFee = (int)(parkingFee/2 * (diffHour+1)); // per 30 min..
 
                 BasicDBObject leaveTimeObj = new BasicDBObject("$set", new BasicDBObject("leaveTime", leaveTime));
                 BasicDBObject chargingFeeObj = new BasicDBObject("$set", new BasicDBObject("chargingFee", chargingFee));
