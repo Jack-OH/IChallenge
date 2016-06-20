@@ -84,21 +84,7 @@ public class SureParkConfig {
 			if ( info.id == garageID ) {
 					info.slotStatus.set(slotIdx, slotStatus);
 				
-				mgtDB.updateGarageSlot(info.id, info.slotStatus);
-			}
-		}
-	}	
-	
-	public void setGarageSlotState(int garageID, ArrayList<Integer> slotStatus) throws Exception {
-		ManagementDBTransaction mgtDB = ManagementDBTransaction.getInstance();
-		
-		for (GarageInfo info : this.garageArray) {
-			if ( info.id == garageID ) {
-				for(int i=0; i<info.slotNum; i++) {
-					info.slotStatus.set(i, slotStatus.get(i));
-				}
-				
-				mgtDB.updateGarageSlot(info.id, info.slotStatus);
+				mgtDB.updateGarageSlot(garageID, slotIdx, slotStatus);
 			}
 		}
 	}

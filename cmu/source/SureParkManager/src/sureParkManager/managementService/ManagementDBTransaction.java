@@ -85,12 +85,16 @@ public class ManagementDBTransaction {
         doc.append("garageName", dbObject.get("garageName"));
         doc.append("garageNumber", Integer.parseInt((String)dbObject.get("garageNumber")));
         doc.append("slotNumber", Integer.parseInt((String)dbObject.get("slotNumber")));
-        BasicDBList docList = new BasicDBList();
+        BasicDBList slotStatusList = new BasicDBList();
         for(int i=0; i < Integer.parseInt((String)dbObject.get("slotNumber")); i++) {
-            docList.add("Open");
+            slotStatusList.add("Open");
         }
-        doc.append("slotStatus", docList);
-        doc.append("updateTime", new Date());
+        doc.append("slotStatus", slotStatusList);
+        BasicDBList updateTimeList = new BasicDBList();
+        for(int i=0; i < Integer.parseInt((String)dbObject.get("slotNumber")); i++) {
+            updateTimeList.add(new Date());
+        }
+        doc.append("updateTime", updateTimeList);
         doc.append("gracePeriod", Integer.parseInt((String)dbObject.get("gracePeriod")));
         doc.append("parkingFee", 5);
         doc.append("garageIP", dbObject.get("garageIP"));
@@ -144,22 +148,36 @@ public class ManagementDBTransaction {
 		coll.insert(doc);
 	}
 
-	public void updateGarageSlot(int garageID, ArrayList<Integer> slotStatus) {
+	public void updateGarageSlot(int garageID, int slotIndex, int slotStatus) {
 		DBCollection coll = db.getCollection("garages");
 		GarageInfo garageInfo = new GarageInfo();
-		BasicDBObject statusObj= new BasicDBObject();
-        BasicDBList slotStatusList = new BasicDBList();
-        BasicDBObject updateTimeObj = new BasicDBObject();
 
-    	for(int i=0; i<slotStatus.size();i++) {
-    		slotStatusList.add(garageInfo.GarageSlotStatusIntToString(slotStatus.get(i)));
-    	}
-    	
-    	statusObj.append("$set", new BasicDBObject().append("slotStatus", slotStatusList));
-        updateTimeObj.append("$set", new BasicDBObject().append("updateTime", new Date()));
+        BasicDBObject whereQuery = new BasicDBObject("garageNumber", garageID);
 
-		coll.update(new BasicDBObject().append("garageNumber", garageID), statusObj);
-        coll.update(new BasicDBObject().append("garageNumber", garageID), updateTimeObj);
+        DBCursor cursor = coll.find(whereQuery);
+
+        while(cursor.hasNext()) {
+            DBObject dbObj = cursor.next();
+
+            BasicDBList slotStatusList = new BasicDBList();
+            BasicDBList updateTimeList = new BasicDBList();
+
+            slotStatusList.add(dbObj.get("slotStatus"));
+            slotStatusList.add(slotIndex, garageInfo.GarageSlotStatusIntToString(slotStatus));
+
+            updateTimeList.add(dbObj.get("updateTime"));
+            updateTimeList.add(slotIndex, new Date());
+
+            BasicDBObject updateQuery = new BasicDBObject();
+            BasicDBObject updateObj = new BasicDBObject();
+
+            updateObj.append("slotStatus", slotStatusList);
+            updateObj.append("updateTime", updateTimeList);
+
+            updateQuery.append("$set", updateObj);
+
+            coll.update(whereQuery, updateQuery);
+        }
 	}
 
     public ArrayList<ReservationInfo> getReservationInfo() {
@@ -253,25 +271,26 @@ public class ManagementDBTransaction {
     public boolean parkingCar(String str, int garageID, int slot) {
         boolean ret = false;
 
-        DBObject dbObject = (DBObject) JSON.parse(str);
 
         DBCollection coll = db.getCollection("reservations");
-
+        DBObject dbObject = (DBObject) JSON.parse(str);
         BasicDBObject whereQuery = new BasicDBObject("confirmInformation", dbObject.get("confirmInformation"));
-
-        BasicDBObject rsvStatusObj= new BasicDBObject("$set", new BasicDBObject("reservationStatus", "parked"));
-        BasicDBObject parkingTimeObj = new BasicDBObject("$set", new BasicDBObject("parkingTime", new Date()));
-        BasicDBObject usingGarageIDObj = new BasicDBObject("$set", new BasicDBObject("usingGarageNumber", garageID));
-        BasicDBObject usingSlotObj = new BasicDBObject("$set", new BasicDBObject("usingSlot", slot));
 
         DBCursor cursor = coll.find(whereQuery);
 
         if (cursor.hasNext()) {
 
-            coll.update(whereQuery, rsvStatusObj);
-            coll.update(whereQuery, parkingTimeObj);
-            coll.update(whereQuery, usingGarageIDObj);
-            coll.update(whereQuery, usingSlotObj);
+            BasicDBObject updateQuery = new BasicDBObject();
+            BasicDBObject updateObj = new BasicDBObject();
+
+            updateObj.append("reservationStatus", "parked");
+            updateObj.append("parkingTime", new Date());
+            updateObj.append("usingGarageNumber", garageID);
+            updateObj.append("usingSlot", slot);
+
+            updateQuery.append("$set", updateObj);
+
+            coll.update(whereQuery, updateQuery);
 
             ret = true;
         }
@@ -284,12 +303,13 @@ public class ManagementDBTransaction {
         DBCollection coll = db.getCollection("reservations");
 
         BasicDBObject whereQuery = new BasicDBObject("confirmInformation", confirmInformation);
-        BasicDBObject rsvStatusObj= new BasicDBObject("$set", new BasicDBObject("reservationStatus", "cancelled"));
 
         DBCursor cursor = coll.find(whereQuery);
 
         if (cursor.hasNext()) {
-            coll.update(whereQuery, rsvStatusObj);
+            BasicDBObject updateQuery= new BasicDBObject("$set", new BasicDBObject("reservationStatus", "cancelled"));
+
+            coll.update(whereQuery, updateQuery);
         }
     }
 
@@ -321,13 +341,16 @@ public class ManagementDBTransaction {
 
                 int chargingFee = (int)(parkingFee/2 * (diffHour+1)); // per 30 min..
 
-                BasicDBObject leaveTimeObj = new BasicDBObject("$set", new BasicDBObject("leaveTime", leaveTime));
-                BasicDBObject chargingFeeObj = new BasicDBObject("$set", new BasicDBObject("chargingFee", chargingFee));
-                BasicDBObject reservationStatusObj = new BasicDBObject("$set", new BasicDBObject("reservationStatus", "leaved"));
+                BasicDBObject updateQuery = new BasicDBObject();
+                BasicDBObject updateObj = new BasicDBObject();
 
-                coll.update(whereQuery, leaveTimeObj);
-                coll.update(whereQuery, chargingFeeObj);
-                coll.update(whereQuery, reservationStatusObj);
+                updateObj.append("reservationStatus", "leaved");
+                updateObj.append("leaveTime", leaveTime);
+                updateObj.append("chargingFee", chargingFee);
+
+                updateQuery.append("$set", updateObj);
+
+                coll.update(whereQuery, updateQuery);
 
                 System.out.println("Charging Fee is $"+chargingFee);
 
@@ -351,13 +374,16 @@ public class ManagementDBTransaction {
         if (cursor.hasNext()) {
             Date leaveTime = new Date();
 
-            BasicDBObject reservationStatusObj = new BasicDBObject("$set", new BasicDBObject("reservationStatus", "cancelled"));
-            BasicDBObject chargingFeeObj = new BasicDBObject("$set", new BasicDBObject("chargingFee", 0));
-            BasicDBObject leaveTimeObj = new BasicDBObject("$set", new BasicDBObject("leaveTime", leaveTime));
+            BasicDBObject updateQuery = new BasicDBObject();
+            BasicDBObject updateObj = new BasicDBObject();
 
-            coll.update(whereQuery, leaveTimeObj);
-            coll.update(whereQuery, chargingFeeObj);
-            coll.update(whereQuery, reservationStatusObj);
+            updateObj.append("reservationStatus", "cancelled");
+            updateObj.append("leaveTime", leaveTime);
+            updateObj.append("chargingFee", 0);
+
+            updateQuery.append("$set", updateObj);
+
+            coll.update(whereQuery, updateQuery);
         }
     }
 
@@ -374,9 +400,9 @@ public class ManagementDBTransaction {
         DBCursor cursor = coll.find(whereQuery);
 
         if (cursor.hasNext()) {
-            BasicDBObject slotObj= new BasicDBObject("$set", new BasicDBObject("usingSlot", slot));
+            BasicDBObject updateQuery = new BasicDBObject("$set", new BasicDBObject("usingSlot", slot));
 
-            coll.update(whereQuery, slotObj);
+            coll.update(whereQuery, updateQuery);
         }
 
     }
