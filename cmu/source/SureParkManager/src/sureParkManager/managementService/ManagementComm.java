@@ -172,7 +172,7 @@ public class ManagementComm extends Thread {
                         System.err.println("readLine failed::");
                         break;
                     }
-                    Thread.sleep(1000);
+                    // Thread.sleep(1000);
                 }
             } catch (SocketTimeoutException e) {
                 e.printStackTrace ();

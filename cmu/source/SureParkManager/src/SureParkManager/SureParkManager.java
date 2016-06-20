@@ -9,7 +9,7 @@ import java.io.InputStreamReader;
 import sureParkManager.common.SureParkConfig;
 import sureParkManager.controlService.ControlService;
 import sureParkManager.managementService.ManagementServer;
-import sureParkManager.noshowService.NoShowManager;
+import sureParkManager.managementService.NoShowManager;
 
 public class SureParkManager {
 
