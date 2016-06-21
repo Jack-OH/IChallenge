@@ -95,4 +95,19 @@ public class ManagementFacility implements IManagementFacility {
 
         mgtDB.leaveWithoutParking(garageID, slotIdx);
     }
+
+    public void testUpdateSlotStatus(int garageID)  throws Exception
+    {
+        ManagementDBTransaction mgtDB = ManagementDBTransaction.getInstance();
+
+        JSONObject jsonObject = new JSONObject();
+        JSONObject jsonObject1 = new JSONObject();
+
+        jsonObject1.put("garageName", mgtDB.getGarageName(garageID));
+        jsonObject1.put("garageNumber", garageID);
+
+        jsonObject.put("updateSlotStatus", jsonObject1);
+
+        comm.broadcast(jsonObject.toJSONString() + "\n");
+    }
 }

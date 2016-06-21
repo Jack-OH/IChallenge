@@ -14,7 +14,7 @@ public class SureParkManager {
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+//        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
         SureParkConfig config = SureParkConfig.getInstance();
         config.updateGarageInfo(); // DB update
@@ -63,13 +63,12 @@ public class SureParkManager {
                 mgtFacility.setFacilityFailure(1001, false);
             } else if(message.equals("1")) {
                 mgtFacility.setFacilityFailure(1001, true);
-            } else if(message.equals("9")) {
-                mail.sendCharginFeeMail("acmoleg@gmail.com", 40);
-                System.out.println("charged");
+            } else if(message.equals("u")) {
+                mgtFacility.testUpdateSlotStatus(config.getGarageInfoFromIndex(0).id);
 			} else if(message.equals("EXIT")) {
 				ctlService.interrupt();
 				break;
-			}	
+			}
             // Wait maximum of 1 second
             // for MessageLoop thread
             // to finish.

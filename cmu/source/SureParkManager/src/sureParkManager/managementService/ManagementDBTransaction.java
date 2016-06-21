@@ -78,6 +78,7 @@ public class ManagementDBTransaction {
 	}
 
 	public void addNewGarage(String str) throws Exception {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(simpleDateFormat);
 		DBCollection coll = db.getCollection("garages");
 
 		DBObject dbObject = (DBObject) JSON.parse(str);
@@ -92,7 +93,8 @@ public class ManagementDBTransaction {
         doc.append("slotStatus", slotStatusList);
         BasicDBList updateTimeList = new BasicDBList();
         for(int i=0; i < Integer.parseInt((String)dbObject.get("slotNumber")); i++) {
-            updateTimeList.add(new Date());
+            String updateTime = dateFormat.format(new Date());
+            updateTimeList.add(updateTime);
         }
         doc.append("updateTime", updateTimeList);
         doc.append("gracePeriod", Integer.parseInt((String)dbObject.get("gracePeriod")));
@@ -104,18 +106,13 @@ public class ManagementDBTransaction {
 	}
 
 	public void addNewReservation(String str) throws Exception {
-        SimpleDateFormat format = new SimpleDateFormat(simpleDateFormat);
-		DBCollection coll = db.getCollection("reservations");
+        DBCollection coll = db.getCollection("reservations");
 
 		DBObject dbObject = (DBObject) JSON.parse(str);
 		BasicDBObject doc = new BasicDBObject();
 
         doc.append("userID", dbObject.get("userID"));
-
-        String strDate = (String)dbObject.get("reservationTime");
-        System.out.println(strDate);
-        Date date = format.parse(strDate);
-        doc.append("reservationTime", date);
+        doc.append("reservationTime", dbObject.get("reservationTime"));
         doc.append("cardInfo", dbObject.get("cardInfo"));
         doc.append("confirmInformation", dbObject.get("confirmInformation"));
         doc.append("gracePeriod", Integer.parseInt((String)dbObject.get("gracePeriod")));
@@ -142,13 +139,14 @@ public class ManagementDBTransaction {
         doc.append("userType", dbObject.get("userType"));
         doc.append("userName", dbObject.get("userName"));
         doc.append("userEmail", dbObject.get("userEmail"));
-        doc.append("registerationTime", new Date());
+        doc.append("registerationTime", new Date().toString());
         doc.append("displayName", dbObject.get("displayName"));
 
 		coll.insert(doc);
 	}
 
 	public void updateGarageSlot(int garageID, int slotIndex, int slotStatus) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(simpleDateFormat);
 		DBCollection coll = db.getCollection("garages");
 		GarageInfo garageInfo = new GarageInfo();
 
@@ -165,7 +163,8 @@ public class ManagementDBTransaction {
             slotStatusList.put(slotIndex, garageInfo.GarageSlotStatusIntToString(slotStatus));
 
             updateTimeList = (BasicDBList)dbObj.get("updateTime");
-            updateTimeList.put(slotIndex, new Date());
+            String updateTime = dateFormat.format(new Date());
+            updateTimeList.put(slotIndex, updateTime);
 
             BasicDBObject updateQuery = new BasicDBObject();
             BasicDBObject updateObj = new BasicDBObject();
@@ -192,12 +191,14 @@ public class ManagementDBTransaction {
         while(cursor.hasNext()) {
             DBObject dbObj = cursor.next();
 
-            SimpleDateFormat format = new SimpleDateFormat(simpleDateFormat);
+            SimpleDateFormat dateFormat = new SimpleDateFormat(simpleDateFormat);
 
-			String formatted = format.format(dbObj.get("reservationTime"));
+            String reservationTime = (String)dbObj.get("reservationTime");
+
+            System.out.println(reservationTime);
 
             try {
-                Date date = format.parse(formatted);
+                Date date = dateFormat.parse(reservationTime);
 
 //                System.out.println(date.toString());
 //                System.out.println((int)dbObj.get("gracePeriod"));
@@ -287,6 +288,7 @@ public class ManagementDBTransaction {
     public boolean parkingCar(String str, int garageID, int slot) {
         boolean ret = false;
 
+        SimpleDateFormat dateFormat = new SimpleDateFormat(simpleDateFormat);
 
         DBCollection coll = db.getCollection("reservations");
         DBObject dbObject = (DBObject) JSON.parse(str);
@@ -300,7 +302,8 @@ public class ManagementDBTransaction {
             BasicDBObject updateObj = new BasicDBObject();
 
             updateObj.append("reservationStatus", "parked");
-            updateObj.append("parkingTime", new Date());
+            String parkingTime = dateFormat.format(new Date());
+            updateObj.append("parkingTime", parkingTime);
             updateObj.append("usingGarageNumber", garageID);
             updateObj.append("usingSlot", slot);
 
@@ -332,7 +335,7 @@ public class ManagementDBTransaction {
     public void leaveWithParking(int garageID, int slot) {
         DBCollection coll = db.getCollection("reservations");
 
-        SimpleDateFormat format = new SimpleDateFormat(simpleDateFormat);
+        SimpleDateFormat dateFormat = new SimpleDateFormat(simpleDateFormat);
 
         BasicDBObject whereQuery = new BasicDBObject();
 
@@ -345,43 +348,47 @@ public class ManagementDBTransaction {
         if (cursor.hasNext()) {
             DBObject dbObj = cursor.next();
 
-            String formatted = format.format(dbObj.get("parkingTime"));
+            String strParkingTime = (String)dbObj.get("parkingTime");
 
             try {
-                Date parkingTime = format.parse(formatted);
+                Date parkingTime = dateFormat.parse(strParkingTime);
                 Date leaveTime = new Date();
                 double parkingFee = (int)dbObj.get("parkingFee");
 
                 long diff = leaveTime.getTime() - parkingTime.getTime();
                 long diffMin = diff / (60 * 1000); // Calculate a minute unit.
-                int chargingFee = 0;
+                double chargingFee = 0;
 
                 if ((diffMin % 30) != 0) {
-                    chargingFee = (int) (parkingFee / 2 * ((diffMin/30)+1)); // per 30 min..
+                    chargingFee = (double) (parkingFee / 2 * ((diffMin/30)+1)); // per 30 min..
                 } else {
-                    chargingFee = (int) (parkingFee / 2 * (diffMin/30)); // per 30 min..
+                    chargingFee = (double) (parkingFee / 2 * (diffMin/30)); // per 30 min..
                 }
 
                 BasicDBObject updateQuery = new BasicDBObject();
                 BasicDBObject updateObj = new BasicDBObject();
 
                 updateObj.append("reservationStatus", "leaved");
-                updateObj.append("leaveTime", leaveTime);
+                String strLeaveTime = dateFormat.format(leaveTime);
+                updateObj.append("leaveTime", strLeaveTime);
                 updateObj.append("chargingFee", chargingFee);
 
                 updateQuery.append("$set", updateObj);
 
                 coll.update(whereQuery, updateQuery);
 
-                System.out.println("Charging Fee is $" + chargingFee);
+                System.out.println("==========================");
+                System.out.println("     Sure Park Garage");
+                System.out.println("  Charging Fee is $" + chargingFee);
+                System.out.println("==========================");
 
-                MailService mail = new MailService();
+//                MailService mail = new MailService();
 
-                try {
-                    mail.sendCharginFeeMail("acmoleg@gmailc.com", chargingFee);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    mail.sendCharginFeeMail("acmoleg@gmailc.com", chargingFee);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
 
             } catch (ParseException e) {
                 e.printStackTrace();
@@ -391,6 +398,8 @@ public class ManagementDBTransaction {
 
     public void leaveWithoutParking(int garageID, int slot) {
         DBCollection coll = db.getCollection("reservations");
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat(simpleDateFormat);
 
         BasicDBObject whereQuery = new BasicDBObject();
 
@@ -406,8 +415,9 @@ public class ManagementDBTransaction {
             BasicDBObject updateQuery = new BasicDBObject();
             BasicDBObject updateObj = new BasicDBObject();
 
-            updateObj.append("reservationStatus", "cancelled");
-            updateObj.append("leaveTime", leaveTime);
+            updateObj.append("reservationStatus", "refused");
+            String strLeaveTime = dateFormat.format(leaveTime);
+            updateObj.append("leaveTime", strLeaveTime);
             updateObj.append("chargingFee", 0);
 
             updateQuery.append("$set", updateObj);

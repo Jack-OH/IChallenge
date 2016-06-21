@@ -13,4 +13,6 @@ public interface IManagementFacility {
     void leaveWithoutParking(int garageID, int slotIdx)  throws Exception;
 
 	void updateWrongParking(int garageID, int slot) throws Exception;
+
+    void testUpdateSlotStatus(int garageID)  throws Exception;
 }
