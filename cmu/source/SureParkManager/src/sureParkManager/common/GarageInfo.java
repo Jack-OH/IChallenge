@@ -35,7 +35,7 @@ public class GarageInfo {
 		
 		if (	 slotStatus == kGarageInfoSlotStatusOpen) 		slotStatusStr = new String("Open");
 		else if (slotStatus == kGarageInfoSlotStatusBroken) 	slotStatusStr = new String("Broken");
-		else if (slotStatus == kGarageInfoSlotStatusOccupied) 	slotStatusStr = new String("Occpied");
+		else if (slotStatus == kGarageInfoSlotStatusOccupied) 	slotStatusStr = new String("Occupied");
 		else if (slotStatus == kGarageInfoSlotStatusReserved) 	slotStatusStr = new String("Reserved");
 		
 		return slotStatusStr;
@@ -46,7 +46,7 @@ public class GarageInfo {
 		
 		if (	 slotStatus.equals("Open")) 	slotStatusEnum = kGarageInfoSlotStatusOpen;
 		else if (slotStatus.equals("Broken")) 	slotStatusEnum = kGarageInfoSlotStatusBroken;
-		else if (slotStatus.equals("Occpied")) 	slotStatusEnum = kGarageInfoSlotStatusOccupied;
+		else if (slotStatus.equals("Occupied")) slotStatusEnum = kGarageInfoSlotStatusOccupied;
 		else if (slotStatus.equals("Reserved")) slotStatusEnum = kGarageInfoSlotStatusReserved;
 		
 		return slotStatusEnum;
