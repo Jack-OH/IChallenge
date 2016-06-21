@@ -158,15 +158,14 @@ public class ManagementDBTransaction {
 
         while(cursor.hasNext()) {
             DBObject dbObj = cursor.next();
+            BasicDBList slotStatusList;
+            BasicDBList updateTimeList;
 
-            BasicDBList slotStatusList = new BasicDBList();
-            BasicDBList updateTimeList = new BasicDBList();
+            slotStatusList = (BasicDBList)dbObj.get("slotStatus");
+            slotStatusList.put(slotIndex, garageInfo.GarageSlotStatusIntToString(slotStatus));
 
-            slotStatusList.add(dbObj.get("slotStatus"));
-            slotStatusList.add(slotIndex, garageInfo.GarageSlotStatusIntToString(slotStatus));
-
-            updateTimeList.add(dbObj.get("updateTime"));
-            updateTimeList.add(slotIndex, new Date());
+            updateTimeList = (BasicDBList)dbObj.get("updateTime");
+            updateTimeList.put(slotIndex, new Date());
 
             BasicDBObject updateQuery = new BasicDBObject();
             BasicDBObject updateObj = new BasicDBObject();
