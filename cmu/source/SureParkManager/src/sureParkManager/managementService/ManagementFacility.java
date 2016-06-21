@@ -88,12 +88,32 @@ public class ManagementFacility implements IManagementFacility {
 
         // parking fee calculation
         mgtDB.leaveWithParking(garageID, slotIdx);
+
+        JSONObject jsonObject = new JSONObject();
+        JSONObject jsonObject1 = new JSONObject();
+
+        jsonObject1.put("garageName", mgtDB.getGarageName(garageID));
+        jsonObject1.put("garageNumber", garageID);
+
+        jsonObject.put("updateSlotStatus", jsonObject1);
+
+        comm.broadcast(jsonObject.toJSONString() + "\n");
     }
 
     public void leaveWithoutParking(int garageID, int slotIdx)  throws Exception {
         ManagementDBTransaction mgtDB = ManagementDBTransaction.getInstance();
 
         mgtDB.leaveWithoutParking(garageID, slotIdx);
+
+        JSONObject jsonObject = new JSONObject();
+        JSONObject jsonObject1 = new JSONObject();
+
+        jsonObject1.put("garageName", mgtDB.getGarageName(garageID));
+        jsonObject1.put("garageNumber", garageID);
+
+        jsonObject.put("updateSlotStatus", jsonObject1);
+
+        comm.broadcast(jsonObject.toJSONString() + "\n");
     }
 
     public void testUpdateSlotStatus(int garageID)  throws Exception
