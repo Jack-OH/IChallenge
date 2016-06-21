@@ -104,7 +104,7 @@ public class ManagementDBTransaction {
 	}
 
 	public void addNewReservation(String str) throws Exception {
-        SimpleDateFormat format = new SimpleDateFormat(simpleDateFormat, Locale.US);
+        SimpleDateFormat format = new SimpleDateFormat(simpleDateFormat);
 		DBCollection coll = db.getCollection("reservations");
 
 		DBObject dbObject = (DBObject) JSON.parse(str);
@@ -192,7 +192,7 @@ public class ManagementDBTransaction {
         while(cursor.hasNext()) {
             DBObject dbObj = cursor.next();
 
-            SimpleDateFormat format = new SimpleDateFormat(simpleDateFormat, Locale.US);
+            SimpleDateFormat format = new SimpleDateFormat(simpleDateFormat);
 
 			String formatted = format.format(dbObj.get("reservationTime"));
 
@@ -332,7 +332,7 @@ public class ManagementDBTransaction {
     public void leaveWithParking(int garageID, int slot) {
         DBCollection coll = db.getCollection("reservations");
 
-        SimpleDateFormat format = new SimpleDateFormat(simpleDateFormat, Locale.US);
+        SimpleDateFormat format = new SimpleDateFormat(simpleDateFormat);
 
         BasicDBObject whereQuery = new BasicDBObject();
 

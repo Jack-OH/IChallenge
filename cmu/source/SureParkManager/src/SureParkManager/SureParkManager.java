@@ -4,6 +4,7 @@ import sureParkManager.managementService.*;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.TimeZone;
 
 import sureParkManager.common.SureParkConfig;
 import sureParkManager.controlService.ControlService;
@@ -12,7 +13,9 @@ public class SureParkManager {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-	        
+
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+
         SureParkConfig config = SureParkConfig.getInstance();
         config.updateGarageInfo(); // DB update
         
