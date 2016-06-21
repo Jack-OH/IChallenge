@@ -25,6 +25,7 @@ module.exports = function(app, db) {
     app.post('/newReservation', contentHandler.newReservation);
 
     app.get('/parkingCar', contentHandler.parkingCar);
+    app.get('/makeConnection', contentHandler.makeConnection);
 
     app.use(ErrorHandler);
 };
@@ -119,14 +120,34 @@ function ContentHandler(db) {
 
     this.parkingCar = function(req, res, next){
         var data = req.query;
-        console.log(data);
+        console.log("index.js -> makeConnection" + data);
         transManager.saveDatabase(data, function(err, result){
+
+        var test = JSON.parse(result);
+        console.log(test);
 
         if(err)
             return next(err);
     
         res.writeHead(200, { 'Content-Type': 'application/json'});
-        res.end(JSON.stringify(result));
+        res.end(JSON.stringify(test));
+        });
+    };
+
+    this.makeConnection = function(req, res, next){
+        var data = req.query;
+        console.log("index.js -> makeConnection" + data);
+        transManager.makeConnection(data, function(err, result){
+
+           // console.log(JSON.parse(result));
+           var test = JSON.parse(result);
+           console.log(test);
+
+            if(err)
+                return next(err);
+
+            res.writeHead(200, { 'Content-Type': 'application/json'});
+            res.end(JSON.stringify(test));
         });
     };
 

@@ -4,10 +4,10 @@
     <meta charset="UTF-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <title> SurePark Reservation Service </title>
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans" / > <!-- google web font service -->
+    <link rel="stylesheet" href="/css/googlefont.css" / > <!-- google web font service -->
     <link rel="stylesheet" href="/css/style.css" /> <!-- default style -->
     <link rel="stylesheet" href="/css/nice-select.css" /> <!-- nice-selector -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
     <link rel="stylesheet" href="/jquery-ui-1.11.4.custom/jquery-ui.min.css" />
     <link rel="stylesheet" href="/bootstrap/3.3.5/css/bootstrap.min.css">
 </head>
@@ -46,7 +46,7 @@
         <div id="newReservation" class="inputForm" >
             <div class="well well-sm"> Reserve a parking sapce</div>
             <br>
-            <form class="form-horizontal" role="form">
+            <form class="form-horizontal" role="form" onsubmit="return makeReserveDone();">
                 <div class="form-group">
                     <label class="control-label col-sm-2" for="reserve_garage">Garage Name</label>
 
@@ -71,23 +71,23 @@
                 <div class="form-group">
                     <label class="control-label col-sm-2" for="card1">Card Info.</label>
                     <div class="col-xs-1">
-                        <input class="form-control" id="card1" type="text" maxlength="4" min="1000" required>
+                        <input class="form-control" id="card1" type="number" maxlength="4" min="1000" required>
                     </div>
                     <div class="col-xs-1">
-                        <input class="form-control" id="card2" type="text" maxlength="4" min="1000" required>
+                        <input class="form-control" id="card2" type="number" maxlength="4" min="1000" required>
                     </div>
                     <div class="col-xs-1">
-                        <input class="form-control" id="card3" type="text" maxlength="4" min="1000" required>
+                        <input class="form-control" id="card3" type="number" maxlength="4" min="1000" required>
                     </div>
                     <div class="col-xs-1">
-                        <input class="form-control" id="card4" type="password" maxlength="4" min="1000" required>
+                        <input class="form-control" id="card4" type="number" maxlength="4" min="1000" required>
                     </div>
                 </div>
 
                 <div class="form-group">        
                     <div class="col-sm-offset-2 col-sm-10">
-                        <button id="makeReserveDoneBtn" type="submit" class="btn btn-default">Submit</button>
-                        <button id="makeReserveCancelBtn" type="submit" class="btn btn-default">Cancel</button>
+                        <button id="makeReserveDoneBtn"  type="submit" class="btn btn-default">Submit</button>
+                        <button id="makeReserveCancelBtn" type="button" class="btn btn-default">Cancel</button>
                     </div>
                 </div>
           </form>
@@ -96,7 +96,7 @@
         <div id="confirmReservation" class="inputForm" >
             <div class="well well-sm"> Check the reservation ID </div>
             <br>
-            <form class="form-horizontal" role="form">
+            <form class="form-horizontal" role="form" onsubmit="return confirmReserveDone();">
                 <div class="form-group">
                     <label class="control-label col-sm-2" for="confirmReservation_garage">Garage Name</label>
                     
@@ -127,7 +127,7 @@
                 <div class="form-group">        
                     <div class="col-sm-offset-2 col-sm-10">
                         <button id="confirmReserveDoneBtn" type="submit" class="btn btn-default">Confirm</button>
-                        <button id="confirmReserveCancelBtn" type="submit" class="btn btn-default">Cancel</button>
+                        <button id="confirmReserveCancelBtn" type="button" class="btn btn-default">Cancel</button>
                     </div>
                 </div>
           </form>
@@ -135,7 +135,7 @@
         <div id="addNewGarage" class="inputForm" >
             <div class="well well-sm"> Add new garage</div>
             <br>
-            <form class="form-horizontal" role="form">
+            <form class="form-horizontal" role="form" onsubmit="return addGarageDone();">
                 <div class="form-group">
                     <label class="control-label col-sm-2" for="add_garage_name">Garage name </label>
                     <div class="col-xs-4">          
@@ -186,7 +186,7 @@
                 <div class="form-group">        
                     <div class="col-sm-offset-2 col-sm-10">
                         <button id="addGarageDoneBtn" type="submit" class="btn btn-default">Submit</button>
-                        <button id="addGarageCancelBtn" type="submit" class="btn btn-default">Cancel</button>
+                        <button id="addGarageCancelBtn" type="button" class="btn btn-default">Cancel</button>
                     </div>
                 </div>
           </form>

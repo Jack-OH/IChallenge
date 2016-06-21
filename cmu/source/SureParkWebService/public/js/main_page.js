@@ -48,7 +48,7 @@ $('#loginBtn').click(function(){
     });
 });
 
-$('#makeReserveDoneBtn').click(function(){
+function makeReserveDone(){
     //var date = $('#reserve_date').val();
     var date = $('#reserve_date').combodate('getValue');
     //var time = $('#reserve_time').val();
@@ -68,9 +68,12 @@ $('#makeReserveDoneBtn').click(function(){
     }
 
     date = date + ":00.000Z";
-    console.log(date);
+    console.log("makeReserveDone --> " + date);
 
     $.get('getUsers', {'displayName':userName}, function(userdata) {
+
+        console.log("makeReserveDone() " + userdata);
+
         userdata.forEach(function(useritem){
             if(useritem.displayName == userName) {
                 userID = useritem.userID;
@@ -80,6 +83,7 @@ $('#makeReserveDoneBtn').click(function(){
         //userID = userdata.userID;
         if(userID !== undefined) {
             $.get("getGarages", query, function(data) {
+                console.log("makeReserveDone() " + data);
                 data.forEach(function(item){
                     console.log(item);
                     if(item.garageName ==  garageName) {
@@ -92,14 +96,12 @@ $('#makeReserveDoneBtn').click(function(){
 
                         console.log(newReservation);
                         $.post("newReservation", newReservation, function(resdata){
-                        console.log(resdata);                      
+                            console.log("makeReserveDone() " + resdata);                      
 
                             if(resdata.errorMsg){
                                 alert("TCP/IP Error");
                             }
-                            else {
-                                console.log(resdata);
-                                
+                            else {                                
                                 showPopup("Reservation Info.", "Your reservation id is " + 
                                                 confirmInformation + "  Don't forget it!!" );
                                 
@@ -119,7 +121,7 @@ $('#makeReserveDoneBtn').click(function(){
 
     });
    
-});
+}
 
 $('#makeReserveCancelBtn').click(function(){
     if($('#newReservation').is(':visible')){
@@ -141,14 +143,19 @@ $('#make_reservation').click(function(){
 
 
 
-$('#confirmReserveDoneBtn').click(function(){
+//$('#confirmReserveDoneBtn').click(function(){
+function confirmReserveDone() {
     var confirmInfo = $('#confirmReservation_info').val();
     var confirmUserID = $('#confirmReservation_name').val();
     var usingGarage = $('#confirmReservation_garage').next().find('.current').html(); // $('#confirmReservation_garage').text();
     var query = {"confirmInformation":confirmInfo, "userID":confirmUserID, "usingGarage": usingGarage };
     var parkingCar;
 
+    console.log("confirmReserveDone --> ");
+
     $.post("checkReservation", query, function(data) {
+        console.log("confirmReserveDone()" + data);
+
         if(data.length===0) {
             alert("Please check your reservation information ...");
         } else {
@@ -160,6 +167,8 @@ $('#confirmReserveDoneBtn').click(function(){
                         {"userID":confirmUserID, "usingGarage":usingGarage, "confirmInformation":confirmInfo}};
 
                      $.get("parkingCar", parkingCar, function(resdata){
+                        console.log("confirmReserveDone()" + resdata);
+
                         if(resdata.errorMsg){
                             alert("TCP/IP Error");
                         }
@@ -178,7 +187,7 @@ $('#confirmReserveDoneBtn').click(function(){
         }
         
     });
-});
+}
 
 $('#confirmReserveCancelBtn').click(function(){
     if($('#confirmReservation').is(':visible')){
@@ -201,7 +210,7 @@ $('#confirm_reservation').click(function(){
 });
 
 
-$('#addGarageDoneBtn').click(function(){
+function addGarageDone(){
     var garageName = $('#add_garage_name').val();
     var garageID = 1000; 
     var numberOfSlots = parseInt($('#add_number_of_slot').val());
@@ -214,12 +223,15 @@ $('#addGarageDoneBtn').click(function(){
 
     for(i=0; i < numberOfSlots; i++) {
         slotStatus[i] = "Open";
-    }    
+    }
+
+    console.log("addGarageDone --> ");
 
     $.get("getGarages", {}, function(data) {
+        console.log("addGarageDone() " + data);
         if(data.length > 0) {
             data.forEach(function(item){
-                console.log(item);
+                //console.log(item);
                 if(item.garageNumber > garageID) {
                     garageID = item.garageNumber;
                 }
@@ -233,6 +245,7 @@ $('#addGarageDoneBtn').click(function(){
         console.log(newGarage);
 
         $.post("setGarage", newGarage, function(resdata){
+            console.log("addGarageDone() " + resdata);
             if(resdata.errorMsg){
                 alert("TCP/IP Error");
             }
@@ -245,7 +258,7 @@ $('#addGarageDoneBtn').click(function(){
        
     });     
 
-});
+}
 
 $('#addGarageCancelBtn').click(function(){
     if($('#addNewGarage').is(':visible')){
@@ -353,34 +366,6 @@ function drawBarChart1(elementID) {
       var chart = new google.visualization.BarChart(elementID);
       chart.draw(view, options);
 }
-
-$('#show_statistics').click(function(){ 
-
-    var newGarage = {"newGarage": {"garageName":"AAAAA", "garageID":1001, "slotNumber":4, "slotStatus":["Open","Open","Open","Open"], 
-                      "gracePeriod":90, "parkingFee":30, "garageIP":"127.0.0.1", "isAvailable":true}};
-
-    var newReservation = {"newReservation": {"userID":"jack", "cardInfo":"1111-2222-3333-4444", "confirmInformation":"A1234", 
-                    "gracePeriod":90, "parkingFee":30, "usingGarage":"Sure-Park"}};
-
-    var cancelReservation = {"cancelReservation": {"userID":"jack", "usingGarage":"Sure-Park", "confirmInformation":"A1234"}};
-
-    var newUser = {"newUser": {"userID":"jack", "userPassword":"jack", "userType":"attendant", 
-                    "userName":"Jack OH", "userEmail":"jungkyun98@gmail.com", "displayName":"JUNGKYUN"}};
-
-    var parkingCar = {"parkingCar": {"userID":"jack", "usingGarage":"Sure-Park", "confirmInformation":"A1234"}};
-
-
-    
-
-    $.get("setGarage", newGarage, function(data){
-        if(data.errorMsg){
-            alert("TCP/IP Error");
-        }
-        else {
-            console.log(data);
-        }
-    });
-});
 
 
 function showUserReservation(reservation_data) {
@@ -562,9 +547,30 @@ function updatePageList(arg, callback){
     setUserName(userName, userType);
     setGarageStatus();
     setUserReservation();
+    setManagerConnection();
 
     if(typeof callback !== 'undefined')
         callback();
+}
+
+function setManagerConnection() {    
+    if(access_priority=="attendant" || access_priority=="owner") {
+        $.get("makeConnection", "makeConnection", function(resdata){            
+             if (resdata.wrongParking !== undefined) {
+                 showPopup("Notification", "The car is parked another slot.");
+             } else if (resdata.detectFailure !== undefined) { 
+                showPopup("Notification", "The garage status is not available.");
+             } else if (resdata.updateSlotStatus !== undefined) { 
+                showPopup("Notification", "Slot status are updated.");
+             }
+             else {
+                console.log("Ignore message");
+             }
+        });
+    } else {
+        console.log("Don't need to make connection with manager");
+    }
+
 }
 
 function calUpdateTime(updateTime) {
@@ -590,9 +596,6 @@ function showPopup(popupHeader, popupContent) {
 
     $('#modal_title').text(popupHeader);
     $('#modal_content').text(popupContent);
-
-    //('#myModal').find('h1').innerText = popupHeader;
-    //('#myModal').find('p').innerText = popupContent;
 
     $('#myModal').modal('show');    
 }
