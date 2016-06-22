@@ -4,25 +4,31 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import sureParkManager.common.SureParkConfig;
 import sureParkManager.controlService.ControlService;
+import sureParkManager.controlService.IControlService;
 
 /**
- * Created by jaeheonkim on 2016. 6. 20..
+ * Created by jaeheonkim on 2016. 6. 14..
  */
-public class ManagementProtocol {
-    private ControlService ctlService = null;
+public class ManagementProtocol implements IManagementProtocol {
+    private IControlService ctlService = null;
+    private IManagementDBTransaction mgtDBtr;
 
-    public ManagementProtocol(ControlService ctlService) {
+    public ManagementProtocol(IControlService ctlService) {
         this.ctlService = ctlService;
+        try {
+            mgtDBtr = ManagementDBTransaction.getInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public String parseJson(String inputLine) throws Exception {
-        ManagementDBTransaction mgtDBtr = ManagementDBTransaction.getInstance();
-
         JSONParser parser = new JSONParser();
         Object obj = parser.parse(inputLine);
         JSONObject jsonObject = (JSONObject) obj;
 
         System.out.println("\nnow json parsing...\n");
+        System.out.println("JSON data : " + inputLine);
 
         // json parsing...
         JSONObject subJsonObject;

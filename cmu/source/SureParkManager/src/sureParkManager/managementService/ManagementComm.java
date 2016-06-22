@@ -3,6 +3,7 @@ package sureParkManager.managementService;
 import sureParkManager.common.ReservationInfo;
 import sureParkManager.common.SureParkConfig;
 import sureParkManager.controlService.ControlService;
+import sureParkManager.controlService.IControlService;
 
 import java.io.*;
 import java.net.*;
@@ -60,7 +61,7 @@ public class ManagementComm extends Thread {
 
                         System.out.println("readLine start::");
 
-                        ManagementProtocol protocol = new ManagementProtocol(ctlService);
+                        IManagementProtocol protocol = new ManagementProtocol(ctlService);
 
                         String outStr = protocol.parseJson(inputLine);
                         if (!outStr.isEmpty()) {

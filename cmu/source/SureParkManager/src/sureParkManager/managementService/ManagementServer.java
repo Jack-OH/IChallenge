@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Created by jaeheonkim on 2016. 6. 14..
+ */
 public class ManagementServer extends Thread {
 	// Definitions
 	public static final int kNoError        = 0;

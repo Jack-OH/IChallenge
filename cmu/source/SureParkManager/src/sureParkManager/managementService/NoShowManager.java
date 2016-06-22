@@ -9,10 +9,18 @@ import sureParkManager.managementService.ManagementDBTransaction;
 public class NoShowManager extends Thread {
 	
 	public static final int kNectCheckTime = 10*1000; //10sec
+
 	private static Calendar now;
-	
+	private IManagementDBTransaction mgrDB = null;
+
 	public NoShowManager() {
 		now = Calendar.getInstance();
+
+		try {
+			mgrDB = ManagementDBTransaction.getInstance();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void run() {
@@ -20,8 +28,6 @@ public class NoShowManager extends Thread {
 
 		while(!isInterrupted()) {
 			try {
-				ManagementDBTransaction mgrDB = ManagementDBTransaction.getInstance();
-				
 				ArrayList<ReservationInfo> info = mgrDB.getReservationInfo();
 				if( info != null ) {
 					for( ReservationInfo r : info ) {						
