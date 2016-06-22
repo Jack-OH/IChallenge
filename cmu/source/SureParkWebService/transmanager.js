@@ -13,7 +13,7 @@ module.exports = function TransManager() {
 			socket.write(JSON.stringify(sendData)+'\n');
 		});
 
-		console.log(JSON.stringify(sendData));
+		//console.log(JSON.stringify(sendData));
 
 		socket.on('data', function(recvData) {
 			console.log('Received!!: ' + recvData);
@@ -23,18 +23,18 @@ module.exports = function TransManager() {
 	        	temp.parkingCar !== undefined || 
 	        	temp.newReservation !== undefined ) {
 
-				socket.destroy();
 		        callback(null, JSON.stringify(recvData));
+		    	socket.destroy();
 	    	}
 		});
 
 		socket.on('close', function() {
-			console.log('Connection closed');
+			console.log('Connection closed!!');
+			socket.destroy(); // kill client after server's response
 		});
 
 		socket.on('error', function(err) {
   			console.log("Error!!: " + err);
-  			//callback(null, err);
 		});
 	};
 
@@ -49,18 +49,16 @@ module.exports = function TransManager() {
 
 		socket.on('data', function(recvData) {
 			console.log('Received: ' + recvData);
-			//console.log('Received: ' + err);
-			//socket.destroy(); // kill client after server's response
-
-	        //callback(null, JSON.stringify(recvData));
+			
 	        var temp = JSON.parse(recvData);
+        
 	        if(temp.wrongParking !== undefined  || 
 	        	temp.detectFailure !== undefined || 
 	        	temp.updateSlotStatus !== undefined ) {
 
-	        	console.log("!!!!!!!!!!!!!!!");
-	        	callback(null, recvData);
-	        	socket.destroy();
+	           	callback(null, recvData);
+	            socket.destroy(); // kill client after server's response
+	        	
 	        }        
 		});
 
