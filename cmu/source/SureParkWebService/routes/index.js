@@ -120,34 +120,42 @@ function ContentHandler(db) {
 
     this.parkingCar = function(req, res, next){
         var data = req.query;
-        console.log("index.js -> makeConnection" + data);
+        //console.log("index.js -> makeConnection" + data);
         transManager.saveDatabase(data, function(err, result){
+            var test = JSON.parse(result);
+            console.log(test);
 
-        var test = JSON.parse(result);
-        console.log(test);
+            if(err)
+                return next(err);
 
-        if(err)
-            return next(err);
-    
-        res.writeHead(200, { 'Content-Type': 'application/json'});
-        res.end(JSON.stringify(test));
+            try {
+                res.writeHead(200, { 'Content-Type': 'application/json'});
+                res.end(JSON.stringify(test));    
+            } catch (error) {
+                console.log(error.message);
+            }    
+        
         });
     };
 
     this.makeConnection = function(req, res, next){
         var data = req.query;
-        console.log("index.js -> makeConnection" + data);
+        //console.log("index.js -> makeConnection" + data);
         transManager.makeConnection(data, function(err, result){
-
-           // console.log(JSON.parse(result));
            var test = JSON.parse(result);
            console.log(test);
 
             if(err)
                 return next(err);
 
-            res.writeHead(200, { 'Content-Type': 'application/json'});
-            res.end(JSON.stringify(test));
+            try {
+                res.writeHead(200, { 'Content-Type': 'application/json'});
+                res.end(JSON.stringify(test));
+            }
+            catch(error) {
+                console.log(error.message);
+            }
+            
         });
     };
 

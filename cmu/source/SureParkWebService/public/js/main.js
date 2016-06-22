@@ -2,7 +2,6 @@
 //google.charts.load('current', {'packages':['bar', 'corechart', 'line', 'table' ]});
 google.charts.load('visualization', '1', {'packages':['bar', 'corechart', 'line', 'table']});
 //google.charts.setOnLoadCallback(drawChart);
-
 var gGarages = [];
 
 $('#usernameBtn').click(function(){
@@ -49,9 +48,9 @@ $('#loginBtn').click(function(){
 });
 
 function makeReserveDone(){
-    //var date = $('#reserve_date').val();
-    var date = $('#reserve_date').combodate('getValue');
-    //var time = $('#reserve_time').val();
+    var date = $('#reserve_date').val();
+    //var date = $('#reserve_date').combodate('getValue');
+    var time = $('#reserve_time').val();
     var cardInfo = $('#card1').val() + "-" + $('#card2').val() + "-" + $('#card3').val() + "-" + $('#card4').val();
     var garageName = $('#reserve_garage').next().find('.current').html(); 
     var gracePeriod;
@@ -62,12 +61,30 @@ function makeReserveDone(){
 
     var query = {};
 
+    date = date + "T" + time+":00.000Z";
+
+    var inputDate = new Date(date);
+    var todayDate = new Date();
+
+    var offset = todayDate.getTimezoneOffset();
+    var offset_millisecond = offset * 60 * 1000; 
+
+    var inputGetTime = inputDate.getTime() + offset_millisecond;
+    var todayGetTime = todayDate.getTime();
+
+/*
+    if(inputGetTime > todayGetTime && (todayGetTime + (180 * 60 * 1000)) < inputGetTime) {
+        alert("You have to input the reservation date from now to within 3 hours");
+        return;
+    }
+*/    
+
     if(userName === "" || date===undefined || cardInfo===undefined || garageName===undefined) {
         alert("To make reservation, you need to log-in first.");
         return;
     }
 
-    date = date + ":00.000Z";
+    //date = date + ":00.000Z";
     console.log("makeReserveDone --> " + date);
 
     $.get('getUsers', {'displayName':userName}, function(userdata) {
@@ -146,16 +163,14 @@ $('#make_reservation').click(function(){
 //$('#confirmReserveDoneBtn').click(function(){
 function confirmReserveDone() {
     var confirmInfo = $('#confirmReservation_info').val();
-    var confirmUserID = $('#confirmReservation_name').val();
+    //var confirmUserID = $('#confirmReservation_name').val();
     var usingGarage = $('#confirmReservation_garage').next().find('.current').html(); // $('#confirmReservation_garage').text();
-    var query = {"confirmInformation":confirmInfo, "userID":confirmUserID, "usingGarage": usingGarage };
+    var query = {"confirmInformation":confirmInfo, "usingGarage": usingGarage };
     var parkingCar;
 
     console.log("confirmReserveDone --> ");
 
     $.post("checkReservation", query, function(data) {
-        console.log("confirmReserveDone()" + data);
-
         if(data.length===0) {
             alert("Please check your reservation information ...");
         } else {
@@ -164,7 +179,7 @@ function confirmReserveDone() {
                 if(item.reservationStatus == "waiting") {
                     //usingGarage = item.usingGarage;
                     parkingCar = {"parkingCar": 
-                        {"userID":confirmUserID, "usingGarage":usingGarage, "confirmInformation":confirmInfo}};
+                        {"usingGarage":usingGarage, "confirmInformation":confirmInfo}};
 
                      $.get("parkingCar", parkingCar, function(resdata){
                         console.log("confirmReserveDone()" + resdata);
@@ -371,7 +386,7 @@ function drawBarChart1(elementID) {
 function showUserReservation(reservation_data) {
     $('#showReservation').empty();
 
-    var div = $('<div class="well well-sm">Your reservation history </div>').appendTo('#showReservation');
+    var div = $('<div class="well well-sm">Reservation history </div>').appendTo('#showReservation');
     var table = $('<table class="table table-bordered" width:100%></table>').appendTo('#showReservation');
 
     var thead = $('<thead data-header="true"></thead>').appendTo(table);
@@ -380,7 +395,11 @@ function showUserReservation(reservation_data) {
     $('<th  data-sort-column="true">' + 'Garage Name' + '</th>').appendTo(tr);
     $('<th  data-sort-column="true">' + 'Reservation Time' + '</th>').appendTo(tr);
     $('<th  data-sort-column="true">' + 'Reservation ID' + '</th>').appendTo(tr);
-    $('<th  data-sort-column="true">' + 'Card Info' + '</th>').appendTo(tr);
+
+    if(access_priority!="attendant") {
+        $('<th  data-sort-column="true">' + 'Card Info' + '</th>').appendTo(tr);
+    }
+    
     $('<th  data-sort-column="true">' + 'Reservation Status' + '</th>').appendTo(tr);
     $('<th  data-sort-column="true">' + 'Parking Time' + '</th>').appendTo(tr);
     $('<th  data-sort-column="true">' + 'Leaving Time' + '</th>').appendTo(tr);
@@ -399,13 +418,18 @@ function showReservationTableList(reservation_data, tbody){
     } else {
         i = 0;
         reservation_data.forEach(function(arr){
-                console.log(arr);
+                //console.log(arr);
+                //var d = new Date(arr.reservationTime);
                 tr = $('<tr></tr>').addClass('tableRow').appendTo(tbody);
                 $('<td>' + arr.userID + '</td>').appendTo(tr);
                 $('<td>' + arr.usingGarage + '</td>').appendTo(tr);
                 $('<td>' + arr.reservationTime + '</td>').appendTo(tr);
                 $('<td>' + arr.confirmInformation + '</td>').appendTo(tr);
-                $('<td>' + arr.cardInfo + '</td>').appendTo(tr);
+
+                if(access_priority!="attendant") {
+                    $('<td>' + arr.cardInfo + '</td>').appendTo(tr);
+                }
+                
                 $('<td>' + arr.reservationStatus + '</td>').appendTo(tr);
                 $('<td>' + arr.parkingTime + '</td>').appendTo(tr);
                 $('<td>' + arr.leaveTime + '</td>').appendTo(tr);
@@ -442,7 +466,12 @@ function setUserReservation() {
 
         //userID = userdata.userID;
         if(userID !== undefined) {
-            $.get('getReservations', {'userID': userID}, function(data){
+            var useQuery = {};
+            if(access_priority!="attendant" && access_priority!="owner" ) {
+                useQuery = {'userID': userID};
+            } 
+
+            $.get('getReservations', useQuery, function(data){
                 showUserReservation(data);
             });
         }
@@ -489,8 +518,6 @@ function makeGarageTableList(garage_data, tbody){
 
                 gGarages.push(arr.garageName);
 
-                //tr1 = $('<tr></tr>').addClass('tableRow').appendTo(tbody);
-
                 if(access_priority=="attendant" || access_priority=="owner") {
                     tr1 = $('<tr></tr>').addClass('tableRow').appendTo(tbody);
                     tr2 = $('<tr></tr>').addClass('tableRow').appendTo(tbody);   
@@ -500,9 +527,7 @@ function makeGarageTableList(garage_data, tbody){
                     $('<td>' + arr.garageName + '</td>').appendTo(tr1); 
                 }
                 
-                //$('<td rowspan="2">' + arr.garageName + '</td>').appendTo(tr1);
-
-                
+               
                 slotIndex = 0;
                 while(slotIndex < arr.slotNumber) {
                     console.log(arr.slotStatus[slotIndex]);
@@ -520,11 +545,18 @@ function makeGarageTableList(garage_data, tbody){
                             '</td>').css("background-color","DarkGray").css("text-align", "-webkit-center").css("width", "150px").appendTo(tr1);
                     } 
 
-                    if(access_priority=="attendant" || access_priority=="owner") {
-                        $('<td>' + calUpdateTime(arr.updateTime[slotIndex]) + 
-                            '</td>').css("background-color","white").css("text-align", "-webkit-center").css("width", "150px").appendTo(tr2);
-                    }
+     
 
+                    if(access_priority=="attendant" || access_priority=="owner" ) {
+                        if(arr.slotStatus[slotIndex] == "Occupied") {
+                            $('<td>' + calUpdateTime(arr.updateTime[slotIndex]) + 
+                                '</td>').css("background-color","white").css("text-align", "-webkit-center").css("width", "150px").appendTo(tr2);
+                        } else {
+                            $('<td>' + "" + 
+                                '</td>').css("background-color","white").css("text-align", "-webkit-center").css("width", "150px").appendTo(tr2);
+                        }
+                    }
+                    
                     slotIndex++;                   
                 }
         });
@@ -553,7 +585,7 @@ function updatePageList(arg, callback){
         callback();
 }
 
-function setManagerConnection() {    
+function setManagerConnection() {  
     if(access_priority=="attendant" || access_priority=="owner") {
         $.get("makeConnection", "makeConnection", function(resdata){            
              if (resdata.wrongParking !== undefined) {
@@ -566,6 +598,8 @@ function setManagerConnection() {
              else {
                 console.log("Ignore message");
              }
+
+             setManagerConnection();
         });
     } else {
         console.log("Don't need to make connection with manager");
@@ -604,7 +638,8 @@ function showPopup(popupHeader, popupContent) {
 
 updatePageList();
 
-
+/*
 $(function(){
     $('#reserve_date').combodate();
 });
+*/
