@@ -14,7 +14,7 @@ import java.util.Vector;
  */
 public class ManagementComm extends Thread {
     private Socket clientSocket = null;
-    private ControlService ctlService = null;
+    private IControlService ctlService = null;
 
     private BufferedReader in = null;
     private BufferedWriter out = null;
@@ -24,7 +24,7 @@ public class ManagementComm extends Thread {
     public ManagementComm() throws IOException {
     }
 
-    public ManagementComm(ControlService ctlService, Socket clientSocket) throws Exception {
+    public ManagementComm(IControlService ctlService, Socket clientSocket) throws Exception {
         // TODO Auto-generated constructor stub
         this.ctlService = ctlService;
         this.clientSocket = clientSocket;

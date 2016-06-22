@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.util.TimeZone;
 
 import sureParkManager.common.SureParkConfig;
-import sureParkManager.controlService.ControlService;
+import sureParkManager.controlService.IControlService;
 
 public class SureParkManager {
 
@@ -26,8 +26,9 @@ public class SureParkManager {
         IManagementFacility mgtFacility = new ManagementFacility();
                 
         // Create ControlService
-        ControlService ctlService = new ControlService(mgtFacility);
-        ctlService.start();
+
+        IControlService ctlService = new ControlService(mgtFacility);
+        
         
         // Start server thread
 		ManagementServer mgtServer = ManagementServer.getInstance();
@@ -49,7 +50,7 @@ public class SureParkManager {
         config.printGarageList();
         */
 
-        MailService mail = new MailService();
+        //MailService mail = new MailService();
 
         // It's test for Open gate
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -66,9 +67,8 @@ public class SureParkManager {
             } else if(message.equals("u")) {
                 mgtFacility.testUpdateSlotStatus(config.getGarageInfoFromIndex(0).id);
 			} else if(message.equals("EXIT")) {
-				ctlService.interrupt();
 				break;
-			}
+			}	
             // Wait maximum of 1 second
             // for MessageLoop thread
             // to finish.

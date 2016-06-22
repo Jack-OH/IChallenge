@@ -3,6 +3,7 @@ package sureParkManager.managementService;
 import java.net.*;
 
 import sureParkManager.controlService.ControlService;
+import sureParkManager.controlService.IControlService;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class ManagementServer extends Thread {
      */
     private ExecutorService executorService = Executors.newFixedThreadPool(10);
 
-    private ControlService ctlService = null;
+    private IControlService ctlService = null;
 
 	public ManagementServer() {
 	}
@@ -44,11 +45,11 @@ public class ManagementServer extends Thread {
 		return instance;
 	}
 
-	public void setControlService(ControlService ctlService) {
+	public void setControlService(IControlService ctlService) {
 		this.ctlService = ctlService;
 	}
 
-	public ControlService getControlService() {
+	public IControlService getControlService() {
 		return this.ctlService;
 	}
 

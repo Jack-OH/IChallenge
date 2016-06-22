@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class ControlService extends Thread {
+public class ControlService extends Thread implements IControlService {
 	public static final int kConnectionRetryCount = 2;
 	
 	private ArrayList<FacilityClientInfo> mClientInfo = new ArrayList<FacilityClientInfo>();
@@ -28,6 +28,8 @@ public class ControlService extends Thread {
 			 info.facilityId = gInfo.id;
 			 mClientInfo.add(info);
 		 }
+		 
+		 start();
 		 
 	}
 
@@ -55,9 +57,8 @@ public class ControlService extends Thread {
 		}
 	}
 	
-	public void addFacility(int facilityId) throws Exception {
-		
-		//mAddFacilityQueue.add(facilityId);
+	public void addFacility(int facilityId) {
+
 		newFacilityId = facilityId;
 		System.out.println("add facility id=" + facilityId);
 		isNewGarageAdded = true;
