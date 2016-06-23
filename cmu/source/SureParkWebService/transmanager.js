@@ -7,15 +7,19 @@ module.exports = function TransManager() {
 	this.saveDatabase = function(sendData, callback) {
 		console.log("TransManager -> saveDatabase" + JSON.stringify(sendData));
 
-		var socket = new net.Socket();
-		socket.connect(port, host, function() {
+		var socket_save = new net.Socket();
+		socket_save.connect(port, host, function() {
 			console.log('Connected');
-			socket.write(JSON.stringify(sendData)+'\n');
+			try {
+				socket_save.write(JSON.stringify(sendData)+'\n');
+			} catch (error) {
+				console.log(error.message);
+			}
 		});
 
 		//console.log(JSON.stringify(sendData));
 
-		socket.on('data', function(recvData) {
+		socket_save.on('data', function(recvData) {
 			console.log('Received!!: ' + recvData);
 
 			try {
@@ -23,10 +27,11 @@ module.exports = function TransManager() {
 		        if(temp.setGarage !== undefined  || 
 		        	temp.parkingCar !== undefined || 
 		        	temp.newReservation !== undefined ||
-		        	temp.newGarage != undefined ) {
+		        	temp.newGarage != undefined ||
+		        	temp.wrongParking != undefined ) {
 
 			        callback(null, JSON.stringify(recvData));
-			    	socket.destroy();
+			    	socket_save.destroy();
 		    	}
 			} catch(error) {
 				console.log(error.message);
@@ -35,12 +40,16 @@ module.exports = function TransManager() {
 			
 		});
 
-		socket.on('close', function() {
+		socket_save.on('close', function() {
 			console.log('Connection closed!!');
-			socket.destroy(); // kill client after server's response
+			try {
+				socket_save.destroy(); // kill client after server's response
+			} catch (error) {
+				console.log(error.message);
+			}
 		});
 
-		socket.on('error', function(err) {
+		socket_save.on('error', function(err) {
   			console.log("Error!!: " + err);
 		});
 	};
@@ -51,37 +60,47 @@ module.exports = function TransManager() {
 		var socket = new net.Socket();
 		socket.connect(port, host, function() {
 			console.log('Connected');
-			socket.write(JSON.stringify(sendData)+'\n');
+
+			try {
+				socket.write(JSON.stringify(sendData)+'\n');
+			} catch (error) {
+				console.log(error.message);
+			}		
+			
 		});
 
 		socket.on('data', function(recvData) {
 			console.log('Received: ' + recvData);
 
-			try {
-			
+			try {			
 		        var temp = JSON.parse(recvData);
 	        
 		        if(temp.wrongParking !== undefined  || 
 		        	temp.detectFailure !== undefined || 
-		        	temp.updateSlotStatus !== undefined ) {
+		        	temp.updateSlotStatus !== undefined) {
 
 		           	callback(null, recvData);
-		            socket.destroy(); // kill client after server's response
+		            //socket.destroy(); // kill client after server's response
 		        	
 		        }
 		    } catch (error) {
-		    	console.log(error.message);
+		    	console.log("socket.data()" + error.message);
 		    }
 		});
 
 		socket.on('close', function() {
 			console.log('Connection closed');
-			socket.destroy(); // kill client after server's response
+
+			try {
+				socket.destroy(); // kill client after server's response
+			} catch (error) {
+				console.log("socket.close()" + error.message);
+			}
+			
 		});
 
 		socket.on('error', function(err) {
-  			console.log("Error: " + err);
-  			//callback(null, err);
+  			console.log("socket.error(): " + err);
 		});
 	};
 };

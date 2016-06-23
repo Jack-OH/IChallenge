@@ -149,14 +149,13 @@ $('#makeReserveCancelBtn').click(function(){
 $('#make_reservation').click(function(){
     var freeSlot = 0;
     var availableSlot = 0;
-
+/*
     gReservations.forEach(function(reservation){
-        if(reservation.reservationStatus == "waiting" ||  
-            reservation.reservationStatus == "parked" ) {
+        if(reservation.reservationStatus == "waiting" ) {
             freeSlot++;
         }
     });
-
+*/
     gGarages.forEach(function(garage) {
         var i = 0; 
         for(i=0; i<garage.slotNumber; i++) {
@@ -166,7 +165,8 @@ $('#make_reservation').click(function(){
         }
     });
 
-    if(freeSlot >= availableSlot) {
+//    if(freeSlot >= availableSlot) {
+    if(availableSlot <= 0) {
         alert("There is no available slot. ");
         return;
     }
@@ -353,6 +353,7 @@ function showUserReservation(reservation_data, userID) {
     }
     
     $('<th  data-sort-column="true">' + 'Reservation Status' + '</th>').appendTo(tr);
+    $('<th  data-sort-column="true">' + 'Slot #' + '</th>').appendTo(tr);
     $('<th  data-sort-column="true">' + 'Parking Time' + '</th>').appendTo(tr);
     $('<th  data-sort-column="true">' + 'Leaving Time' + '</th>').appendTo(tr);
     $('<th  data-sort-column="true">' + 'Charge Fee($)' + '</th>').appendTo(tr);
@@ -362,6 +363,7 @@ function showUserReservation(reservation_data, userID) {
 }
 
 function showReservationTableList(reservation_data, userID, tbody){
+//usingSlot    
     var tr;
     var i = 0;
     if (reservation_data.length === 0){
@@ -383,6 +385,7 @@ function showReservationTableList(reservation_data, userID, tbody){
                     }
                     
                     $('<td>' + arr.reservationStatus + '</td>').appendTo(tr);
+                    $('<td>' + (arr.usingSlot + 1) + '</td>').appendTo(tr);
                     $('<td>' + getDateString(arr.parkingTime) + '</td>').appendTo(tr);
                     $('<td>' + getDateString(arr.leaveTime) + '</td>').appendTo(tr);
                     $('<td>' + arr.chargingFee + '</td>').appendTo(tr);
@@ -404,6 +407,7 @@ function showReservationTableList(reservation_data, userID, tbody){
                 }
                 
                 $('<td>' + arr.reservationStatus + '</td>').appendTo(tr);
+                $('<td>' + (arr.usingSlot + 1) + '</td>').appendTo(tr);
                 $('<td>' + getDateString(arr.parkingTime) + '</td>').appendTo(tr);
                 $('<td>' + getDateString(arr.leaveTime) + '</td>').appendTo(tr);
                 $('<td>' + arr.chargingFee + '</td>').appendTo(tr);
@@ -491,8 +495,6 @@ function makeGarageTableList(garage_data, tbody){
     } else {
         garage_data.forEach(function(arr){
                 console.log(arr);
-
-                //gGarages.push(arr.garageName);
 
                 if(access_priority=="attendant" || access_priority=="owner") {
                     tr1 = $('<tr></tr>').addClass('tableRow').appendTo(tbody);
