@@ -18,11 +18,11 @@ public interface IManagementDBTransaction {
 
     int getEmptyGarageID(String garageName);
 
-    int getReservedGarageID(String garageName);
+    int getReservedGarageID(String confirmInformation);
 
     int getEmptyGarageSlotNum(int garageID);
 
-    int getReservedGarageSlotNum(int garageID);
+    int getReservedGarageSlotNum(String confirmInformation);
 
     String getGarageName(int garageID);
 
@@ -38,7 +38,7 @@ public interface IManagementDBTransaction {
 
     void updateWrongParkingSlot(int garageID, int slot, String lastConfirmInfo) throws Exception;
 
-    boolean parkingCar(String str, int garageID, int slot);
+    boolean parkingCar(String str);
 
     void leaveWithParking(int garageID, int slot);
 

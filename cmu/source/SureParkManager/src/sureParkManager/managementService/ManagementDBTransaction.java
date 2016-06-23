@@ -143,26 +143,18 @@ public class ManagementDBTransaction implements IManagementDBTransaction{
         return ret;
     }
 
-    public int getReservedGarageID(String garageName) {
+    public int getReservedGarageID(String confirmInformation) {
         int ret = -1;
 
-        DBCollection garageColl = db.getCollection("garages");
+        DBCollection garageColl = db.getCollection("reservations");
 
-        BasicDBObject whereQuery = new BasicDBObject("garageName", garageName);
+        BasicDBObject whereQuery = new BasicDBObject("confirmInformation", confirmInformation);
         DBCursor cursor = garageColl.find(whereQuery);
 
         while(cursor.hasNext()) {
             DBObject dbObj = cursor.next();
 
-            BasicDBList dbList = (BasicDBList)dbObj.get("slotStatus");
-
-            int index = dbList.indexOf("Reserved");
-
-            if (index < 0)
-                continue;
-
-            ret = (int)dbObj.get("garageNumber");
-            break;
+            ret = (int) dbObj.get("usingGarageNumber");
         }
 
         return ret;
@@ -193,26 +185,18 @@ public class ManagementDBTransaction implements IManagementDBTransaction{
         return ret;
     }
 
-    public int getReservedGarageSlotNum(int garageID) {
+    public int getReservedGarageSlotNum(String confirmInformation) {
         int ret = -1;
 
-        DBCollection garageColl = db.getCollection("garages");
+        DBCollection garageColl = db.getCollection("reservations");
 
-        BasicDBObject whereQuery = new BasicDBObject("garageNumber", garageID);
+        BasicDBObject whereQuery = new BasicDBObject("confirmInformation", confirmInformation);
         DBCursor cursor = garageColl.find(whereQuery);
 
         while(cursor.hasNext()) {
             DBObject dbObj = cursor.next();
 
-            BasicDBList dbList = (BasicDBList)dbObj.get("slotStatus");
-
-            int index = dbList.indexOf("Reserved");
-
-            if (index < 0)
-                continue;
-
-            ret = index;
-            break;
+            ret = (int) dbObj.get("usingSlot");
         }
 
         return ret;
@@ -396,7 +380,7 @@ public class ManagementDBTransaction implements IManagementDBTransaction{
         }
     }
 
-    public boolean parkingCar(String str, int garageID, int slot) {
+    public boolean parkingCar(String str) {
         boolean ret = false;
 
         SimpleDateFormat dateFormat = new SimpleDateFormat(simpleDateFormat);
@@ -415,8 +399,6 @@ public class ManagementDBTransaction implements IManagementDBTransaction{
             updateObj.append("reservationStatus", "parked");
             String parkingTime = dateFormat.format(new Date());
             updateObj.append("parkingTime", parkingTime);
-            updateObj.append("usingGarageNumber", garageID);
-            updateObj.append("usingSlot", slot);
 
             updateQuery.append("$set", updateObj);
 
@@ -519,6 +501,8 @@ public class ManagementDBTransaction implements IManagementDBTransaction{
             updateQuery.append("$set", updateObj);
 
             coll.update(whereQuery, updateQuery);
+
+            updateGarageSlot(garageID, slot, GarageInfo.kGarageInfoSlotStatusOpen);
         }
     }
 

@@ -91,17 +91,17 @@ public class ManagementProtocol implements IManagementProtocol {
         if (subJsonObject != null) {
             int garageID, slot;
 
-            garageID = mgtDBtr.getReservedGarageID((String)subJsonObject.get("usingGarage"));
+            garageID = mgtDBtr.getReservedGarageID((String)subJsonObject.get("confirmInformation"));
             if (garageID < 0) {
                 retJsonObj.put("parkingCar", "FAIL");
             } else {
 
-                slot = mgtDBtr.getReservedGarageSlotNum(garageID);
+                slot = mgtDBtr.getReservedGarageSlotNum((String)subJsonObject.get("confirmInformation"));
                 if (slot < 0) {
                     retJsonObj.put("parkingCar", "FAIL");
                 } else {
                     // DB Update
-                    boolean ret = mgtDBtr.parkingCar(subJsonObject.toJSONString(), garageID, slot);
+                    boolean ret = mgtDBtr.parkingCar(subJsonObject.toJSONString());
 
                     if (ret) {
                         System.out.println("Garage ID " + garageID + ", Empty slot number is " + slot);
