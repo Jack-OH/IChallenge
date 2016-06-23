@@ -20,12 +20,16 @@
 #include <Servo.h> 
 #include <string.h> 
 #include <stdlib.h> 
+#include <avr/wdt.h>
 
 #define Open  90
 #define Close 0
 #define PORTID 5001             // IP socket port#
 
 char ssid[] = "LGArchi";           // The network SSID for CMU unsecure network
+//char ssid[] = "LGArchi_Guest1";
+char wifiPass[] = "16swarchitect";
+char spID[6] = {'$','0','0','0','0'};
 int status = WL_IDLE_STATUS;   // Network connection status
 WiFiServer server(PORTID);     // Server connection and port
 char inChar;                   // Character read from client
@@ -51,41 +55,58 @@ byte mac[6];                   // Wifi shield MAC address
 #define EntryBeamRcvr  34 
 #define ExitBeamRcvr   35
 
+#define	STALL_LED 0;
+#define	EXIT_LED 1;
+#define	ENTRY_LED 2;
+#define	EXIT_SERVO 3;
+#define	ENTRY_SERVO 4;
 
-long  Stall1SensorVal;
-long  Stall2SensorVal;
-long  Stall3SensorVal;
-long  Stall4SensorVal;
-long  Stall1SensorValOffset;
-long  Stall2SensorValOffset;
-long  Stall3SensorValOffset;
-long  Stall4SensorValOffset;
-int EntryBeamState;
-int ExitBeamState;
+#define	STALL_SENSOR 0;
+#define	EXIT_SENSOR 1;
+#define	ENTRY_SENSOR 2;
+
+
+long  StallSensorVal[4];
+long  StallSensorValOffset[4];
+
+
 int	heartBitCount;
-//int	ExitTimer;
+unsigned long	timer_save;
+int	ExitTimer;
 
 Servo EntryGateServo;
 Servo ExitGateServo;
 long ProximityVal(int);
-typedef	struct {	/* optimize control bit-field definition */
-	unsigned char	s0;
-	unsigned char	s1;
-	unsigned char	s2;
-	unsigned char	s3;
-	unsigned char	s4;
-	unsigned char	s5;
-	unsigned char	s6;
-	unsigned char	s7;
-} SP_STALL_NUM;
-SP_STALL_NUM sp_stall_num;
 
 typedef	struct {	/* optimize control bit-field definition */
-	unsigned char	s0;
-	unsigned char	s1;
-	unsigned char	s2;
-	unsigned char	s3;
-	unsigned char	s4;
+	unsigned char	deviceType; //0 stall led, 1 exit led, 2 entry led, 3 exit servo, 4 entry servo
+	unsigned char	state; //1 ON, 0 OFF
+	unsigned char	oldState; //1 ON, 0 OFF
+} SP_NON_FB_DEVICE;
+SP_NON_FB_DEVICE sp_non_fb_devices[10];
+
+typedef	struct {	/* optimize control bit-field definition */
+	unsigned char	deviceType; //0 stall sensor, 1 exit sensor, 2 entry sensor
+	unsigned char	state; //1 : gate broken, stall occupied, 0 : gate not broken, stall not occupied
+	unsigned char	oldState; //1 : gate broken, stall occupied, 0 : gate not broken, stall not occupied
+} SP_FB_DEVICE;
+SP_FB_DEVICE sp_fb_devices[10];
+
+//typedef	struct {	/* optimize control bit-field definition */
+//	unsigned char	s0;
+//	unsigned char	s1;
+//	unsigned char	s2;
+//	unsigned char	s3;
+//	unsigned char	s4;
+//	unsigned char	s5;
+//	unsigned char	s6;
+//	unsigned char	s7;
+//} SP_STALL_NUM;
+//SP_STALL_NUM sp_stall_num;
+//sp_fb_devices[0].state
+
+typedef	struct {	/* optimize control bit-field definition */
+	unsigned char	s[5];
 } SP_STALL_STATE;
 SP_STALL_STATE sp_stall_state;     
 SP_STALL_STATE sp_stall_state_old;     
@@ -108,6 +129,8 @@ SP_STALL_LED sp_stall_led;
 long StallSensorValAvg[4]={0,};
 char f_stallStateChange = 0; 
 char f_stallStateChange_save = 0;
+unsigned char ParkingState = 0;
+char stallNum = 0;
 
 void setup() 
 { 
@@ -152,10 +175,10 @@ int delayvalue = 1000;
   ExitGateServo.write(Close);  
   delay( delayvalue );    
   StallSensorOffset();   
-  Stall1SensorValOffset = 216;
-  Stall2SensorValOffset = 151;
-  Stall3SensorValOffset = 129;
-  Stall4SensorValOffset = 72; 
+  StallSensorValOffset[0] = 216;
+  StallSensorValOffset[1] = 151;
+  StallSensorValOffset[2] = 129;
+  StallSensorValOffset[3] = 72; 
     // Debug terminal
   Serial.begin(9600);
   
@@ -165,6 +188,7 @@ int delayvalue = 1000;
      Serial.print("Attempting to connect to SSID: ");
      Serial.println(ssid);
      status = WiFi.begin(ssid);
+     //status = WiFi.begin(ssid, wifiPass);
    }  
    
    // Print the basic connection and network information.
@@ -173,19 +197,18 @@ int delayvalue = 1000;
    // Start the server and print and message for the user.
    server.begin();
    Serial.println("The Server is started.");
+   wdt_enable(WDTO_8S);
 } 
 
 void loop() 
 { 
-	LED_ControlEntry();
-	LED_ControlExit();
-	LED_ControlStall();
-	StallSensor();
-	EntryServo();
-	ExitServo();    
+	wdt_reset(); 
+	//while(1){};	
+	
 	Comm(); 
-	heartBit();	//heartbit send every about 3sec
+	//heartBit();	//heartbit send every about 3sec
 	//delay(100); 
+	timer();
 } 
 
 /*********************************************************************
@@ -214,6 +237,8 @@ void InitEntryExitLEDs()
     
 char EntryCheck(void)
 {
+	int EntryBeamState;
+	
  	EntryBeamState = digitalRead(EntryBeamRcvr);  // Here we read the state of the
                                                 // entry beam.
 
@@ -231,6 +256,8 @@ char EntryCheck(void)
 
 char ExitCheck(void)
 {
+	int ExitBeamState;
+	
 	 ExitBeamState = digitalRead(ExitBeamRcvr);  // Here we read the state of the
                                               // exit beam.  
   if (ExitBeamState == LOW)  // if ExitBeamState is LOW the beam is broken
@@ -284,7 +311,7 @@ void LED_ControlStall(void)
 {
 	//int delayvalue = 100;
 	
-	if(sp_stall_num.s1 == 1)
+	if(sp_fb_devices[0].state == 1)
 	{
 		Serial.println( "Turn on stall 1 LED" );
 		digitalWrite(ParkingStall1LED, HIGH);
@@ -295,7 +322,7 @@ void LED_ControlStall(void)
 		digitalWrite(ParkingStall1LED, LOW);
 	}
 
-	if(sp_stall_num.s2 == 1)
+	if(sp_fb_devices[1].state == 1)
 	{
 		Serial.println( "Turn on stall 2 LED" );
 		digitalWrite(ParkingStall2LED, HIGH);
@@ -305,7 +332,7 @@ void LED_ControlStall(void)
 	{
 		digitalWrite(ParkingStall2LED, LOW);
 	}
-	if(sp_stall_num.s3 == 1)
+	if(sp_fb_devices[2].state == 1)
 	{
 		Serial.println( "Turn on stall 3 LED" );
 		digitalWrite(ParkingStall3LED, HIGH);
@@ -315,7 +342,7 @@ void LED_ControlStall(void)
 	{
 		digitalWrite(ParkingStall3LED, LOW);
 	}
-	if(sp_stall_num.s4 == 1)
+	if(sp_fb_devices[3].state == 1)
 	{	
 		Serial.println( "Turn on stall 4 LED" );
 		digitalWrite(ParkingStall4LED, HIGH);
@@ -334,15 +361,15 @@ void StallSensor(void)
 
 	for(i=0;i<16;i++)
 	{
-		Stall1SensorVal = ProximityVal(Stall1SensorPin); //Check parking space 1   	    
-	    Stall2SensorVal = ProximityVal(Stall2SensorPin); //Check parking space 2	
-	    Stall3SensorVal = ProximityVal(Stall3SensorPin); //Check parking space 3	
-	    Stall4SensorVal =  ProximityVal(Stall4SensorPin); //Check parking space 4
-	    	    
-	    sum[0] = sum[0] + Stall1SensorVal;
-	    sum[1] = sum[1] + Stall2SensorVal;
-	    sum[2] = sum[2] + Stall3SensorVal;
-	    sum[3] = sum[3] + Stall4SensorVal;
+	    StallSensorVal[0] = ProximityVal(Stall1SensorPin); //Check parking space 1    
+	    StallSensorVal[1] = ProximityVal(Stall2SensorPin); //Check parking space 2
+	    StallSensorVal[2] = ProximityVal(Stall3SensorPin); //Check parking space 3
+	    StallSensorVal[3] = ProximityVal(Stall4SensorPin); //Check parking space 4
+	    
+	    sum[0] = sum[0] + StallSensorVal[0];
+	    sum[1] = sum[1] + StallSensorVal[1];
+	    sum[2] = sum[2] + StallSensorVal[2];
+	    sum[3] = sum[3] + StallSensorVal[3];
 	}
 	StallSensorValAvg[0] = sum[0]>>4;
 	StallSensorValAvg[1] = sum[1]>>4;
@@ -352,53 +379,54 @@ void StallSensor(void)
 	Serial.print("  Stall 1 avg = ");
 	Serial.print(StallSensorValAvg[0]);    
 	Serial.print("  Stall 1 offset = ");
-	Serial.print(Stall1SensorValOffset);
+	Serial.print(StallSensorValOffset[0]);
 	Serial.print("  Stall 2 avg = ");
 	Serial.print(StallSensorValAvg[1]);  
 	Serial.print("  Stall 2 offset = ");
-	Serial.print(Stall2SensorValOffset);  
+	Serial.print(StallSensorValOffset[1]);  
 	Serial.print("  Stall 3 avg = ");
 	Serial.print(StallSensorValAvg[2]); 
 	Serial.print("  Stall 3 offset = ");
-	Serial.print(Stall3SensorValOffset);   
+	Serial.print(StallSensorValOffset[2]);   
 	Serial.print("  Stall 4 avg = ");
 	Serial.print(StallSensorValAvg[3]); 
 	Serial.print("  Stall 4 offset = ");
-	Serial.println(Stall4SensorValOffset);  
+	Serial.println(StallSensorValOffset[3]);  
+	
 	 
-	if(Stall1SensorValOffset - StallSensorValAvg[0] >= 30) 
+	if(StallSensorValOffset[0] - StallSensorValAvg[0] >= 30) 
 	{
-		sp_stall_state.s1 = 1;  
+		sp_stall_state.s[0] = 1;  
 		
 	}
-	else sp_stall_state.s1 = 0;  
+	else sp_stall_state.s[0] = 0;  
 	
-	if(Stall2SensorValOffset - StallSensorValAvg[1] >= 30) 
+	if(StallSensorValOffset[1] - StallSensorValAvg[1] >= 30) 
 	{
-		sp_stall_state.s2 = 1; 
+		sp_stall_state.s[1] = 1; 
 	}
-	else sp_stall_state.s2 = 0;   
+	else sp_stall_state.s[1] = 0;   
 	
-	if(Stall3SensorValOffset - StallSensorValAvg[2] >= 30) 
+	if(StallSensorValOffset[2] - StallSensorValAvg[2] >= 30) 
 	{
-		sp_stall_state.s3 = 1;  
+		sp_stall_state.s[2] = 1;  
 	}
-	else sp_stall_state.s3 = 0;  
+	else sp_stall_state.s[2] = 0;  
 	
-	if(Stall4SensorValOffset - StallSensorValAvg[3] >= 13) 
+	if(StallSensorValOffset[3] - StallSensorValAvg[3] >= 13) 
 	{
-		sp_stall_state.s4 = 1;  
+		sp_stall_state.s[3] = 1;  
 	}
-	else sp_stall_state.s4 = 0;      
-	
-	
-	if(sp_stall_state_old.s1 != sp_stall_state.s1 || sp_stall_state_old.s2 != sp_stall_state.s2 || sp_stall_state_old.s3 != sp_stall_state.s3 || sp_stall_state_old.s4 != sp_stall_state.s4)
+	else sp_stall_state.s[3] = 0;      
+		
+	if(((sp_stall_state_old.s[0] != sp_stall_state.s[0])&& stallNum >= 1) || ((sp_stall_state_old.s[1] != sp_stall_state.s[1])&& stallNum >= 2) || ((sp_stall_state_old.s[2] != sp_stall_state.s[2])&& stallNum >= 3) || ((sp_stall_state_old.s[3] != sp_stall_state.s[3])&& stallNum >= 4))
 	{
 		f_stallStateChange = 1;
-		sp_stall_num.s1 = 0; //led
-		sp_stall_num.s2 = 0;
-		sp_stall_num.s3 = 0;
-		sp_stall_num.s4 = 0;
+		sp_fb_devices[0].state = 0; //led
+		sp_fb_devices[1].state = 0;
+		sp_fb_devices[2].state = 0;
+		sp_fb_devices[3].state = 0;
+		sp_gate_state.entry = 0;
 	}  
 	sp_stall_state_old = sp_stall_state;
 }
@@ -410,33 +438,33 @@ void StallSensorOffset(void)
 	long sum[4]={0,};
 	for(i=0;i<50;i++)
 	{
-		Stall1SensorVal = ProximityVal(Stall1SensorPin); //Check parking space 1    
-	    Stall2SensorVal = ProximityVal(Stall2SensorPin); //Check parking space 2
-	    Stall3SensorVal = ProximityVal(Stall3SensorPin); //Check parking space 3
-	    Stall4SensorVal =  ProximityVal(Stall4SensorPin); //Check parking space 4
+		StallSensorVal[0] = ProximityVal(Stall1SensorPin); //Check parking space 1    
+	    StallSensorVal[1] = ProximityVal(Stall2SensorPin); //Check parking space 2
+	    StallSensorVal[2] = ProximityVal(Stall3SensorPin); //Check parking space 3
+	    StallSensorVal[3] = ProximityVal(Stall4SensorPin); //Check parking space 4
 	    
-	    sum[0] = sum[0] + Stall1SensorVal;
-	    sum[1] = sum[1] + Stall2SensorVal;
-	    sum[2] = sum[2] + Stall3SensorVal;
-	    sum[3] = sum[3] + Stall4SensorVal;
+	    sum[0] = sum[0] + StallSensorVal[0];
+	    sum[1] = sum[1] + StallSensorVal[1];
+	    sum[2] = sum[2] + StallSensorVal[2];
+	    sum[3] = sum[3] + StallSensorVal[3];
 	}
-	Stall1SensorValOffset = sum[0]/50;
-	Stall2SensorValOffset = sum[1]/50;
-	Stall3SensorValOffset = sum[2]/50;
-	Stall4SensorValOffset = sum[3]/50;
+	StallSensorValOffset[0] = sum[0]/50;
+	StallSensorValOffset[1] = sum[1]/50;
+	StallSensorValOffset[2] = sum[2]/50;
+	StallSensorValOffset[3] = sum[3]/50;
 	Serial.print("  Stall 1 offset = ");
-    Serial.print(Stall1SensorValOffset);
+    Serial.print(StallSensorValOffset[0]);
     Serial.print("  Stall 2 offset = ");
-    Serial.print(Stall2SensorValOffset);
+    Serial.print(StallSensorValOffset[1]);
     Serial.print("  Stall 3 offset = ");
-    Serial.print(Stall3SensorValOffset);
+    Serial.print(StallSensorValOffset[2]);
     Serial.print("  Stall 4 offset = ");
-    Serial.println(Stall4SensorValOffset);
+    Serial.println(StallSensorValOffset[3]);
     
-    StallSensorValAvg[0]=Stall1SensorValOffset;
-    StallSensorValAvg[1]=Stall2SensorValOffset;
-    StallSensorValAvg[2]=Stall3SensorValOffset;
-    StallSensorValAvg[3]=Stall4SensorValOffset;
+    StallSensorValAvg[0]=StallSensorValOffset[0];
+    StallSensorValAvg[1]=StallSensorValOffset[1];
+    StallSensorValAvg[2]=StallSensorValOffset[2];
+    StallSensorValAvg[3]=StallSensorValOffset[3];
 }
 
 void EntryServo(void)
@@ -466,7 +494,7 @@ void EntryServo(void)
 void ExitServo(void)
 {
 	static char f_closeAfterOpen = 0;
-	static int ExitTimer = 0;
+	//static int ExitTimer = 0;
 	if(ExitCheck()==1)	
 	{
 		Serial.println( "Open Exit Gate" );    //Here we open the exit gate
@@ -479,16 +507,35 @@ void ExitServo(void)
 	}
 	else
 	{ 
-		if(ExitTimer >= 5)
-		{
+		//Serial.println( "*************************" );
+		//Serial.println( f_closeAfterOpen+'0');    //Here we open the exit gate
+		//Serial.println( f_stallStateChange_save+'0');    //Here we open the exit gate
+		//Serial.println( stallNum+'0');    //Here we open the exit gate
+		
+		//Serial.println( "*************************" );
+		
 			//delay( delayvalue ); 
-			if(f_closeAfterOpen == 1)	f_stallStateChange_save = 0;
-			f_closeAfterOpen = 0;
+			if(f_closeAfterOpen == 1)
+			{
+				if(f_stallStateChange_save == 1)
+				{
+					ParkingState = 1; //normal parking
+				}	
+				else
+				{
+					ParkingState = 2; //bypass
+				}
+				f_stallStateChange_save = 0;
+				f_closeAfterOpen = 0;
+				
+			}
+		if(ExitTimer >= 3)
+		{
 			Serial.println( "Close Exit Gate" );   //Here we close the exit gate
 			ExitGateServo.write(Close);
 			//delay( delayvalue );
 		}
-		ExitTimer++;
+		//ExitTimer++;
 	}
 }
 
@@ -499,13 +546,14 @@ void Comm(void)
 	static char byteCount = 0;
 	static char byte6th = 0;
 	static char readEnable = 0;
-	static char spID[6] = {'$','0','0','0','0'};
+	
 	//char head[9]="$0001S";
 	char temp[12]={0,};
 	static char firstConnect = 0;
-	static char stallNum;
+
 	unsigned char clientStringCount;
-	
+	DevieControl();
+	Observer();
    // When the client connects we send them a couple of messages.
    if (client) 
    {
@@ -591,27 +639,27 @@ void Comm(void)
 			  			
 			  			strcpy(temp,spID); //initial stall state
 			        	temp[5] = 'S';
-			        	temp[6] = '0'+sp_stall_state.s1;
-			        	temp[7] = '0'+sp_stall_state.s2;
-			        	temp[8] = '0'+sp_stall_state.s3;
-			        	temp[9] = '0'+sp_stall_state.s4;
+			        	temp[6] = '0'+sp_stall_state.s[0];
+			        	temp[7] = '0'+sp_stall_state.s[1];
+			        	temp[8] = '0'+sp_stall_state.s[2];
+			        	temp[9] = '0'+sp_stall_state.s[3];
 			        	temp[10] = '\n';
 			        	client.println(temp);
 			        	
 			        	break; 
 			        
 			        case 'L':    
-			        	if(inChar - '0' == 0)	sp_stall_num.s1 = 1;
-			        	if(inChar - '0' == 1)	sp_stall_num.s2 = 1;
-			        	if(inChar - '0' == 2)	sp_stall_num.s3 = 1;
-			        	if(inChar - '0' == 3)	sp_stall_num.s4 = 1;
+			        	if(inChar - '0' == 0)	sp_fb_devices[0].state = 1;
+			        	if(inChar - '0' == 1)	sp_fb_devices[1].state = 1;
+			        	if(inChar - '0' == 2)	sp_fb_devices[2].state = 1;
+			        	if(inChar - '0' == 3)	sp_fb_devices[3].state = 1;
 			        	Serial.println("==============================");
 			        	Serial.println("Received Stall LED Command");
 			        	Serial.println("==============================");
-			        	Serial.println(sp_stall_num.s1);
-			        	Serial.println(sp_stall_num.s2);
-			        	Serial.println(sp_stall_num.s3);
-			        	Serial.println(sp_stall_num.s4);
+			        	Serial.println(sp_fb_devices[0].state);
+			        	Serial.println(sp_fb_devices[1].state);
+			        	Serial.println(sp_fb_devices[2].state);
+			        	Serial.println(sp_fb_devices[3].state);
 			       		break; 
 			        
 			        case 'E': //Entry Gate Commend
@@ -626,16 +674,16 @@ void Comm(void)
 			        	//client.println("$0001S0001\n"); 
 			        	Serial.println("Sent : stall info");
 			        	//Serial.print("$0001S");
-			        	Serial.print(sp_stall_state.s1);
-			        	Serial.print(sp_stall_state.s2);
-			        	Serial.print(sp_stall_state.s3);
-			        	Serial.println(sp_stall_state.s4);
+			        	Serial.print(sp_stall_state.s[0]);
+			        	Serial.print(sp_stall_state.s[1]);
+			        	Serial.print(sp_stall_state.s[2]);
+			        	Serial.println(sp_stall_state.s[3]);
 			        	strcpy(temp,spID);
 			        	temp[5] = 'S';
-			        	temp[6] = '0'+sp_stall_state.s1;
-			        	temp[7] = '0'+sp_stall_state.s2;
-			        	temp[8] = '0'+sp_stall_state.s3;
-			        	temp[9] = '0'+sp_stall_state.s4;
+			        	temp[6] = '0'+sp_stall_state.s[0];
+			        	temp[7] = '0'+sp_stall_state.s[1];
+			        	temp[8] = '0'+sp_stall_state.s[2];
+			        	temp[9] = '0'+sp_stall_state.s[3];
 			        	temp[10] = '\n';
 			        	client.println(temp);
 			        	Serial.println(temp); 
@@ -664,11 +712,12 @@ void Comm(void)
      	
     }    
 
-	if(ExitCheck() == 1) // broken
+	//if(ExitCheck() == 1) // broken
+	if(ParkingState > 0)
 	{
 		strcpy(temp,spID);
 		temp[5] = 'X';
-		if(f_stallStateChange_save == 1)	
+		if(ParkingState == 1)	
 		{
 			temp[6] = '1'; //exitgate OPEN 0 close, 1 open, 2 bypass open
 		}
@@ -684,10 +733,10 @@ void Comm(void)
 		Serial.println("===========Gatechange===================");
 		
 		temp[5] = 'S';
-		temp[6] = '0'+sp_stall_state.s1;
-		temp[7] = '0'+sp_stall_state.s2;
-		temp[8] = '0'+sp_stall_state.s3;
-		temp[9] = '0'+sp_stall_state.s4;
+		temp[6] = '0'+sp_stall_state.s[0];
+		temp[7] = '0'+sp_stall_state.s[1];
+		temp[8] = '0'+sp_stall_state.s[2];
+		temp[9] = '0'+sp_stall_state.s[3];
 		temp[10] = '\n';		
 		
 		client.println(temp);
@@ -695,12 +744,14 @@ void Comm(void)
 		Serial.println(temp); 
 		Serial.println("===========statechange or heartbit===================");
 		
-		sp_stall_num.s1 = 0; //led
-		sp_stall_num.s2 = 0;
-		sp_stall_num.s3 = 0;
-		sp_stall_num.s4 = 0;
+		sp_fb_devices[0].state = 0; //led
+		sp_fb_devices[1].state = 0;
+		sp_fb_devices[2].state = 0;
+		sp_fb_devices[3].state = 0;
+		ParkingState = 0;
+		heartBitCount = 0;
 	}
-	if(f_stallStateChange == 1 || heartBitCount >= 17)//heartbit send every about 10sec & send data
+	if(f_stallStateChange == 1 || heartBitCount >= 8)//heartbit send every about 10sec & send data
 	{
 		//client.flush();
 		//Serial.println(temp);
@@ -709,10 +760,10 @@ void Comm(void)
 		if(f_stallStateChange == 1)
 		{
 			temp[5] = 'S';
-			temp[6] = '0'+sp_stall_state.s1;
-			temp[7] = '0'+sp_stall_state.s2;
-			temp[8] = '0'+sp_stall_state.s3;
-			temp[9] = '0'+sp_stall_state.s4;
+			temp[6] = '0'+sp_stall_state.s[0];
+			temp[7] = '0'+sp_stall_state.s[1];
+			temp[8] = '0'+sp_stall_state.s[2];
+			temp[9] = '0'+sp_stall_state.s[3];
 			temp[10] = '\n';
 			EntryServo();
 			f_stallStateChange_save = f_stallStateChange;
@@ -738,8 +789,25 @@ void Comm(void)
 	
    } // if we are connected
 }
+/*char* ParkingState(void)
+{
+	char temp[12];
+	
+}*/
+void DevieControl(void)
+{
+	LED_ControlEntry();
+	LED_ControlExit();
+	LED_ControlStall();	
+	EntryServo();
+	ExitServo();    
+}
 
-void heartBit(void)
+void Observer(void)
+{
+	StallSensor();
+}
+/*void heartBit(void)
 {
 	heartBitCount++;
 	if(heartBitCount>=100)	heartBitCount = 0;
@@ -747,6 +815,49 @@ void heartBit(void)
 	//ExitTimer++;
 	//if(ExitTimer>=100)	ExitTimer = 0;
 	
+}*/
+
+
+void timer(void)
+{
+	unsigned long tempTime;
+
+	tempTime = millis();
+	//Serial.println(tempTime);
+	//Serial.println(timer_save);
+	if(tempTime - timer_save >= 10)
+	{
+   		timer_10ms((tempTime - timer_save)/10);
+	}
+   	timer_save = tempTime;
+   //prints time since program started   
+}
+
+void	timer_10ms(unsigned long temp_10msTime)
+{
+	static unsigned long ms10Timer;
+	ms10Timer = ms10Timer + temp_10msTime;
+	if(ms10Timer >= 100)
+	{
+		ms10Timer = 0;
+		timer_1second();
+	}
+}
+
+void	timer_1second(void)
+{
+	//static unsigned long time1sec;
+	//time1sec++;
+	//if(time1sec >= 100000) time1sec = 100000;
+	
+	heartBitCount++;
+	if(heartBitCount >= 1000) heartBitCount = 1000;
+	
+	ExitTimer++;
+	if(ExitTimer >= 1000) ExitTimer = 1000;
+	
+	//Serial.print("Time: ");
+	//Serial.println(time1sec);
 }
 
 /*********************************************************************
