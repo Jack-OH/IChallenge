@@ -330,8 +330,8 @@ $('#show_statistics').click(function() {
         drawBarChart(document.getElementById('average_occupancy'));
         drawLineChart(document.getElementById('peak_usage_hours'));
         drawBarChart1(document.getElementById("parking_hours"));
-        //drawBarChart2(document.getElementById("heavy_users"));
-        drawBarChart3(document.getElementById("heavy_users"));
+        drawBarChart2(document.getElementById("heavy_users"));
+        //drawBarChart3(document.getElementById("heavy_users"));
     }
 });
 
