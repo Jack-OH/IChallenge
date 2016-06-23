@@ -19,18 +19,15 @@ public class GarageInfo {
 	public GarageInfo() {
 	}
 	
-	public GarageInfo(int id, String name, String ip, int slotNum) {
+	public GarageInfo(int id, String name, String ip, int slotNum, ArrayList<Integer> slotStatus) {
 		this.id = id;
 		this.name = name;
 		this.ip = ip;
 		this.slotNum = slotNum;		
-		this.slotStatus = new ArrayList<Integer>();
-		
-		for( int i = 0 ; i < this.slotNum ; i++ )
-			this.slotStatus.add(0);
+		this.slotStatus = slotStatus;
 	}
 	
-	public String GarageSlotStatusIntToString(int slotStatus) {
+	public static String GarageSlotStatusIntToString(int slotStatus) {
 		String slotStatusStr = null;
 		
 		if (	 slotStatus == kGarageInfoSlotStatusOpen) 		slotStatusStr = new String("Open");
@@ -41,7 +38,7 @@ public class GarageInfo {
 		return slotStatusStr;
 	}
 	
-	public int GrageSlotStatusStringToInt(String slotStatus) {
+	public static int GrageSlotStatusStringToInt(String slotStatus) {
 		int slotStatusEnum = -1;
 		
 		if (	 slotStatus.equals("Open")) 	slotStatusEnum = kGarageInfoSlotStatusOpen;

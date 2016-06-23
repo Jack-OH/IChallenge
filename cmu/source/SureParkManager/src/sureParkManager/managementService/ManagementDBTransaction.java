@@ -72,8 +72,16 @@ public class ManagementDBTransaction implements IManagementDBTransaction{
 		DBCursor cursor = coll.find();
 		while (cursor.hasNext()) {
 			DBObject dbObj = cursor.next();
+            ArrayList<Integer> slotStatus = new ArrayList<>();
+
+            BasicDBList dbList = (BasicDBList)dbObj.get("slotStatus");
+            for(int i=0; i<(int)dbObj.get("slotNumber");i++) {
+                slotStatus.add(GarageInfo.GrageSlotStatusStringToInt((String)dbList.get(i)));
+            }
+
 			GarageInfo garageInfo = new GarageInfo((int) dbObj.get("garageNumber"), (String) dbObj.get("garageName"),
-					(String) dbObj.get("garageIP"), (int) dbObj.get("slotNumber"));
+					(String) dbObj.get("garageIP"), (int) dbObj.get("slotNumber"), slotStatus);
+
 			garageInfoList.add(garageInfo);
 		}
 
@@ -305,7 +313,6 @@ public class ManagementDBTransaction implements IManagementDBTransaction{
 	public void updateGarageSlot(int garageID, int slotIndex, int slotStatus) {
         SimpleDateFormat dateFormat = new SimpleDateFormat(simpleDateFormat);
 		DBCollection coll = db.getCollection("garages");
-		GarageInfo garageInfo = new GarageInfo();
 
         BasicDBObject whereQuery = new BasicDBObject("garageNumber", garageID);
 
@@ -317,7 +324,7 @@ public class ManagementDBTransaction implements IManagementDBTransaction{
             BasicDBList updateTimeList;
 
             slotStatusList = (BasicDBList)dbObj.get("slotStatus");
-            slotStatusList.put(slotIndex, garageInfo.GarageSlotStatusIntToString(slotStatus));
+            slotStatusList.put(slotIndex, GarageInfo.GarageSlotStatusIntToString(slotStatus));
 
             updateTimeList = (BasicDBList)dbObj.get("updateTime");
             String updateTime = dateFormat.format(new Date());
@@ -338,8 +345,6 @@ public class ManagementDBTransaction implements IManagementDBTransaction{
     public void updateWrongParkingSlot(int garageID, int slot, String lastConfirmInfo) throws Exception {
         DBCollection resvColl = db.getCollection("reservations");
         DBCollection garageColl = db.getCollection("garages");
-
-        GarageInfo garageInfo = new GarageInfo();
 
         BasicDBObject resvWhereQuery = new BasicDBObject();
 
@@ -363,7 +368,7 @@ public class ManagementDBTransaction implements IManagementDBTransaction{
                 slotStatusList = (BasicDBList) garageDbObj.get("slotStatus");
 
                 int oldSlot = (int) resvDbObj.get("usingSlot");  // original designate slot.
-                int oldStatus = garageInfo.GrageSlotStatusStringToInt((String) slotStatusList.get(slot)); // wrong parking slot's old status
+                int oldStatus = GarageInfo.GrageSlotStatusStringToInt((String) slotStatusList.get(slot)); // wrong parking slot's old status
 
                 updateGarageSlot(garageID, oldSlot, oldStatus); // original designate slot status update to wrong parking slot's old status
             }

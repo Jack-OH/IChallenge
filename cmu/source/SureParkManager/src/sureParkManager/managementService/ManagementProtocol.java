@@ -100,27 +100,28 @@ public class ManagementProtocol implements IManagementProtocol {
                 if (slot < 0) {
                     retJsonObj.put("parkingCar", "FAIL");
                 } else {
-                    // DB Update
-                    boolean ret = mgtDBtr.parkingCar(subJsonObject.toJSONString());
 
-                    if (ret) {
-                        System.out.println("Garage ID " + garageID + ", Empty slot number is " + slot);
+                    // open gate
+                    try {
+                        ctlService.openEntryGate(garageID, slot);
 
-                        SureParkConfig config = SureParkConfig.getInstance();
-                        config.setLastConfirmInfo((String)subJsonObject.get("confirmInformation"));
+                        // DB Update
+                        boolean ret = mgtDBtr.parkingCar(subJsonObject.toJSONString());
 
-                        // open gate
-                        try {
-                            ctlService.openEntryGate(garageID, slot);
+                        if (ret) {
+                            System.out.println("Garage ID " + garageID + ", Reserved slot number is " + slot);
 
-                            retJsonObj.put("parkingCar", "OK");
-                        } catch (Exception e) {
-                            System.err.println("Cannot control facility!!!");
+                            SureParkConfig config = SureParkConfig.getInstance();
+                            config.setLastConfirmInfo((String)subJsonObject.get("confirmInformation"));
+                        }
+                        else
+                        {
                             retJsonObj.put("parkingCar", "FAIL");
                         }
-                    }
-                    else
-                    {
+
+                        retJsonObj.put("parkingCar", "OK");
+                    } catch (Exception e) {
+                        System.err.println("Cannot control facility!!!");
                         retJsonObj.put("parkingCar", "FAIL");
                     }
                 }
