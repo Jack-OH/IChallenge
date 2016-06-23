@@ -18,14 +18,21 @@ module.exports = function TransManager() {
 		socket.on('data', function(recvData) {
 			console.log('Received!!: ' + recvData);
 
-			var temp = JSON.parse(recvData);
-	        if(temp.setGarage !== undefined  || 
-	        	temp.parkingCar !== undefined || 
-	        	temp.newReservation !== undefined ) {
+			try {
+				var temp = JSON.parse(recvData);
+		        if(temp.setGarage !== undefined  || 
+		        	temp.parkingCar !== undefined || 
+		        	temp.newReservation !== undefined ||
+		        	temp.newGarage != undefined ) {
 
-		        callback(null, JSON.stringify(recvData));
-		    	socket.destroy();
-	    	}
+			        callback(null, JSON.stringify(recvData));
+			    	socket.destroy();
+		    	}
+			} catch(error) {
+				console.log(error.message);
+			}
+
+			
 		});
 
 		socket.on('close', function() {
@@ -49,17 +56,22 @@ module.exports = function TransManager() {
 
 		socket.on('data', function(recvData) {
 			console.log('Received: ' + recvData);
-			
-	        var temp = JSON.parse(recvData);
-        
-	        if(temp.wrongParking !== undefined  || 
-	        	temp.detectFailure !== undefined || 
-	        	temp.updateSlotStatus !== undefined ) {
 
-	           	callback(null, recvData);
-	            socket.destroy(); // kill client after server's response
-	        	
-	        }        
+			try {
+			
+		        var temp = JSON.parse(recvData);
+	        
+		        if(temp.wrongParking !== undefined  || 
+		        	temp.detectFailure !== undefined || 
+		        	temp.updateSlotStatus !== undefined ) {
+
+		           	callback(null, recvData);
+		            socket.destroy(); // kill client after server's response
+		        	
+		        }
+		    } catch (error) {
+		    	console.log(error.message);
+		    }
 		});
 
 		socket.on('close', function() {
