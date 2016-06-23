@@ -18,7 +18,11 @@ public interface IManagementDBTransaction {
 
     int getEmptyGarageID(String garageName);
 
+    int getReservedGarageID(String garageName);
+
     int getEmptyGarageSlotNum(int garageID);
+
+    int getReservedGarageSlotNum(int garageID);
 
     String getGarageName(int garageID);
 

@@ -71,8 +71,6 @@ public class FacilityPacketReader extends Thread {
 						mgrFacility.updateSlotStatus(mInfo.facilityId, i, status);
 					} else if ( status != info.slotStatus.get(i) ) {
 
-						mgrFacility.updateSlotStatus(mInfo.facilityId, i, status);
-						
 						if( status == 1 ) {
 							// parking a car!!
 							if( i == parkingSlotIndex ) {
@@ -87,6 +85,8 @@ public class FacilityPacketReader extends Thread {
 							mgrFacility.leaveWithParking(mInfo.facilityId, i);
 							System.out.println("------------> leave garage slotid=" + i);
 						}
+
+						mgrFacility.updateSlotStatus(mInfo.facilityId, i, status);
 					}
 				} //end for
 				

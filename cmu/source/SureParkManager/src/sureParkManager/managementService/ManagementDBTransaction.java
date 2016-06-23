@@ -143,6 +143,31 @@ public class ManagementDBTransaction implements IManagementDBTransaction{
         return ret;
     }
 
+    public int getReservedGarageID(String garageName) {
+        int ret = -1;
+
+        DBCollection garageColl = db.getCollection("garages");
+
+        BasicDBObject whereQuery = new BasicDBObject("garageName", garageName);
+        DBCursor cursor = garageColl.find(whereQuery);
+
+        while(cursor.hasNext()) {
+            DBObject dbObj = cursor.next();
+
+            BasicDBList dbList = (BasicDBList)dbObj.get("slotStatus");
+
+            int index = dbList.indexOf("Reserved");
+
+            if (index < 0)
+                continue;
+
+            ret = (int)dbObj.get("garageNumber");
+            break;
+        }
+
+        return ret;
+    }
+
     public int getEmptyGarageSlotNum(int garageID) {
         int ret = -1;
 
@@ -157,6 +182,31 @@ public class ManagementDBTransaction implements IManagementDBTransaction{
             BasicDBList dbList = (BasicDBList)dbObj.get("slotStatus");
 
             int index = dbList.indexOf("Open");
+
+            if (index < 0)
+                continue;
+
+            ret = index;
+            break;
+        }
+
+        return ret;
+    }
+
+    public int getReservedGarageSlotNum(int garageID) {
+        int ret = -1;
+
+        DBCollection garageColl = db.getCollection("garages");
+
+        BasicDBObject whereQuery = new BasicDBObject("garageNumber", garageID);
+        DBCursor cursor = garageColl.find(whereQuery);
+
+        while(cursor.hasNext()) {
+            DBObject dbObj = cursor.next();
+
+            BasicDBList dbList = (BasicDBList)dbObj.get("slotStatus");
+
+            int index = dbList.indexOf("Reserved");
 
             if (index < 0)
                 continue;
@@ -302,7 +352,11 @@ public class ManagementDBTransaction implements IManagementDBTransaction{
 	}
 
     public void updateWrongParkingSlot(int garageID, int slot, String lastConfirmInfo) throws Exception {
-        DBCollection coll = db.getCollection("reservations");
+        DBCollection resvColl = db.getCollection("reservations");
+        DBCollection garageColl = db.getCollection("garages");
+
+        GarageInfo garageInfo = new GarageInfo();
+
 
         BasicDBObject whereQuery = new BasicDBObject();
 
@@ -310,12 +364,23 @@ public class ManagementDBTransaction implements IManagementDBTransaction{
         whereQuery.append("usingGarageNumber", garageID);
         whereQuery.append("confirmInformation", lastConfirmInfo);
 
-        DBCursor cursor = coll.find(whereQuery);
+        DBCursor cursor = resvColl.find(whereQuery);
 
         if (cursor.hasNext()) {
+            DBObject dbObj = cursor.next();
+
+            BasicDBList slotStatusList;
+            slotStatusList = (BasicDBList)dbObj.get("slotStatus");
+
+            int oldSlot = (int)dbObj.get("usingSlot");  // original designate slot.
+            int oldStatus = garageInfo.GrageSlotStatusStringToInt((String)slotStatusList.get(slot)); // wrong parking slot's old status
+
+
+            updateGarageSlot(garageID, oldSlot, oldStatus); // original designate slot status update to wrong parking slot's old status
+
             BasicDBObject updateQuery = new BasicDBObject("$set", new BasicDBObject("usingSlot", slot));
 
-            coll.update(whereQuery, updateQuery);
+            resvColl.update(whereQuery, updateQuery);
         }
     }
 

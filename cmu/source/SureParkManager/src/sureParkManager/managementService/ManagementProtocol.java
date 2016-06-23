@@ -2,6 +2,7 @@ package sureParkManager.managementService;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import sureParkManager.common.GarageInfo;
 import sureParkManager.common.SureParkConfig;
 import sureParkManager.controlService.ControlService;
 import sureParkManager.controlService.IControlService;
@@ -55,8 +56,24 @@ public class ManagementProtocol implements IManagementProtocol {
 
         subJsonObject = (JSONObject) jsonObject.get("newReservation");
         if (subJsonObject != null) {
-            mgtDBtr.addNewReservation(subJsonObject.toJSONString());
-            retJsonObj.put("newReservation", "OK");
+            int garageID, slot;
+
+            garageID = mgtDBtr.getEmptyGarageID((String)subJsonObject.get("usingGarage"));
+            if (garageID < 0) {
+                retJsonObj.put("parkingCar", "FAIL");
+            } else {
+
+                slot = mgtDBtr.getEmptyGarageSlotNum(garageID);
+                if (slot < 0) {
+                    retJsonObj.put("parkingCar", "FAIL");
+                } else {
+
+                    mgtDBtr.updateGarageSlot(garageID, slot, GarageInfo.kGarageInfoSlotStatusReserved);
+
+                    mgtDBtr.addNewReservation(subJsonObject.toJSONString());
+                    retJsonObj.put("newReservation", "OK");
+                }
+            }
         }
 
         subJsonObject = (JSONObject) jsonObject.get("newUser");
@@ -74,12 +91,12 @@ public class ManagementProtocol implements IManagementProtocol {
         if (subJsonObject != null) {
             int garageID, slot;
 
-            garageID = mgtDBtr.getEmptyGarageID((String)subJsonObject.get("usingGarage"));
+            garageID = mgtDBtr.getReservedGarageID((String)subJsonObject.get("usingGarage"));
             if (garageID < 0) {
                 retJsonObj.put("parkingCar", "FAIL");
             } else {
 
-                slot = mgtDBtr.getEmptyGarageSlotNum(garageID);
+                slot = mgtDBtr.getReservedGarageSlotNum(garageID);
                 if (slot < 0) {
                     retJsonObj.put("parkingCar", "FAIL");
                 } else {
