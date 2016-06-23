@@ -28,7 +28,7 @@ public interface IManagementDBTransaction {
 
     void addNewGarage(String str) throws Exception;
 
-    void addNewReservation(String str) throws Exception;
+    void addNewReservation(String str, int garageID, int slot) throws Exception;
 
     void cancelReservation(String confirmInformation);
 

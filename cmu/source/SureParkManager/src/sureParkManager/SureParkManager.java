@@ -1,5 +1,6 @@
 package sureParkManager;
 
+import sureParkManager.common.GarageInfo;
 import sureParkManager.controlService.ControlService;
 import sureParkManager.managementService.*;
 
@@ -67,6 +68,9 @@ public class SureParkManager {
                 mgtFacility.setFacilityFailure(1001, true);
             } else if(message.equals("u")) {
                 mgtFacility.testUpdateSlotStatus(config.getGarageInfoFromIndex(0).id);
+            } else if(message.equals("w")) {
+                mgtFacility.updateWrongParking(1001, 3);
+                mgtFacility.updateSlotStatus(1001, 3, GarageInfo.kGarageInfoSlotStatusOccupied);
 			} else if(message.equals("EXIT")) {
 				break;
 			}	

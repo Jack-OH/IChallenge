@@ -70,7 +70,7 @@ public class ManagementProtocol implements IManagementProtocol {
 
                     mgtDBtr.updateGarageSlot(garageID, slot, GarageInfo.kGarageInfoSlotStatusReserved);
 
-                    mgtDBtr.addNewReservation(subJsonObject.toJSONString());
+                    mgtDBtr.addNewReservation(subJsonObject.toJSONString(), garageID, slot);
                     retJsonObj.put("newReservation", "OK");
                 }
             }
@@ -106,13 +106,12 @@ public class ManagementProtocol implements IManagementProtocol {
                     if (ret) {
                         System.out.println("Garage ID " + garageID + ", Empty slot number is " + slot);
 
+                        SureParkConfig config = SureParkConfig.getInstance();
+                        config.setLastConfirmInfo((String)subJsonObject.get("confirmInformation"));
+
                         // open gate
                         try {
                             ctlService.openEntryGate(garageID, slot);
-
-                            SureParkConfig config = SureParkConfig.getInstance();
-
-                            config.setLastConfirmInfo((String)subJsonObject.get("confirmInformation"));
 
                             retJsonObj.put("parkingCar", "OK");
                         } catch (Exception e) {

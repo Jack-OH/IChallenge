@@ -263,7 +263,7 @@ public class ManagementDBTransaction implements IManagementDBTransaction{
 		coll.insert(doc);
 	}
 
-	public void addNewReservation(String str) throws Exception {
+	public void addNewReservation(String str, int garageID, int slot) throws Exception {
         DBCollection coll = db.getCollection("reservations");
 
 		DBObject dbObject = (DBObject) JSON.parse(str);
@@ -277,8 +277,8 @@ public class ManagementDBTransaction implements IManagementDBTransaction{
         doc.append("reservationStatus", "waiting");
         doc.append("parkingFee", Integer.parseInt((String)dbObject.get("parkingFee")));
         doc.append("usingGarage", dbObject.get("usingGarage"));
-        doc.append("usingGarageNumber", -1);
-        doc.append("usingSlot", -1);
+        doc.append("usingGarageNumber", garageID);
+        doc.append("usingSlot", slot);
         doc.append("parkingTime", "null");
         doc.append("leaveTime", "null");
         doc.append("chargingFee", 0);
@@ -357,30 +357,42 @@ public class ManagementDBTransaction implements IManagementDBTransaction{
 
         GarageInfo garageInfo = new GarageInfo();
 
+        BasicDBObject resvWhereQuery = new BasicDBObject();
 
-        BasicDBObject whereQuery = new BasicDBObject();
+        resvWhereQuery.append("reservationStatus", "parked");
+        resvWhereQuery.append("usingGarageNumber", garageID);
+        resvWhereQuery.append("confirmInformation", lastConfirmInfo);
 
-        whereQuery.append("reservationStatus", "parked");
-        whereQuery.append("usingGarageNumber", garageID);
-        whereQuery.append("confirmInformation", lastConfirmInfo);
+        DBCursor resvCursor = resvColl.find(resvWhereQuery);
 
-        DBCursor cursor = resvColl.find(whereQuery);
+        if (resvCursor.hasNext()) {
+            DBObject resvDbObj = resvCursor.next();
 
-        if (cursor.hasNext()) {
-            DBObject dbObj = cursor.next();
+            BasicDBObject garageWhereQuery = new BasicDBObject("garageNumber", garageID);
 
-            BasicDBList slotStatusList;
-            slotStatusList = (BasicDBList)dbObj.get("slotStatus");
+            DBCursor garageCursor = garageColl.find(garageWhereQuery);
 
-            int oldSlot = (int)dbObj.get("usingSlot");  // original designate slot.
-            int oldStatus = garageInfo.GrageSlotStatusStringToInt((String)slotStatusList.get(slot)); // wrong parking slot's old status
+            if (garageCursor.hasNext()) {
+                DBObject garageDbObj = garageCursor.next();
+                BasicDBList slotStatusList;
 
+                slotStatusList = (BasicDBList) garageDbObj.get("slotStatus");
 
-            updateGarageSlot(garageID, oldSlot, oldStatus); // original designate slot status update to wrong parking slot's old status
+                int oldSlot = (int) resvDbObj.get("usingSlot");  // original designate slot.
+                int oldStatus = garageInfo.GrageSlotStatusStringToInt((String) slotStatusList.get(slot)); // wrong parking slot's old status
 
-            BasicDBObject updateQuery = new BasicDBObject("$set", new BasicDBObject("usingSlot", slot));
+                updateGarageSlot(garageID, oldSlot, oldStatus); // original designate slot status update to wrong parking slot's old status
+            }
 
-            resvColl.update(whereQuery, updateQuery);
+            BasicDBObject updateQuery = new BasicDBObject();
+            BasicDBObject updateObj = new BasicDBObject();
+
+            updateObj.append("usingGarageNumber", garageID);
+            updateObj.append("usingSlot", slot);
+
+            updateQuery.append("$set", updateObj);
+
+            resvColl.update(resvWhereQuery, updateQuery);
         }
     }
 
