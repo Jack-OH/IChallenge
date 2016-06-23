@@ -287,9 +287,13 @@ public class ManagementDBTransaction implements IManagementDBTransaction{
         DBCursor cursor = coll.find(whereQuery);
 
         if (cursor.hasNext()) {
+            DBObject dbObj = cursor.next();
+
             BasicDBObject updateQuery= new BasicDBObject("$set", new BasicDBObject("reservationStatus", "cancelled"));
 
             coll.update(whereQuery, updateQuery);
+
+            updateGarageSlot((int)dbObj.get("usingGarageNumber"), (int)dbObj.get("usingSlot"), GarageInfo.kGarageInfoSlotStatusOpen);
         }
     }
 
