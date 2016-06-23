@@ -31,6 +31,8 @@ public class ManagementFacility implements IManagementFacility {
 	{
 		SureParkConfig config = SureParkConfig.getInstance();
 
+        System.out.println(">>>> updateSlotStatus start, garageID : " + garageID + ", slot Index : " + slotIdx + ", slot Status : " + slotStatus);
+
 		config.setGarageSlotState(garageID, slotIdx, slotStatus);
 
 		JSONObject jsonObject = new JSONObject();
@@ -42,12 +44,14 @@ public class ManagementFacility implements IManagementFacility {
 		jsonObject.put("updateSlotStatus", jsonObject1);
 
 		comm.broadcast(jsonObject.toJSONString() + "\n");
-		
-		System.out.println("update slot state, garageID : " + garageID + ", slot Index : " + slotIdx + ", slot Status : " + slotStatus);
+
+        System.out.println(">>>> updateSlotStatus end");
 	}
 	
 	// CS -> MS
 	public void setFacilityFailure(int garageID, boolean isFail) throws Exception {
+        System.out.println(">>>> setFacilityFailure start, garageID: " + garageID + ", isFail :" + isFail);
+
         mgtDB.setFacilityAvailable(garageID, !isFail);
 
 		if (isFail) {
@@ -68,10 +72,14 @@ public class ManagementFacility implements IManagementFacility {
 		else {
             System.out.println("EVENT : " + garageID + " facility is fixed...");
         }
+
+        System.out.println(">>>> setFacilityFailure end");
 	}
 
     public void updateWrongParking(int garageID, int slotIdx) throws Exception {
         SureParkConfig config = SureParkConfig.getInstance();
+
+        System.out.println(">>>> updateWrongParking start, garageID: " + garageID + ", slotIndex :" + slotIdx);
 
         mgtDB.updateWrongParkingSlot(garageID, slotIdx, config.getLastConfirmInfo());
 
@@ -86,10 +94,14 @@ public class ManagementFacility implements IManagementFacility {
         System.out.println(jsonObject.toJSONString());
 
         comm.broadcast(jsonObject.toJSONString() + "\n");
+
+        System.out.println(">>>> updateWrongParking end");
     }
 
     public void leaveWithParking(int garageID, int slotIdx)  throws Exception {
         SureParkConfig config = SureParkConfig.getInstance();
+
+        System.out.println(">>>> leaveWithParking start, garageID: " + garageID + ", slotIndex :" + slotIdx);
 
         // slot status update
         config.setGarageSlotState(garageID, slotIdx, GarageInfo.kGarageInfoSlotStatusOpen);
@@ -106,9 +118,13 @@ public class ManagementFacility implements IManagementFacility {
         jsonObject.put("updateSlotStatus", jsonObject1);
 
         comm.broadcast(jsonObject.toJSONString() + "\n");
+
+        System.out.println(">>>> leaveWithParking end");
     }
 
     public void leaveWithoutParking(int garageID, int slotIdx)  throws Exception {
+        System.out.println(">>>> leaveWithoutParking start, garageID: " + garageID + ", slotIndex :" + slotIdx);
+
         mgtDB.leaveWithoutParking(garageID, slotIdx);
 
         JSONObject jsonObject = new JSONObject();
@@ -120,6 +136,8 @@ public class ManagementFacility implements IManagementFacility {
         jsonObject.put("updateSlotStatus", jsonObject1);
 
         comm.broadcast(jsonObject.toJSONString() + "\n");
+
+        System.out.println(">>>> leaveWithoutParking end");
     }
 
     public void testUpdateSlotStatus(int garageID)  throws Exception
