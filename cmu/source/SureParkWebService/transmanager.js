@@ -30,14 +30,19 @@ module.exports = function TransManager() {
 		        	temp.newGarage != undefined ||
 		        	temp.wrongParking != undefined ) {
 
+		        	socket_save.end();
+
 			        callback(null, JSON.stringify(recvData));
-			    	socket_save.destroy();
 		    	}
 			} catch(error) {
 				console.log(error.message);
 			}
 
 			
+		});
+
+		socket_save.on('end', function() {
+  			console.log('disconnected from server!!');
 		});
 
 		socket_save.on('close', function() {
@@ -79,8 +84,9 @@ module.exports = function TransManager() {
 		        	temp.detectFailure !== undefined || 
 		        	temp.updateSlotStatus !== undefined) {
 
-		           	callback(null, recvData);
-		            //socket.destroy(); // kill client after server's response
+		        	socket.end();
+
+		        	callback(null, recvData);	            
 		        	
 		        }
 		    } catch (error) {
@@ -88,9 +94,12 @@ module.exports = function TransManager() {
 		    }
 		});
 
+		socket.on('end', function() {
+  			console.log('disconnected from server');
+		});
+
 		socket.on('close', function() {
 			console.log('Connection closed');
-
 			try {
 				socket.destroy(); // kill client after server's response
 			} catch (error) {
@@ -100,7 +109,7 @@ module.exports = function TransManager() {
 		});
 
 		socket.on('error', function(err) {
-  			console.log("socket.error(): " + err);
+			console.log("Error: " + err);	
 		});
 	};
 };
