@@ -347,13 +347,13 @@ public class ManagementDBTransaction implements IManagementDBTransaction{
 	}
 
     public void updateWrongParkingSlot(int garageID, int slot, String lastConfirmInfo) throws Exception {
-        DBCollection resvColl = db.getCollection("reservations");
+        DBCollection resvColl   = db.getCollection("reservations");
         DBCollection garageColl = db.getCollection("garages");
 
         BasicDBObject resvWhereQuery = new BasicDBObject();
 
-        resvWhereQuery.append("reservationStatus", "parked");
-        resvWhereQuery.append("usingGarageNumber", garageID);
+        resvWhereQuery.append("reservationStatus",  "parked");
+        resvWhereQuery.append("usingGarageNumber",  garageID);
         resvWhereQuery.append("confirmInformation", lastConfirmInfo);
 
         DBCursor resvCursor = resvColl.find(resvWhereQuery);
@@ -371,21 +371,42 @@ public class ManagementDBTransaction implements IManagementDBTransaction{
 
                 slotStatusList = (BasicDBList) garageDbObj.get("slotStatus");
 
-                int oldSlot = (int) resvDbObj.get("usingSlot");  // original designate slot.
+                int oldSlot = (int) resvDbObj.get("usingSlot");     // original designate slot.
                 int oldStatus = GarageInfo.GrageSlotStatusStringToInt((String) slotStatusList.get(slot)); // wrong parking slot's old status
 
                 updateGarageSlot(garageID, oldSlot, oldStatus); // original designate slot status update to wrong parking slot's old status
+
+                // 이전 예약을 찾는다
+                BasicDBObject oldWhereQuery = new BasicDBObject();
+                oldWhereQuery.append("reservationStatus", "waiting");
+                oldWhereQuery.append("usingGarageNumber", garageID);
+                oldWhereQuery.append("usingSlot", slot);
+
+                DBCursor cursor = resvColl.find(oldWhereQuery);
+
+                if (cursor.hasNext()) {
+                    BasicDBObject oldQuery = new BasicDBObject();
+                    BasicDBObject oldObj = new BasicDBObject();
+
+                    oldObj.append("usingGarageNumber", garageID);
+                    oldObj.append("usingSlot", oldSlot);
+
+                    oldQuery.append("$set", oldObj);
+
+                    resvColl.update(oldWhereQuery, oldQuery);
+                }
+
+                // Update
+                BasicDBObject updateQuery = new BasicDBObject();
+                BasicDBObject updateObj = new BasicDBObject();
+
+                updateObj.append("usingGarageNumber", garageID);
+                updateObj.append("usingSlot", slot);
+
+                updateQuery.append("$set", updateObj);
+
+                resvColl.update(resvWhereQuery, updateQuery);
             }
-
-            BasicDBObject updateQuery = new BasicDBObject();
-            BasicDBObject updateObj = new BasicDBObject();
-
-            updateObj.append("usingGarageNumber", garageID);
-            updateObj.append("usingSlot", slot);
-
-            updateQuery.append("$set", updateObj);
-
-            resvColl.update(resvWhereQuery, updateQuery);
         }
     }
 
