@@ -245,6 +245,7 @@ char EntryCheck(void)
   if (EntryBeamState == LOW)  // if EntryBeamState is LOW the beam is broken
   {   
     Serial.println("Entry beam broken");
+    if(sp_fb_devices[0].state == 1 || sp_fb_devices[1].state == 1 || sp_fb_devices[2].state == 1 || sp_fb_devices[3].state == 1) f_stallStateChange_save = 0;
       return 1;
   } else {
     Serial.println("Entry beam is not broken.");
@@ -394,41 +395,7 @@ void StallSensor(void)
 	Serial.println(StallSensorValOffset[3]);  
 	
 	 
-	if(StallSensorValOffset[0] - StallSensorValAvg[0] >= 30) 
-	{
-		sp_stall_state.s[0] = 1;  
-		
-	}
-	else sp_stall_state.s[0] = 0;  
 	
-	if(StallSensorValOffset[1] - StallSensorValAvg[1] >= 30) 
-	{
-		sp_stall_state.s[1] = 1; 
-	}
-	else sp_stall_state.s[1] = 0;   
-	
-	if(StallSensorValOffset[2] - StallSensorValAvg[2] >= 30) 
-	{
-		sp_stall_state.s[2] = 1;  
-	}
-	else sp_stall_state.s[2] = 0;  
-	
-	if(StallSensorValOffset[3] - StallSensorValAvg[3] >= 13) 
-	{
-		sp_stall_state.s[3] = 1;  
-	}
-	else sp_stall_state.s[3] = 0;      
-		
-	if(((sp_stall_state_old.s[0] != sp_stall_state.s[0])&& stallNum >= 1) || ((sp_stall_state_old.s[1] != sp_stall_state.s[1])&& stallNum >= 2) || ((sp_stall_state_old.s[2] != sp_stall_state.s[2])&& stallNum >= 3) || ((sp_stall_state_old.s[3] != sp_stall_state.s[3])&& stallNum >= 4))
-	{
-		f_stallStateChange = 1;
-		sp_fb_devices[0].state = 0; //led
-		sp_fb_devices[1].state = 0;
-		sp_fb_devices[2].state = 0;
-		sp_fb_devices[3].state = 0;
-		sp_gate_state.entry = 0;
-	}  
-	sp_stall_state_old = sp_stall_state;
 }
 
 
@@ -637,6 +604,11 @@ void Comm(void)
 			  			Serial.println("=============================="); 
 			  			stallNum = inChar - '0';
 			  			
+			  			Serial.println("==============stallNum================");
+			        	Serial.write('0'+stallNum);//Serial.println('0'+stallNum);
+			        	Serial.println("");
+			        	Serial.println("==============stallNum================");
+			        	
 			  			strcpy(temp,spID); //initial stall state
 			        	temp[5] = 'S';
 			        	temp[6] = '0'+sp_stall_state.s[0];
@@ -751,7 +723,7 @@ void Comm(void)
 		ParkingState = 0;
 		heartBitCount = 0;
 	}
-	if(f_stallStateChange == 1 || heartBitCount >= 8)//heartbit send every about 10sec & send data
+	if(f_stallStateChange == 1 || heartBitCount >= 7)//heartbit send every about 10sec & send data
 	{
 		//client.flush();
 		//Serial.println(temp);
@@ -806,6 +778,42 @@ void DevieControl(void)
 void Observer(void)
 {
 	StallSensor();
+	
+	if(StallSensorValOffset[0] - StallSensorValAvg[0] >= 40) 
+	{
+		sp_stall_state.s[0] = 1;  
+		
+	}
+	else sp_stall_state.s[0] = 0;  
+	
+	if(StallSensorValOffset[1] - StallSensorValAvg[1] >= 30) 
+	{
+		sp_stall_state.s[1] = 1; 
+	}
+	else sp_stall_state.s[1] = 0;   
+	
+	if(StallSensorValOffset[2] - StallSensorValAvg[2] >= 30) 
+	{
+		sp_stall_state.s[2] = 1;  
+	}
+	else sp_stall_state.s[2] = 0;  
+	
+	if(StallSensorValOffset[3] - StallSensorValAvg[3] >= 13) 
+	{
+		sp_stall_state.s[3] = 1;  
+	}
+	else sp_stall_state.s[3] = 0;      
+		
+	if(((sp_stall_state_old.s[0] != sp_stall_state.s[0])&& stallNum >= 1) || ((sp_stall_state_old.s[1] != sp_stall_state.s[1])&& stallNum >= 2) || ((sp_stall_state_old.s[2] != sp_stall_state.s[2])&& stallNum >= 3) || ((sp_stall_state_old.s[3] != sp_stall_state.s[3])&& stallNum >= 4))
+	{
+		f_stallStateChange = 1;
+		sp_fb_devices[0].state = 0; //led
+		sp_fb_devices[1].state = 0;
+		sp_fb_devices[2].state = 0;
+		sp_fb_devices[3].state = 0;
+		sp_gate_state.entry = 0;
+	}  
+	sp_stall_state_old = sp_stall_state;
 }
 /*void heartBit(void)
 {
